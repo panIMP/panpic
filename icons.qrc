@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/open_pic.ico</file>
+        <file>icon/rotate_clockwise.ico</file>
+        <file>icon/rotate_cntrclockwise.ico</file>
+        <file>icon/mirror_horizontally.ico</file>
+        <file>icon/mirror_vertically.ico</file>
+        <file>icon/previous_pic.ico</file>
+        <file>icon/next_pic.ico</file>
+    </qresource>
+</RCC>
