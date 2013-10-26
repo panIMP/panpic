@@ -6,7 +6,6 @@
 #include <QAction>
 #include <QMenu>
 #include <QMenuBar>
-#include <QWidget>
 #include <QImage>
 #include <QLabel>
 #include <QScrollArea>
@@ -14,8 +13,13 @@
 #include <QFileInfoList>
 #include <QObject>
 #include <QWheelEvent>
+#include <QTabWidget>
+#include <QSlider>
+#include <QLineEdit>
+#include <QRegExpValidator>
+#include <QStatusBar>
+#include <QPushButton>
 
-#include "quickhandwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -25,7 +29,7 @@ class MainWindow : public QMainWindow
 
 
 public:
-    explicit MainWindow(const QString& m_fileName = 0, QWidget *parent = 0);
+    explicit MainWindow(const QString& fileName = 0, QWidget *parent = 0);
 
     bool HasImage() const {return m_hasImage;}
     void SetHasImage(bool value);
@@ -35,22 +39,26 @@ public:
 
     void CreateActions();
     void CreateMenus();
-    void CreateToolBars();
-    void CreatImageFrameLayout(const QString& m_fileName = 0);
-    void CreatGlobalSigSlotLink();
+    void CreateTabWidgets();
+    void CreatePicDispWidgets(const QString& fileName = 0);
+    void CreateCenterWidget(const QString& fileName = 0);
+    void CreateStatusBar();
+    void CreateGlobalSigSlotLink();
+    void CreateMainWindowStyle();
 
 
 signals:
    void ImageChanged();
    void ImageLoaded(bool);
-   void CurPicIndex(int, int);
-   void CurWheelDistance(int);
+   void MouseOnPicWheeled(int);
+   void PicIndexSwitched(int, int);
 
 
 public slots:
     void OpenPic();
     void NextPic();
     void PrevPic();
+    void SaveAs();
 
     void RotateClkwise();
     void RotateCntrClkwise();
@@ -58,7 +66,11 @@ public slots:
     void MirrorV();
 
     void ZoomPic(int curValue);
+    void ZoomPic();
+    void ZoomRateDisp(int value);
+
     void ShowCurIndexPic();
+    void ShowCurPicIndex(int, int);
 
 
 protected:
@@ -69,30 +81,43 @@ protected:
 private:
     /* signals and const values*/
     bool m_hasImage;
+
     static const int m_minWidth = 800;
     static const int m_minHeight = 600;
-
 
     /* menu action toolbar */
     QMenu* m_fileHdlMenu;
     QAction* m_openPic;
-    QAction* m_nextPic;
     QAction* m_prevPic;
+    QAction* m_nextPic;
+    QAction* m_saveAs;
 
-    QMenu* m_imageHdlMenu;
+    QMenu* m_picBasicHdlMenu;
     QAction* m_rotateClkwise;
     QAction* m_rotateCntrClkwise;
     QAction* m_mirrorH;
     QAction* m_mirrorV;
 
-    /* tool bars */
-    QToolBar* m_ToolBar;
-    QuickHandWidget* m_quickHand;
+    /* tab tool bars */
+    QWidget* m_centerWidget;
+    QTabWidget* m_tabWidget;
+
+    /* status bar */
+    QStatusBar* m_statusBar;
+    QLineEdit* m_zoomRateBox;
+    QLineEdit* m_curPicIndexBox;
+    QPushButton* m_prevPic2;
+    QPushButton* m_nextPic2;
 
     /* picture display area components */
     QScrollArea* m_dispFrame;
     QLabel* m_dispArea;
     QImage* m_Image;
+    static int const ZOOM_RANGE = 240;
+    static int const ZOOM_SAME = 120;
+    int m_picX;
+    int m_picY;
+
     QFileInfoList m_curFileList;
     QString m_fileName;
     int m_curFileIndex;

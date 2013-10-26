@@ -6,7 +6,6 @@
 #include <QLineEdit>
 #include <QRegExpValidator>
 
-
 class QuickHandWidget : public QWidget
 {
     Q_OBJECT

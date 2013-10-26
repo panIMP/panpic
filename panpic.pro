@@ -1,13 +1,11 @@
 QT += core widgets gui
 
 SOURCES += \
-    quickhandwidget.cpp \
     mainwindow.cpp \
     main.cpp
 
 HEADERS += \
-    mainwindow.h \
-    quickhandwidget.h
+    mainwindow.h
 
 RESOURCES += \
     icons.qrc

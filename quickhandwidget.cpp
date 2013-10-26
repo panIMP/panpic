@@ -49,6 +49,7 @@ QuickHandWidget::QuickHandWidget(QWidget *parent) :QWidget(parent)
 
 
     QHBoxLayout* hLay = new QHBoxLayout;
+
     hLay->addWidget(m_zoomSlider);
     hLay->addWidget(m_zoomRateBox);
     hLay->addWidget(m_curPicIndexBox);
