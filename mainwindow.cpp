@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "imagehandle.h"
 
 #include <QFileDialog>
 #include <QString>
@@ -12,7 +13,6 @@
 #include <QMimeData>
 #include <QFileDialog>
 
-#include <opencv2/imgproc/imgproc.hpp>
 
 /*---------------------------------------------------------------------
 Fuction:        MainWindow(const QString& fileName, QWidget *parent)
@@ -33,6 +33,7 @@ MainWindow::MainWindow(const QString& fileName, QWidget *parent) : QMainWindow(p
     CreateCenterWidget(fileName);
     CreateGlobalSigSlotLink();
     CreateMainWindowStyle();
+    CreateImgProcObjs();
 }
 
 
@@ -297,6 +298,21 @@ Output:         None
 ----------------------------------------------------------------------*/
 void MainWindow::CreateMainWindowStyle(){
     setAcceptDrops(true);
+}
+
+
+/*---------------------------------------------------------------------
+Fuction:        CreateImgProcObjs()
+
+Description:    Create all the image processing related objects that operate
+                all the imgproc algorithm tasks in the software
+
+Input:          None
+
+Output:         None
+----------------------------------------------------------------------*/
+void MainWindow::CreateImgProcObjs(){
+
 }
 
 

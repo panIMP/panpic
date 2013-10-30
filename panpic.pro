@@ -3,11 +3,11 @@ QT += core widgets gui
 SOURCES += \
     mainwindow.cpp \
     main.cpp \
-    imghdl.cpp
+    imagehandle.cpp
 
 HEADERS += \
     mainwindow.h \
-    imghdl.h
+    imagehandle.h
 
 RESOURCES += \
     icons.qrc
