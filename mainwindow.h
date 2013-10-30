@@ -20,6 +20,7 @@
 #include <QStatusBar>
 #include <QPushButton>
 
+#include "imghdl.h"
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +31,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(const QString& fileName = 0, QWidget *parent = 0);
+
+    static void cvMat2QImage(cv::Mat srcImage, QImage* dstImage);
 
     bool HasImage() const {return m_hasImage;}
     void SetHasImage(bool value);
@@ -112,7 +115,8 @@ private:
     /* picture display area components */
     QScrollArea* m_dispFrame;
     QLabel* m_dispArea;
-    QImage* m_Image;
+    QImage *m_Image;
+
     static int const ZOOM_RANGE = 240;
     static int const ZOOM_SAME = 120;
     int m_picX;

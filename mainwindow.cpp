@@ -12,6 +12,7 @@
 #include <QMimeData>
 #include <QFileDialog>
 
+#include <opencv2/imgproc/imgproc.hpp>
 
 /*---------------------------------------------------------------------
 Fuction:        MainWindow(const QString& fileName, QWidget *parent)
@@ -430,7 +431,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void MainWindow::RotateClkwise(){
     QMatrix matrix;
-    matrix.rotate(90);
+    matrix.rotate(10);
 
     SetImage(m_Image->transformed(matrix));
 }
@@ -594,11 +595,12 @@ void MainWindow::ShowCurIndexPic(){
 
 
 /*---------------------------------------------------------------------
-Fuction:        ShowCurPicIndex()
+Fuction:        ShowCurPicIndex(int indexVal, int rangeVal)
 
 Description:    SLOT -- show current picture index in current folder
 
-Input:          None
+Input:          indexVal -- picture index in picture file list
+                rangeVal -- picture file list element num
 
 Output:         None
 ----------------------------------------------------------------------*/
@@ -608,7 +610,7 @@ void MainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
 
 
 /*---------------------------------------------------------------------
-Fuction:        SetHasImage()
+Fuction:        SetHasImage(bool value)
 
 Description:    Set function of property -- "m_hasImage"(bool)
 
@@ -623,7 +625,7 @@ void MainWindow::SetHasImage(bool value){
 
 
 /*---------------------------------------------------------------------
-Fuction:        SetImage()
+Fuction:        SetImage(const QImage& newImage)
 
 Description:    1. Set function of property -- "m_Image"(QImage*)
                 2. Update the display after setting the image
@@ -641,6 +643,9 @@ void MainWindow::SetImage(const QImage& newImage){
             return;
         }
     }
+    // change the m_OpenCV_Image
+
+    // change the m_Image
     m_Image = new QImage(newImage);
     m_dispArea->setPixmap(QPixmap::fromImage(*m_Image));
     setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
@@ -707,13 +712,4 @@ void MainWindow::wheelEvent(QWheelEvent *event){
         }
     }
 }
-
-
-
-
-
-
-
-
-
 
