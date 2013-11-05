@@ -8,6 +8,8 @@
         <file>icon/previous_pic.ico</file>
         <file>icon/next_pic.ico</file>
         <file>icon/m_tab1.png</file>
-        <file>icon/saveAs.png</file>
+        <file>icon/ok.png</file>
+        <file>icon/save.ico</file>
+        <file>icon/saveAs.ico</file>
     </qresource>
 </RCC>

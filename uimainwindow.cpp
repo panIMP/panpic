@@ -1,17 +1,7 @@
-#include "mainwindow.h"
-#include "imagehandle.h"
-
-#include <QFileDialog>
-#include <QString>
-#include <QHBoxLayout>
-#include <QMatrix>
-#include <QIcon>
-#include <QtMath>
-#include <QDir>
-#include <QApplication>
-#include <QUrl>
-#include <QMimeData>
-#include <QFileDialog>
+#include "uimainwindow.h"
+#include "panimage.h"
+#include "panimageio.h"
+#include "panimageshift.h"
 
 
 /*---------------------------------------------------------------------
@@ -25,7 +15,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-MainWindow::MainWindow(const QString& fileName, QWidget *parent) : QMainWindow(parent)
+UiMainWindow::UiMainWindow(const QString& fileName, QWidget *parent) : QMainWindow(parent)
 {
     CreateActions();
     CreateMenus();
@@ -47,7 +37,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateActions(){
+void UiMainWindow::CreateActions(){
     /*-------------------------------------------------------------
     file handle menu contained actions
     -------------------------------------------------------------*/
@@ -68,8 +58,13 @@ void MainWindow::CreateActions(){
     m_prevPic->setStatusTip(tr("Open previous picture in current file folder"));
     connect(m_prevPic, SIGNAL(triggered()), this, SLOT(PrevPic()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_prevPic, SLOT(setEnabled(bool)));
-    m_saveAs = new QAction(tr("&Save As"), this);
-    m_saveAs->setIcon(QIcon(":/icon/saveAs.png"));
+    m_save = new QAction(tr("&Save"), this);
+    m_save->setIcon(QIcon(":/icon/save.ico"));
+    m_save->setStatusTip("Save the initial picture");
+    connect(m_save, SIGNAL(triggered()), this, SLOT(Save()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
+    m_saveAs = new QAction(tr("Save &As"), this);
+    m_saveAs->setIcon(QIcon(":/icon/saveAs.ico"));
     m_saveAs->setStatusTip("Save the picture apart from the initial picture");
     connect(m_saveAs, SIGNAL(triggered()), this, SLOT(SaveAs()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
@@ -110,7 +105,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateMenus(){
+void UiMainWindow::CreateMenus(){
     // file handle menu
     m_fileHdlMenu = menuBar()->addMenu(tr("&File"));
     m_fileHdlMenu->addAction(m_openPic);
@@ -118,6 +113,7 @@ void MainWindow::CreateMenus(){
     m_fileHdlMenu->addAction(m_nextPic);
     m_fileHdlMenu->addAction(m_prevPic);
     m_fileHdlMenu->addSeparator();
+    m_fileHdlMenu->addAction(m_save);
     m_fileHdlMenu->addAction(m_saveAs);
 
     // picture basic handle menu
@@ -141,7 +137,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateTabWidgets(){
+void UiMainWindow::CreateTabWidgets(){
     QWidget* m_tab1 = new QWidget;
     QHBoxLayout* hLay1 = new QHBoxLayout;
 
@@ -164,19 +160,20 @@ Input:          File path of the image file to display
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreatePicDispWidgets(const QString &fileName){
-    if (fileName != 0){
-        m_Image = new QImage(fileName);
-        SetHasImage(true);
-    }else {
-        m_Image = new QImage;
-        SetHasImage(false);
-    }
+void UiMainWindow::CreatePicDispWidgets(const QString &fileName){
     m_dispArea = new QLabel;
     m_dispArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_dispArea->setPixmap(QPixmap::fromImage(*m_Image));
     m_dispArea->setAlignment(Qt::AlignCenter);
     m_dispArea->setAcceptDrops(true);
+
+    if (fileName != 0){
+        m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
+        m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::GetInstance()->CvImage2QImage(m_PanImage)));
+        SetHasImage(true);
+    }else {
+        m_PanImage.GetMat().create(0, 0, CV_8UC3);
+        SetHasImage(false);
+    }
 
     m_dispFrame = new QScrollArea;
     m_dispFrame->setAutoFillBackground(true);
@@ -197,7 +194,7 @@ Input:          File path of the image file to display
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateCenterWidget(const QString& fileName){
+void UiMainWindow::CreateCenterWidget(const QString& fileName){
     CreateTabWidgets();
     CreatePicDispWidgets(fileName);
 
@@ -226,7 +223,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateStatusBar(){
+void UiMainWindow::CreateStatusBar(){
     m_zoomRateBox = new QLineEdit(this);
     m_zoomRateBox->setText("100%");
     m_zoomRateBox->setMaximumWidth(40);
@@ -277,7 +274,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateGlobalSigSlotLink(){
+void UiMainWindow::CreateGlobalSigSlotLink(){
     // mouse wheeled -- > zoom pic & change zoom rate box
     connect(this, SIGNAL(MouseOnPicWheeled(int)), this, SLOT(ZoomPic(int)));
     connect(this, SIGNAL(MouseOnPicWheeled(int)), this, SLOT(ZoomRateDisp(int)));
@@ -296,7 +293,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateMainWindowStyle(){
+void UiMainWindow::CreateMainWindowStyle(){
     setAcceptDrops(true);
 }
 
@@ -311,7 +308,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::CreateImgProcObjs(){
+void UiMainWindow::CreateImgProcObjs(){
 
 }
 
@@ -325,7 +322,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::OpenPic(){
+void UiMainWindow::OpenPic(){
     QString selectedFilter = tr("PNG(*.png)");
     m_fileName = QFileDialog::getOpenFileName(this,
                                               tr("Open File"),
@@ -336,7 +333,7 @@ void MainWindow::OpenPic(){
                                                  ),
                                               &selectedFilter);
     if (m_fileName != NULL){
-        SetImage(QImage(m_fileName));
+        SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
         SetHasImage(true);
     }
 
@@ -364,13 +361,13 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::PrevPic(){
+void UiMainWindow::PrevPic(){
     m_curFileIndex --;
     if (m_curFileIndex >= 0){
         QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
         if (curfileName != NULL){
             m_fileName = curfileName;
-            SetImage(QImage(m_fileName));
+            SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
             SetHasImage(true);
         }
     }else {
@@ -391,13 +388,13 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::NextPic(){
+void UiMainWindow::NextPic(){
     m_curFileIndex ++;
     if (m_curFileIndex < m_curFileRange){
         QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
         if (curfileName != NULL){
             m_fileName = curfileName;
-            SetImage(QImage(m_fileName));
+            SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
             SetHasImage(true);
         }
     }else {
@@ -410,6 +407,24 @@ void MainWindow::NextPic(){
 
 
 /*---------------------------------------------------------------------
+Fuction:        Save()
+
+Description:    Slot for "m_save" action
+
+Input:          None
+
+Output:         None
+----------------------------------------------------------------------*/
+void UiMainWindow::Save(){
+    cv::cvtColor(m_PanImage.GetMat(), m_PanImage.GetMat(), CV_RGB2BGR);
+    PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
+    setWindowModified(false);
+    setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
+    setWindowModified(false);
+}
+
+
+/*---------------------------------------------------------------------
 Fuction:        SaveAs()
 
 Description:    Slot for "m_saveAs" action
@@ -418,7 +433,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::SaveAs(){
+void UiMainWindow::SaveAs(){
     QString selectedFilter = tr("PNG(*.png)");
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Open File"),
@@ -428,11 +443,12 @@ void MainWindow::SaveAs(){
                                                        ";;GIF(*.gif);; ICO(*.ico);; ALL(*.*)"
                                                        ),
                                                     &selectedFilter);
-    if (m_fileName != NULL){
-        m_Image->save(QFileInfo(fileName).absoluteFilePath(), "png", 100);
+    if (fileName != NULL){
+        PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(fileName).absoluteFilePath());
         setWindowModified(false);
         setWindowTitle("panpic - " + QFileInfo(fileName).fileName());
     }
+    setWindowModified(false);
 }
 
 
@@ -445,11 +461,9 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::RotateClkwise(){
-    QMatrix matrix;
-    matrix.rotate(10);
-
-    SetImage(m_Image->transformed(matrix));
+void UiMainWindow::RotateClkwise(){
+    PanImageShift::GetInstance()->RotateClockWise(m_PanImage);
+    SetImage(m_PanImage);
 }
 
 
@@ -462,11 +476,9 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::RotateCntrClkwise(){
-    QMatrix matrix;
-    matrix.rotate(-90);
-
-    SetImage(m_Image->transformed(matrix));
+void UiMainWindow::RotateCntrClkwise(){
+    PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage);
+    SetImage(m_PanImage);
 }
 
 
@@ -479,8 +491,9 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::MirrorH(){
-    SetImage(m_Image->mirrored(true, false));
+void UiMainWindow::MirrorH(){
+    PanImageShift::GetInstance()->MirrorH(m_PanImage);
+    SetImage(m_PanImage);
 }
 
 
@@ -493,8 +506,9 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::MirrorV(){
-    SetImage(m_Image->mirrored(false, true));
+void UiMainWindow::MirrorV(){
+    PanImageShift::GetInstance()->MirrorV(m_PanImage);
+    SetImage(m_PanImage);
 }
 
 
@@ -512,17 +526,12 @@ Input:          Relative value of zoomed piture by comparison of border length
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::ZoomPic(int curValue){
-    int curWidth;
-    if (curValue < ZOOM_SAME){
-        curWidth = m_Image->width() * curValue / ZOOM_SAME;
-    }else {
-        curWidth = m_Image->width() * (curValue*curValue)
-                            / (ZOOM_SAME * ZOOM_SAME);
-    }
-
-    QImage curImg = m_Image->scaledToWidth(curWidth);
-    m_dispArea->setPixmap(QPixmap::fromImage(curImg));
+void UiMainWindow::ZoomPic(int curValue){
+    int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
+    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::
+                                             GetInstance()->
+                                             CvImage2QImage(m_PanImage).
+                                             scaledToWidth(curWidth)));
     update();
     updateGeometry();
 }
@@ -540,14 +549,15 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::ZoomPic(){
+void UiMainWindow::ZoomPic(){
     QString tmpStr = QString(m_zoomRateBox->text());
     tmpStr.chop(1);
     float value = tmpStr.toFloat() / 100.0;
-    int curWidth = int(value * float(m_Image->width()));
-
-    QImage curImg = m_Image->scaledToWidth(curWidth);
-    m_dispArea->setPixmap(QPixmap::fromImage(curImg));
+    int curWidth = static_cast<int>(value * float(m_PanImage.GetMat().cols));
+    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::
+                                             GetInstance()->
+                                             CvImage2QImage(m_PanImage).
+                                             scaledToWidth(curWidth)));
     update();
     updateGeometry();
 }
@@ -563,16 +573,8 @@ Input:          Relative value
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::ZoomRateDisp(int value){
-    float rate;
-    if (value < ZOOM_SAME){
-        rate = (float(value) / float(ZOOM_SAME)) * 100.0;
-        rate = int(rate);
-    }else {
-        rate = (float(value) / float(ZOOM_SAME));
-        rate *= rate;
-        rate = int(rate * 100.0);
-    }
+void UiMainWindow::ZoomRateDisp(int value){
+    int rate = static_cast<int>(float(value) / float(ZOOM_SAME) * 100.0);
     m_zoomRateBox->setText(QString("%1%").arg(rate));
 }
 
@@ -586,7 +588,7 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::ShowCurIndexPic(){
+void UiMainWindow::ShowCurIndexPic(){
     QString str = m_curPicIndexBox->text();
     QStringList strList = str.split('/');
 
@@ -604,7 +606,7 @@ void MainWindow::ShowCurIndexPic(){
     QString curfileName = m_curFileList.at(index).absoluteFilePath();
     if (curfileName != NULL){
         m_fileName = curfileName;
-        SetImage(QImage(m_fileName));
+        SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
         SetHasImage(true);
     }
 }
@@ -620,7 +622,7 @@ Input:          indexVal -- picture index in picture file list
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
+void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
     m_curPicIndexBox->setText(QString("%1/%2").arg(indexVal + 1).arg(rangeVal));
 }
 
@@ -634,7 +636,7 @@ Input:          True or false
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::SetHasImage(bool value){
+void UiMainWindow::SetHasImage(bool value){
     m_hasImage = value;
     emit(ImageLoaded(value));
 }
@@ -646,24 +648,14 @@ Fuction:        SetImage(const QImage& newImage)
 Description:    1. Set function of property -- "m_Image"(QImage*)
                 2. Update the display after setting the image
 
-Input:          QImage*
+Input:          cv::Mat instance
 
 Output:         None
 ----------------------------------------------------------------------*/
-void MainWindow::SetImage(const QImage& newImage){
-    if (! m_Image->isNull()){
-        if (newImage != *m_Image){
-            delete m_Image;
-            emit(ImageChanged());
-        }else {
-            return;
-        }
-    }
-    // change the m_OpenCV_Image
-
-    // change the m_Image
-    m_Image = new QImage(newImage);
-    m_dispArea->setPixmap(QPixmap::fromImage(*m_Image));
+void UiMainWindow::SetImage(PanImage& newImage){
+    m_PanImage = newImage;
+    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::GetInstance()->CvImage2QImage(m_PanImage)));
+    emit(ImageChanged());
     setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
     update();
     updateGeometry();
@@ -681,7 +673,7 @@ Input:          1. QObject* of the operation upon
 
 Output:         True or False
 ----------------------------------------------------------------------*/
-bool MainWindow::eventFilter(QObject* watched, QEvent* event){
+bool UiMainWindow::eventFilter(QObject* watched, QEvent* event){
     if (watched == this){
         if (event->type() == QEvent::DragEnter){
             QDragEnterEvent* dragEnter = dynamic_cast<QDragEnterEvent*>(event);
@@ -694,9 +686,8 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event){
                 return true;
             }
             QString path = urls.first().toLocalFile();
-            QImage* loadImage = new QImage(path);
-            if (! loadImage->isNull()){
-                SetImage(*loadImage);
+            if (!path.isNull()){
+                SetImage(PanImageIO::GetInstance()->ReadPanImage(path));
             }
             return true;
         }
@@ -715,17 +706,15 @@ Input:          1. Event that trigged
 
 Output:         True or False
 ----------------------------------------------------------------------*/
-void MainWindow::wheelEvent(QWheelEvent *event){
+void UiMainWindow::wheelEvent(QWheelEvent *event){
     static int wheeledDistance = 0;
     if (QApplication::keyboardModifiers() == Qt::ControlModifier){
         wheeledDistance += (event->angleDelta() / 20).y();
-        if (wheeledDistance > ZOOM_SAME){
-            wheeledDistance = ZOOM_SAME;
-        }else if(wheeledDistance < -ZOOM_SAME){
+
+        if(wheeledDistance <= -ZOOM_SAME){
             wheeledDistance = -ZOOM_SAME;
-        }else {
-            emit(MouseOnPicWheeled(wheeledDistance + ZOOM_SAME));
         }
+        emit(MouseOnPicWheeled(wheeledDistance + ZOOM_SAME));
     }
 }
 

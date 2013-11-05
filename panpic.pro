@@ -1,13 +1,17 @@
 QT += core widgets gui
 
 SOURCES += \
-    mainwindow.cpp \
     main.cpp \
-    imagehandle.cpp
+    uimainwindow.cpp \
+    panimage.cpp \
+    panimageio.cpp \
+    panimageshift.cpp
 
 HEADERS += \
-    mainwindow.h \
-    imagehandle.h
+    uimainwindow.h \
+    panimage.h \
+    panimageio.h \
+    panimageshift.h
 
 RESOURCES += \
     icons.qrc
@@ -22,4 +26,5 @@ INCLUDEPATH += C:/opencv/build/include/opencv2/
 LIBS += -LC:/opencv/build/x64/vc11/lib \
         -lopencv_core244 \
         -lopencv_highgui244 \
-        -lopencv_imgproc244
+        -lopencv_imgproc244 \
+        -lopencv_video244
