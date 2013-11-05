@@ -51,6 +51,7 @@ void UiMainWindow::CreateTabWidgets(){
     hLay1->addWidget(m_openPic);
     hLay1->addWidget(m_save);
     hLay1->addWidget(m_saveAs);
+    hLay1->addStretch();
     m_tab1->setLayout(hLay1);
 
     m_tab2 = new QWidget;
@@ -71,6 +72,7 @@ void UiMainWindow::CreateTabWidgets(){
     hLay2->addWidget(m_rotateCntrClkwise);
     hLay2->addWidget(m_mirrorH);
     hLay2->addWidget(m_mirrorV);
+    hLay2->addStretch();
     m_tab2->setLayout(hLay2);
 
     m_tabWidget = new QTabWidget(this);
