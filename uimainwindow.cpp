@@ -17,111 +17,11 @@ Output:         None
 ----------------------------------------------------------------------*/
 UiMainWindow::UiMainWindow(const QString& fileName, QWidget *parent) : QMainWindow(parent)
 {
-    CreateActions();
-    CreateMenus();
     CreateStatusBar();
     CreateCenterWidget(fileName);
     CreateGlobalSigSlotLink();
     CreateMainWindowStyle();
-    CreateImgProcObjs();
-}
-
-
-/*---------------------------------------------------------------------
-Fuction:        CreateActions()
-
-Description:    1. Creat all the actions in the mainwidow
-                2. Bond action signals with their functional slots
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
-void UiMainWindow::CreateActions(){
-    /*-------------------------------------------------------------
-    file handle menu contained actions
-    -------------------------------------------------------------*/
-    m_openPic = new QAction(tr("&Open"), this);
-    m_openPic->setIcon(QIcon(":/icon/open_pic.ico"));
-    m_openPic->setShortcut(QKeySequence::Open);
-    m_openPic->setStatusTip(tr("Open an existing picture"));
-    // action --> correspond slot
-    connect(m_openPic, SIGNAL(triggered()), this, SLOT(OpenPic()));
-    m_nextPic = new QAction(tr("&Next"), this);
-    m_nextPic->setIcon(QIcon(":/icon/next_pic.ico"));
-    m_nextPic->setStatusTip(tr("Open next picture in current file folder"));
-    connect(m_nextPic, SIGNAL(triggered()), this, SLOT(NextPic()));
-    // only after picture loaded can this action be enabled
-    connect(this, SIGNAL(ImageLoaded(bool)), m_nextPic, SLOT(setEnabled(bool)));
-    m_prevPic = new QAction(tr("&Previous"), this);
-    m_prevPic->setIcon(QIcon(":/icon/previous_pic.ico"));
-    m_prevPic->setStatusTip(tr("Open previous picture in current file folder"));
-    connect(m_prevPic, SIGNAL(triggered()), this, SLOT(PrevPic()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_prevPic, SLOT(setEnabled(bool)));
-    m_save = new QAction(tr("&Save"), this);
-    m_save->setIcon(QIcon(":/icon/save.ico"));
-    m_save->setStatusTip("Save the initial picture");
-    connect(m_save, SIGNAL(triggered()), this, SLOT(Save()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
-    m_saveAs = new QAction(tr("Save &As"), this);
-    m_saveAs->setIcon(QIcon(":/icon/saveAs.ico"));
-    m_saveAs->setStatusTip("Save the picture apart from the initial picture");
-    connect(m_saveAs, SIGNAL(triggered()), this, SLOT(SaveAs()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
-
-    /*-------------------------------------------------------------
-    picture basic handle menu contained actions
-    -------------------------------------------------------------*/
-    m_rotateClkwise = new QAction(tr("&Rotate Clockwise"), this);
-    m_rotateClkwise->setIcon(QIcon(":/icon/rotate_clockwise.ico"));
-    m_rotateClkwise->setStatusTip("Rotate the picture clockwise");
-    connect(m_rotateClkwise, SIGNAL(triggered()), this, SLOT(RotateClkwise()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateClkwise, SLOT(setEnabled(bool)));
-    m_rotateCntrClkwise = new QAction(tr("Rotate &Counter Clockwise"), this);
-    m_rotateCntrClkwise->setIcon(QIcon(":/icon/rotate_cntrclockwise.ico"));
-    m_rotateCntrClkwise->setStatusTip("Rotate the picture counter clockwise");
-    connect(m_rotateCntrClkwise, SIGNAL(triggered()), this, SLOT(RotateCntrClkwise()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateCntrClkwise, SLOT(setEnabled(bool)));
-    m_mirrorH = new QAction(tr("&Mirror Horizontally"), this);
-    m_mirrorH->setIcon(QIcon(":/icon/mirror_horizontally"));
-    m_mirrorH->setStatusTip("Mirror the picture horizontally");
-    connect(m_mirrorH, SIGNAL(triggered()), this, SLOT(MirrorH()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorH, SLOT(setEnabled(bool)));
-    m_mirrorV = new QAction(tr("Mirror &Vertically"), this);
-    m_mirrorV->setIcon(QIcon(":/icon/mirror_vertically"));
-    m_mirrorV->setStatusTip("Mirror the picture vertically");
-    connect(m_mirrorV, SIGNAL(triggered()), this, SLOT(MirrorV()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorV, SLOT(setEnabled(bool)));
-}
-
-
-/*---------------------------------------------------------------------
-Fuction:        CreateMenus()
-
-Description:    1. Creat all the menus and submenus... in the mainwidow
-                2. Bond menus with actions
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
-void UiMainWindow::CreateMenus(){
-    // file handle menu
-    m_fileHdlMenu = menuBar()->addMenu(tr("&File"));
-    m_fileHdlMenu->addAction(m_openPic);
-    m_fileHdlMenu->addSeparator();
-    m_fileHdlMenu->addAction(m_nextPic);
-    m_fileHdlMenu->addAction(m_prevPic);
-    m_fileHdlMenu->addSeparator();
-    m_fileHdlMenu->addAction(m_save);
-    m_fileHdlMenu->addAction(m_saveAs);
-
-    // picture basic handle menu
-    m_picBasicHdlMenu = menuBar()->addMenu(tr("&Handle"));
-    m_picBasicHdlMenu->addAction(m_rotateClkwise);
-    m_picBasicHdlMenu->addAction(m_rotateCntrClkwise);
-    m_picBasicHdlMenu->addAction(m_mirrorH);
-    m_picBasicHdlMenu->addAction(m_mirrorV);
+    CreateOthers();
 }
 
 
@@ -138,15 +38,45 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::CreateTabWidgets(){
-    QWidget* m_tab1 = new QWidget;
+    m_tab1 = new QWidget;
+    m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "", this);
+    connect(m_openPic, SIGNAL(clicked()), this, SLOT(OpenPic()));
+    m_save = new QPushButton(QIcon(":/icon/save.ico"), "", this);
+    connect(m_save, SIGNAL(clicked()), this, SLOT(Save()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
+    m_saveAs = new QPushButton(QIcon(":/icon/saveAs.ico"), "", this);
+    connect(m_saveAs, SIGNAL(clicked()), this, SLOT(Save()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
     QHBoxLayout* hLay1 = new QHBoxLayout;
-
+    hLay1->addWidget(m_openPic);
+    hLay1->addWidget(m_save);
+    hLay1->addWidget(m_saveAs);
     m_tab1->setLayout(hLay1);
 
+    m_tab2 = new QWidget;
+    QHBoxLayout* hLay2 = new QHBoxLayout;
+    m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
+    connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateClkwise, SLOT(setEnabled(bool)));
+    m_rotateCntrClkwise = new QPushButton(QIcon(":/icon/rotate_cntrclockwise.ico"), "", this);
+    connect(m_rotateCntrClkwise, SIGNAL(clicked()), this, SLOT(RotateCntrClkwise()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateCntrClkwise, SLOT(setEnabled(bool)));
+    m_mirrorH = new QPushButton(QIcon(":/icon/mirror_horizontally.ico"), "", this);
+    connect(m_mirrorH, SIGNAL(clicked()), this, SLOT(MirrorH()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorH, SLOT(setEnabled(bool)));
+    m_mirrorV = new QPushButton(QIcon(":/icon/mirror_vertically.ico"), "", this);
+    connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorV, SLOT(setEnabled(bool)));
+    hLay2->addWidget(m_rotateClkwise);
+    hLay2->addWidget(m_rotateCntrClkwise);
+    hLay2->addWidget(m_mirrorH);
+    hLay2->addWidget(m_mirrorV);
+    m_tab2->setLayout(hLay2);
+
     m_tabWidget = new QTabWidget(this);
-    m_tabWidget->addTab(m_tab1, QIcon(":/icon/m_tab1.png"), "quick handles");
+    m_tabWidget->addTab(m_tab1, QIcon(":/icon/m_tab1.png"), "File");
+    m_tabWidget->addTab(m_tab2, QIcon(":/icon/m_tab2.png"), "Shift");
     m_tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    connect(this, SIGNAL(ImageLoaded(bool)), m_tabWidget, SLOT(setEnabled(bool)));
 }
 
 
@@ -170,7 +100,8 @@ void UiMainWindow::CreatePicDispWidgets(const QString &fileName){
         m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
         m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::GetInstance()->CvImage2QImage(m_PanImage)));
         SetHasImage(true);
-    }else {
+    }
+    else {
         m_PanImage.GetMat().create(0, 0, CV_8UC3);
         SetHasImage(false);
     }
@@ -240,7 +171,7 @@ void UiMainWindow::CreateStatusBar(){
     m_curPicIndexBox->setMaximumWidth(50);
     m_curPicIndexBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     // use regular expression to restrict the input to be like 'dd/dd'
-    // \d should be set as \\d
+    // \d should be set as \\
     // The C++ compiler transforms backslashes in strings. To include a \ in a regexp,
     // enter it twice, i.e. \\.
     // To match the backslash character itself, enter it four times, i.e. \\\\.
@@ -261,7 +192,6 @@ void UiMainWindow::CreateStatusBar(){
     m_statusBar->addWidget(m_nextPic2);
     m_statusBar->addWidget(m_zoomRateBox);
     connect(this, SIGNAL(ImageLoaded(bool)), m_statusBar, SLOT(setEnabled(bool)));
-
 }
 
 
@@ -299,17 +229,17 @@ void UiMainWindow::CreateMainWindowStyle(){
 
 
 /*---------------------------------------------------------------------
-Fuction:        CreateImgProcObjs()
+Fuction:        CreateOthers()
 
-Description:    Create all the image processing related objects that operate
-                all the imgproc algorithm tasks in the software
+Description:    Create all the other image processing related objects
 
 Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateImgProcObjs(){
-
+void UiMainWindow::CreateOthers(){
+    m_curFileIndex = 0;
+    m_curFileRange = 0;
 }
 
 
@@ -370,7 +300,8 @@ void UiMainWindow::PrevPic(){
             SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
             SetHasImage(true);
         }
-    }else {
+    }
+    else {
         m_curFileIndex ++;
     }
 
@@ -397,7 +328,8 @@ void UiMainWindow::NextPic(){
             SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
             SetHasImage(true);
         }
-    }else {
+    }
+    else {
         m_curFileIndex --;
     }
 
@@ -679,7 +611,8 @@ bool UiMainWindow::eventFilter(QObject* watched, QEvent* event){
             QDragEnterEvent* dragEnter = dynamic_cast<QDragEnterEvent*>(event);
             dragEnter->acceptProposedAction();
             return true;
-        } else if (event->type() == QEvent::Drop){
+        }
+        else if (event->type() == QEvent::Drop){
             QDropEvent* drop = dynamic_cast<QDropEvent*>(event);
             QList<QUrl> urls = drop->mimeData()->urls();
             if (urls.isEmpty()){
@@ -710,8 +643,10 @@ void UiMainWindow::wheelEvent(QWheelEvent *event){
     static int wheeledDistance = 0;
     if (QApplication::keyboardModifiers() == Qt::ControlModifier){
         wheeledDistance += (event->angleDelta() / 20).y();
-
-        if(wheeledDistance <= -ZOOM_SAME){
+/*        if(wheeledDistance > 0){
+            wheeledDistance *= wheeledDistance;
+        }
+        else */if(wheeledDistance <= -ZOOM_SAME){
             wheeledDistance = -ZOOM_SAME;
         }
         emit(MouseOnPicWheeled(wheeledDistance + ZOOM_SAME));

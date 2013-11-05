@@ -46,15 +46,13 @@ public:
     PanImage& Image(){return m_PanImage;}
     void SetImage(PanImage& newImage);
 
-    void CreateActions();
-    void CreateMenus();
     void CreateTabWidgets();
     void CreatePicDispWidgets(const QString& fileName = 0);
     void CreateCenterWidget(const QString& fileName = 0);
     void CreateStatusBar();
     void CreateGlobalSigSlotLink();
     void CreateMainWindowStyle();
-    void CreateImgProcObjs();
+    void CreateOthers();
 
 signals:
    void ImageChanged();
@@ -95,26 +93,23 @@ private:
     static const int m_minWidth = 800;
     static const int m_minHeight = 600;
 
-    // Menu action toolbar
-    QMenu* m_fileHdlMenu;
-    QAction* m_openPic;
-    QAction* m_prevPic;
-    QAction* m_nextPic;
-    QAction* m_saveAs;
-    QAction* m_save;
-    QMenu* m_picBasicHdlMenu;
-    QAction* m_rotateClkwise;
-    QAction* m_rotateCntrClkwise;
-    QAction* m_mirrorH;
-    QAction* m_mirrorV;
-
     // Tab tool bars
     QWidget* m_centerWidget;
     QTabWidget* m_tabWidget;
+    QWidget* m_tab1;
+    QPushButton* m_openPic;
+    QPushButton* m_save;
+    QPushButton* m_saveAs;
+    QWidget* m_tab2;
+    QPushButton* m_rotateClkwise;
+    QPushButton* m_rotateCntrClkwise;
+    QPushButton* m_mirrorH;
+    QPushButton* m_mirrorV;
 
     // Status bar
     QStatusBar* m_statusBar;
     QLineEdit* m_zoomRateBox;
+    static int const ZOOM_SAME = 100;
     QLineEdit* m_curPicIndexBox;
     QPushButton* m_prevPic2;
     QPushButton* m_nextPic2;
@@ -130,8 +125,6 @@ private:
     QString m_fileName;
     int m_curFileIndex;
     int m_curFileRange;
-    static int const ZOOM_RANGE = 240;
-    static int const ZOOM_SAME = 40;
 };
 
 #endif // MAINWINDOW_H
