@@ -29,6 +29,7 @@
 #include <QApplication>
 #include <QUrl>
 #include <QMimeData>
+#include <QSplitter>
 
 #include "panimage.h"
 
@@ -94,7 +95,7 @@ private:
     static const int m_minHeight = 600;
 
     // Tab tool bars
-    QWidget* m_centerWidget;
+    QSplitter* m_centerSplitter;
     QTabWidget* m_tabWidget;
     QWidget* m_tab1;
     QPushButton* m_openPic;

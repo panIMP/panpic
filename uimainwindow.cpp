@@ -131,15 +131,12 @@ void UiMainWindow::CreateCenterWidget(const QString& fileName){
     CreateTabWidgets();
     CreatePicDispWidgets(fileName);
 
-    QVBoxLayout* vLay = new QVBoxLayout;
-    vLay->addWidget(m_tabWidget);
-    vLay->addWidget(m_dispFrame);
+    m_centerSplitter = new QSplitter(Qt::Vertical);
+    m_centerSplitter->addWidget(m_tabWidget);
+    m_centerSplitter->addWidget(m_dispFrame);
+    m_centerSplitter->setStretchFactor(1,1);
 
-    m_centerWidget = new QWidget;
-    m_centerWidget->setAcceptDrops(true);
-    m_centerWidget->setLayout(vLay);
-
-    setCentralWidget(m_centerWidget);
+    setCentralWidget(m_centerSplitter);
     setAcceptDrops(true);
     setMinimumSize(m_minWidth, m_minHeight);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
