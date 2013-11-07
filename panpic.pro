@@ -5,13 +5,17 @@ SOURCES += \
     uimainwindow.cpp \
     panimage.cpp \
     panimageio.cpp \
-    panimageshift.cpp
+    panimageshift.cpp \
+    panimagehistproc.cpp \
+    uihistdialog.cpp
 
 HEADERS += \
     uimainwindow.h \
     panimage.h \
     panimageio.h \
-    panimageshift.h
+    panimageshift.h \
+    panimagehistproc.h \
+    uihistdialog.h
 
 RESOURCES += \
     icons.qrc

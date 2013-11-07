@@ -1,14 +1,14 @@
 #include "panimage.h"
 
 
+
 /*  Function:        CvImage()
  *  Description:     Initiation for attributes of class CvImage
  *  Input:           None
  *  Output:          None
  */
-PanImage::PanImage(int colorType)
+PanImage::PanImage()
 {
-    mat.create(0, 0, colorType);
     channelChangeState = false;
 }
 /*  Function:        ~CvImage()
@@ -27,6 +27,7 @@ PanImage::~PanImage(){
  *  Output:          None
  */
 void PanImage::SetMat(cv::Mat& newMat){
+    mat.create(newMat.cols, newMat.rows, newMat.type());
     mat = newMat;
 }
 
@@ -58,4 +59,46 @@ void PanImage::SetChannelChangeState(bool state){
  */
 bool PanImage::GetChannelChangeState(){
     return channelChangeState;
+}
+
+
+/*  Function:       CvMat2QImage(const cv::Mat& image)
+ *  Description:    Convert the cv::Mat format to QImage Format
+ *  Input:          cv::Mat object
+ *  Output:         QImage object
+ */
+QImage PanImage::PanImage2QImage(){
+    QImage qimage;
+    switch (mat.channels()){
+        case 1:     qimage = QImage((const unsigned char*)(mat.data),
+                                mat.cols,
+                                mat.rows,
+                                static_cast<int>(mat.step),
+                                QImage::Format_Indexed8);
+                    break;
+
+        case 3:     if (channelChangeState == false){
+                        cv::cvtColor(mat, mat, CV_BGR2RGB);
+                        channelChangeState = true;
+                    }
+                    qimage = QImage((const unsigned char*)(mat.data),
+                                           mat.cols,
+                                           mat.rows,
+                                           static_cast<int>(mat.step),
+                                           QImage::Format_RGB888);
+                    break;
+
+        case 4:     if (channelChangeState == false){
+                        cv::cvtColor(mat, mat, CV_BGR2RGB);
+                        channelChangeState = true;
+                    }
+                    qimage = QImage((const unsigned char*)(mat.data),
+                                           mat.cols,
+                                           mat.rows,
+                                           static_cast<int>(mat.step),
+                                           QImage::Format_ARGB32);
+                    break;
+    }
+
+    return qimage;
 }

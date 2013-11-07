@@ -1,7 +1,4 @@
 #include "uimainwindow.h"
-#include "panimage.h"
-#include "panimageio.h"
-#include "panimageshift.h"
 
 
 /*---------------------------------------------------------------------
@@ -45,7 +42,7 @@ void UiMainWindow::CreateTabWidgets(){
     connect(m_save, SIGNAL(clicked()), this, SLOT(Save()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
     m_saveAs = new QPushButton(QIcon(":/icon/saveAs.ico"), "", this);
-    connect(m_saveAs, SIGNAL(clicked()), this, SLOT(Save()));
+    connect(m_saveAs, SIGNAL(clicked()), this, SLOT(SaveAs()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
     QHBoxLayout* hLay1 = new QHBoxLayout;
     hLay1->addWidget(m_openPic);
@@ -58,16 +55,13 @@ void UiMainWindow::CreateTabWidgets(){
     QHBoxLayout* hLay2 = new QHBoxLayout;
     m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
     connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateClkwise, SLOT(setEnabled(bool)));
     m_rotateCntrClkwise = new QPushButton(QIcon(":/icon/rotate_cntrclockwise.ico"), "", this);
     connect(m_rotateCntrClkwise, SIGNAL(clicked()), this, SLOT(RotateCntrClkwise()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_rotateCntrClkwise, SLOT(setEnabled(bool)));
     m_mirrorH = new QPushButton(QIcon(":/icon/mirror_horizontally.ico"), "", this);
     connect(m_mirrorH, SIGNAL(clicked()), this, SLOT(MirrorH()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorH, SLOT(setEnabled(bool)));
     m_mirrorV = new QPushButton(QIcon(":/icon/mirror_vertically.ico"), "", this);
     connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
-    connect(this, SIGNAL(ImageLoaded(bool)), m_mirrorV, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_tab2, SLOT(setEnabled(bool)));
     hLay2->addWidget(m_rotateClkwise);
     hLay2->addWidget(m_rotateCntrClkwise);
     hLay2->addWidget(m_mirrorH);
@@ -75,9 +69,22 @@ void UiMainWindow::CreateTabWidgets(){
     hLay2->addStretch();
     m_tab2->setLayout(hLay2);
 
+    m_tab3 = new QWidget;
+    QHBoxLayout* hLay3 = new QHBoxLayout;
+    m_dispHist = new QPushButton(QIcon(":/icon/hist.ico"), "", this);
+    connect(m_dispHist, SIGNAL(clicked()), this, SLOT(CreateHistDialog()));
+    m_equalizeHist = new QPushButton(QIcon(":/icon/equalizehist.ico"), "", this);
+    connect(m_equalizeHist, SIGNAL(clicked()), this, SLOT(EqualizeHist()));
+    connect(this, SIGNAL(ImageLoaded(bool)), m_tab3, SLOT(setEnabled(bool)));
+    hLay3->addWidget(m_dispHist);
+    hLay3->addWidget(m_equalizeHist);
+    hLay3->addStretch();
+    m_tab3->setLayout(hLay3);
+
     m_tabWidget = new QTabWidget(this);
-    m_tabWidget->addTab(m_tab1, QIcon(":/icon/m_tab1.png"), "File");
-    m_tabWidget->addTab(m_tab2, QIcon(":/icon/m_tab2.png"), "Shift");
+    m_tabWidget->addTab(m_tab1, QIcon(":/icon/tab1.ico"), "File");
+    m_tabWidget->addTab(m_tab2, QIcon(":/icon/tab2.ico"), "Shift");
+    m_tabWidget->addTab(m_tab3, QIcon(":/icon/tab2.ico"), "Pixel");
     m_tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 }
 
@@ -100,11 +107,10 @@ void UiMainWindow::CreatePicDispWidgets(const QString &fileName){
 
     if (fileName != 0){
         m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
-        m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::GetInstance()->CvImage2QImage(m_PanImage)));
+        m_dispArea->setPixmap(QPixmap::fromImage(m_PanImage.PanImage2QImage()));
         SetHasImage(true);
     }
     else {
-        m_PanImage.GetMat().create(0, 0, CV_8UC3);
         SetHasImage(false);
     }
 
@@ -252,7 +258,7 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::OpenPic(){
-    QString selectedFilter = tr("PNG(*.png)");
+    QString selectedFilter = tr("JPEG(*.jpg &.jpeg)");
     m_fileName = QFileDialog::getOpenFileName(this,
                                               tr("Open File"),
                                               "../",
@@ -347,7 +353,6 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::Save(){
-    cv::cvtColor(m_PanImage.GetMat(), m_PanImage.GetMat(), CV_RGB2BGR);
     PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
     setWindowModified(false);
     setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
@@ -365,7 +370,7 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::SaveAs(){
-    QString selectedFilter = tr("PNG(*.png)");
+    QString selectedFilter = tr("JPEG(*.jpg *.jpeg)");
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Open File"),
                                                     "../",
@@ -459,10 +464,16 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::ZoomPic(int curValue){
     int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
-    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::
-                                             GetInstance()->
-                                             CvImage2QImage(m_PanImage).
-                                             scaledToWidth(curWidth)));
+    int channelNum = m_PanImage.GetMat().channels();
+    if (channelNum == 1){
+        m_dispArea->setPixmap(QPixmap::
+                              fromImage(m_PanImage.PanImage2QImage().
+                              convertToFormat(QImage::Format_RGB888).
+                              scaledToWidth(curWidth)));
+    }
+    else if(channelNum == 3) {
+        m_dispArea->setPixmap(QPixmap::fromImage(m_PanImage.PanImage2QImage().scaledToWidth(curWidth)));
+    }
     update();
     updateGeometry();
 }
@@ -485,10 +496,7 @@ void UiMainWindow::ZoomPic(){
     tmpStr.chop(1);
     float value = tmpStr.toFloat() / 100.0;
     int curWidth = static_cast<int>(value * float(m_PanImage.GetMat().cols));
-    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::
-                                             GetInstance()->
-                                             CvImage2QImage(m_PanImage).
-                                             scaledToWidth(curWidth)));
+    m_dispArea->setPixmap(QPixmap::fromImage(m_PanImage.PanImage2QImage().scaledToWidth(curWidth)));
     update();
     updateGeometry();
 }
@@ -558,6 +566,18 @@ void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
 }
 
 
+void UiMainWindow::EqualizeHist(){
+    PanImageHistProc::GetInstance()->HistEqalization(m_PanImage);
+    SetImage(m_PanImage);
+}
+
+
+void UiMainWindow::CreateHistDialog(){
+    UiHistDialog* hist = new UiHistDialog(m_PanImage, m_fileName);
+    hist->show();
+}
+
+
 /*---------------------------------------------------------------------
 Fuction:        SetHasImage(bool value)
 
@@ -585,7 +605,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::SetImage(PanImage& newImage){
     m_PanImage = newImage;
-    m_dispArea->setPixmap(QPixmap::fromImage(PanImageShift::GetInstance()->CvImage2QImage(m_PanImage)));
+    m_dispArea->setPixmap(QPixmap::fromImage(m_PanImage.PanImage2QImage()));
     emit(ImageChanged());
     setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
     update();
@@ -642,10 +662,7 @@ void UiMainWindow::wheelEvent(QWheelEvent *event){
     static int wheeledDistance = 0;
     if (QApplication::keyboardModifiers() == Qt::ControlModifier){
         wheeledDistance += (event->angleDelta() / 20).y();
-/*        if(wheeledDistance > 0){
-            wheeledDistance *= wheeledDistance;
-        }
-        else */if(wheeledDistance <= -ZOOM_SAME){
+        if (wheeledDistance <= -ZOOM_SAME){
             wheeledDistance = -ZOOM_SAME;
         }
         emit(MouseOnPicWheeled(wheeledDistance + ZOOM_SAME));

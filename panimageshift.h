@@ -1,10 +1,7 @@
 #ifndef CVIMAGESHIFT_H
 #define CVIMAGESHIFT_H
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <QImage>
 
 #include "panimage.h"
 
@@ -28,9 +25,6 @@ public:
     void MirrorH(PanImage& image);
     void RotateClockWise(PanImage& image);
     void RotateCntrClockWise(PanImage& image);
-
-    // Auxilary functions
-    QImage CvImage2QImage(PanImage& image);
 };
 
 

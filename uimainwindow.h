@@ -30,8 +30,13 @@
 #include <QUrl>
 #include <QMimeData>
 #include <QSplitter>
+#include <QDialog>
 
 #include "panimage.h"
+#include "panimageio.h"
+#include "panimageshift.h"
+#include "panimagehistproc.h"
+#include "uihistdialog.h"
 
 class UiMainWindow : public QMainWindow
 {
@@ -61,7 +66,6 @@ signals:
    void MouseOnPicWheeled(int);
    void PicIndexSwitched(int, int);
 
-
 public slots:
     void OpenPic();
     void NextPic();
@@ -81,6 +85,9 @@ public slots:
     void ShowCurIndexPic();
     void ShowCurPicIndex(int, int);
 
+    void EqualizeHist();
+
+    void CreateHistDialog();
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event);
@@ -106,6 +113,9 @@ private:
     QPushButton* m_rotateCntrClkwise;
     QPushButton* m_mirrorH;
     QPushButton* m_mirrorV;
+    QWidget* m_tab3;
+    QPushButton* m_dispHist;
+    QPushButton* m_equalizeHist;
 
     // Status bar
     QStatusBar* m_statusBar;

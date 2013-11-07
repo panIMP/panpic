@@ -1,6 +1,7 @@
 #ifndef CVIMAGEIO_H
 #define CVIMAGEIO_H
 
+
 #include <opencv2/highgui/highgui.hpp>
 #include <QString>
 
@@ -24,10 +25,6 @@ public:
     // Image input and output
     PanImage ReadPanImage(const QString& str);
     void SavePanImage(PanImage& ImageToSave, const QString& str);
-
-    // Image modification
-    void ReplaceMat(PanImage& initImage, PanImage& replaceImage);
-    void ReplaceMat(PanImage& initImage, const QString& str);
 };
 
 #endif // IMAGEIO_H

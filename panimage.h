@@ -2,6 +2,9 @@
 #define PANIMAGE_H
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <QImage>
+#include <QMessageBox>
 
 class PanImage
 {
@@ -11,7 +14,7 @@ private:
 
 
 public:
-    PanImage(int colorType = CV_8UC3);
+    PanImage();
     ~PanImage();
 
     void SetMat(cv::Mat& newMat);
@@ -19,6 +22,8 @@ public:
 
     void SetChannelChangeState(bool state);
     bool GetChannelChangeState();
+
+    QImage PanImage2QImage();
 };
 
 #endif // CVIMAGE_H

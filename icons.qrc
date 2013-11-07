@@ -7,9 +7,11 @@
         <file>icon/mirror_vertically.ico</file>
         <file>icon/previous_pic.ico</file>
         <file>icon/next_pic.ico</file>
-        <file>icon/m_tab1.png</file>
         <file>icon/ok.png</file>
         <file>icon/save.ico</file>
         <file>icon/saveAs.ico</file>
+        <file>icon/tab1.ico</file>
+        <file>icon/hist.ico</file>
+        <file>icon/equalizehist.ico</file>
     </qresource>
 </RCC>
