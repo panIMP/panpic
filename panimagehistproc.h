@@ -18,7 +18,7 @@ public:
 
     PanImage GetHistImage(PanImage& inputImage);
     bool HistEqalization(PanImage& inputImage);
-    bool HistMatch(PanImage& inputImage, PanImage& matchImage);
+    bool HistMatch(PanImage& inputImage,  double* histR);
 };
 
 #endif // PANIMAGEHISTPROC_H

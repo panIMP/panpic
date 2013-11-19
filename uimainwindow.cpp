@@ -37,11 +37,14 @@ Output:         None
 void UiMainWindow::CreateTabWidgets(){
     m_tab1 = new QWidget;
     m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "", this);
+    m_openPic->setToolTip("Open a picture");
     connect(m_openPic, SIGNAL(clicked()), this, SLOT(OpenPic()));
     m_save = new QPushButton(QIcon(":/icon/save.ico"), "", this);
+    m_save->setToolTip("Save and cover current picture");
     connect(m_save, SIGNAL(clicked()), this, SLOT(Save()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
     m_saveAs = new QPushButton(QIcon(":/icon/saveAs.ico"), "", this);
+    m_saveAs->setToolTip("Save current picture as another file");
     connect(m_saveAs, SIGNAL(clicked()), this, SLOT(SaveAs()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
     QHBoxLayout* hLay1 = new QHBoxLayout;
@@ -54,12 +57,16 @@ void UiMainWindow::CreateTabWidgets(){
     m_tab2 = new QWidget;
     QHBoxLayout* hLay2 = new QHBoxLayout;
     m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
+    m_rotateClkwise->setToolTip("Rotate the picture clockwise");
     connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
     m_rotateCntrClkwise = new QPushButton(QIcon(":/icon/rotate_cntrclockwise.ico"), "", this);
+    m_rotateCntrClkwise->setToolTip("Rotate the picture counter clockwise");
     connect(m_rotateCntrClkwise, SIGNAL(clicked()), this, SLOT(RotateCntrClkwise()));
     m_mirrorH = new QPushButton(QIcon(":/icon/mirror_horizontally.ico"), "", this);
+    m_mirrorH->setToolTip("Get the horizontal mirror image of the picture");
     connect(m_mirrorH, SIGNAL(clicked()), this, SLOT(MirrorH()));
     m_mirrorV = new QPushButton(QIcon(":/icon/mirror_vertically.ico"), "", this);
+    m_mirrorV->setToolTip("Get the vertically mirror image of the picture");
     connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_tab2, SLOT(setEnabled(bool)));
     hLay2->addWidget(m_rotateClkwise);
@@ -72,12 +79,18 @@ void UiMainWindow::CreateTabWidgets(){
     m_tab3 = new QWidget;
     QHBoxLayout* hLay3 = new QHBoxLayout;
     m_dispHist = new QPushButton(QIcon(":/icon/hist.ico"), "", this);
+    m_dispHist->setToolTip("Show the histogram of the picture");
     connect(m_dispHist, SIGNAL(clicked()), this, SLOT(CreateHistDialog()));
-    m_equalizeHist = new QPushButton(QIcon(":/icon/equalizehist.ico"), "", this);
-    connect(m_equalizeHist, SIGNAL(clicked()), this, SLOT(EqualizeHist()));
+    m_histEqualize = new QPushButton(QIcon(":/icon/equalizehist.ico"), "", this);
+    m_histEqualize->setToolTip("Do histogram equalization for the picture");
+    connect(m_histEqualize, SIGNAL(clicked()), this, SLOT(EqualizeHist()));
+    m_histMatch = new QPushButton(QIcon(":/icon/matchhist.jpg"), "", this);
+    m_histMatch->setToolTip("Do histogram equalization for the picture");
+    connect(m_histMatch, SIGNAL(clicked()), this, SLOT(MatchHist()));
     connect(this, SIGNAL(ImageLoaded(bool)), m_tab3, SLOT(setEnabled(bool)));
     hLay3->addWidget(m_dispHist);
-    hLay3->addWidget(m_equalizeHist);
+    hLay3->addWidget(m_histEqualize);
+    hLay3->addWidget(m_histMatch);
     hLay3->addStretch();
     m_tab3->setLayout(hLay3);
 
@@ -104,6 +117,7 @@ void UiMainWindow::CreatePicDispWidgets(const QString &fileName){
     m_dispArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_dispArea->setAlignment(Qt::AlignCenter);
     m_dispArea->setAcceptDrops(true);
+    //m_dispArea->setScaledContents(true);
 
     if (fileName != 0){
         m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
@@ -258,7 +272,7 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::OpenPic(){
-    QString selectedFilter = tr("JPEG(*.jpg &.jpeg)");
+    QString selectedFilter = tr("JPEG(*.jpg *.jpeg)");
     m_fileName = QFileDialog::getOpenFileName(this,
                                               tr("Open File"),
                                               "../",
@@ -568,6 +582,15 @@ void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
 
 void UiMainWindow::EqualizeHist(){
     PanImageHistProc::GetInstance()->HistEqalization(m_PanImage);
+    SetImage(m_PanImage);
+}
+
+void UiMainWindow::MatchHist(){
+    double histV[256] = {0.0};
+    for (int i = 0; i < 256; i++){
+        histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256;
+    }
+    PanImageHistProc::GetInstance()->HistMatch(m_PanImage, histV);
     SetImage(m_PanImage);
 }
 

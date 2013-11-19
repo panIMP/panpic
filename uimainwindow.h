@@ -61,10 +61,10 @@ public:
     void CreateOthers();
 
 signals:
-   void ImageChanged();
-   void ImageLoaded(bool);
-   void MouseOnPicWheeled(int);
-   void PicIndexSwitched(int, int);
+	void ImageChanged();
+	void ImageLoaded(bool);
+	void MouseOnPicWheeled(int);
+	void PicIndexSwitched(int, int);
 
 public slots:
     void OpenPic();
@@ -86,6 +86,7 @@ public slots:
     void ShowCurPicIndex(int, int);
 
     void EqualizeHist();
+    void MatchHist();
 
     void CreateHistDialog();
 
@@ -115,7 +116,11 @@ private:
     QPushButton* m_mirrorV;
     QWidget* m_tab3;
     QPushButton* m_dispHist;
-    QPushButton* m_equalizeHist;
+    QPushButton* m_histEqualize;
+    QPushButton* m_histMatch;
+    QPushButton* m_guassinBlur;
+    QPushButton* m_medianBlur;
+    QPushButton* m_meanBlur;
 
     // Status bar
     QStatusBar* m_statusBar;

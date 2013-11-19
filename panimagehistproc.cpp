@@ -122,7 +122,6 @@ PanImage PanImageHistProc::GetHistImage(PanImage& inputImage){
  */
 bool PanImageHistProc::HistEqalization(PanImage &inputImage){
     cv::Mat mat = inputImage.GetMat();
-
     if (mat.channels() == 1){
         cv::equalizeHist(mat, mat);
     }
@@ -138,11 +137,61 @@ bool PanImageHistProc::HistEqalization(PanImage &inputImage){
     return true;
 }
 
+bool PanImageHistProc::HistMatch(PanImage &inputImage, double* histR){
+    cv::Mat mat = inputImage.GetMat();
+    cv::Mat histGray;
+    if (mat.channels() == 1){
+        int histSize[] = {256};
+        float hRanges[] = {0.0, 255.0};
+        const float* ranges[] = {hRanges};
+        const int channels[] = {0};
+        cv::calcHist(&mat, 1, channels, cv::Mat(), histGray, 1, histSize, ranges);
+        double histAccumR[256] = {0.0};
+        for (int i = 0; i < 256; i++){
+            if (i == 0){
+                histAccumR[0] = histR[0];
+            }
+            else {
+                histAccumR[i] = histAccumR[i - 1] + histR[i];
+            }
+        }
+        double histAccumS[256] = {0.0};
+        for (int i = 0; i < 256; i++){
+            if (i == 0){
+                histAccumS[0] = histGray.at<double>(i);
+            }
+            else {
+                histAccumS[i] = histAccumS[i - 1] + histGray.at<double>(i);
+            }
+        }
+        int histMap[256] = {};
+        for (int i = 0; i < 256; i++){
+            int m = 0;
+            long double min_value = 1.0f;
+            for (int j = 0; j < 256; j++){
+                long double now_value = fabs(long double(histAccumR[j] - histAccumS[i]));
+                if (now_value < min_value){
+                    m = j;
+                    min_value = now_value;
+                }
+            }
+            histMap[i] = (uchar)m;
+        }
+        for (int i =0; i < mat.rows; i ++){
+            uchar* data = mat.ptr<uchar>(i);
+            for (int j=0; j < mat.cols; j++){
+                data[j] = histMap[data[j]];
+            }
+        }
+    }
+    else if (mat.channels() == 3){
+        std::vector<cv::Mat> v(mat.channels());
+        cv::split(mat, v);
+        cv::Mat histV1, histV2, histV3;
+    }
 
-
-
-
-
+    return true;
+}
 
 
 

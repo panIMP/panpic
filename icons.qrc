@@ -13,5 +13,6 @@
         <file>icon/tab1.ico</file>
         <file>icon/hist.ico</file>
         <file>icon/equalizehist.ico</file>
+        <file>icon/matchhist.jpg</file>
     </qresource>
 </RCC>
