@@ -586,9 +586,9 @@ void UiMainWindow::EqualizeHist(){
 }
 
 void UiMainWindow::MatchHist(){
-    double histV[256] = {0.0};
+    float histV[256] = {0.0};
     for (int i = 0; i < 256; i++){
-        histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256;
+        histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256.0;
     }
     PanImageHistProc::GetInstance()->HistMatch(m_PanImage, histV);
     SetImage(m_PanImage);

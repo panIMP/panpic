@@ -28,7 +28,7 @@ INCLUDEPATH += C:/opencv/build/include/opencv2/
 
 # Contains the list of library files that should be linked with the project.
 LIBS += -LC:/opencv/build/x64/vc11/lib \
-        -lopencv_core244 \
-        -lopencv_highgui244 \
-        -lopencv_imgproc244 \
-        -lopencv_video244
+        -lopencv_core244d \
+        -lopencv_highgui244d \
+        -lopencv_imgproc244d \
+        -lopencv_video244d

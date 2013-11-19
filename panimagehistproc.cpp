@@ -33,7 +33,8 @@ void PanImageHistProc::Destroy(){
 /*  Function:        GetHistImage(PanImage& inputImage)
  *  Description:     Calculate the histogram of panimage
  *                   Gray image:  calculate the gray histogram
- *                   Color image: calculate the hsv format image histogram, 2 histograms
+ *                   Color image: calculate the hsv format image histogram,
+ *                                2 histograms:
  *                                1. h(hue) - s(saturation) histogram
  *                                2. v(value) hitogram
  *  Input:           PanImage instance
@@ -84,7 +85,8 @@ PanImage PanImageHistProc::GetHistImage(PanImage& inputImage){
         const float* ranges[] = {hranges, sranges};
         int channels[] = {0, 1};
         cv::MatND hist;
-        cv::calcHist(&hs, 1, channels, cv::Mat(), hist, 2, histSize, ranges, true, false);
+        cv::calcHist(&hs, 1, channels, cv::Mat(), hist,
+                     2, histSize, ranges, true, false);
         double maxVal;
         cv::minMaxLoc(hist, 0, &maxVal, 0, 0);
         int height = 360;
@@ -98,7 +100,7 @@ PanImage PanImageHistProc::GetHistImage(PanImage& inputImage){
                 float binVal = hist.at<float>(h,s);
                 int intensity = cvRound(binVal * 255 / maxVal);
                 int i = h*sbins + s;
-                hsv_color.setTo(cv::Scalar(h*180.f / hbins, s*255.f/sbins, 255));
+                hsv_color.setTo(cv::Scalar(h*180.f / hbins,s*255.f/sbins, 255));
                 cv::cvtColor(hsv_color,rgb_color,CV_HSV2BGR);
                 cv::Scalar color = rgb_color.at<cv::Vec3b>(0,0);
                 cv::rectangle(histImg, cv::Point(i*bin_w,height),
@@ -137,7 +139,7 @@ bool PanImageHistProc::HistEqalization(PanImage &inputImage){
     return true;
 }
 
-bool PanImageHistProc::HistMatch(PanImage &inputImage, double* histR){
+bool PanImageHistProc::HistMatch(PanImage &inputImage, float* histR){
     cv::Mat mat = inputImage.GetMat();
     cv::Mat histGray;
     if (mat.channels() == 1){
@@ -145,8 +147,9 @@ bool PanImageHistProc::HistMatch(PanImage &inputImage, double* histR){
         float hRanges[] = {0.0, 255.0};
         const float* ranges[] = {hRanges};
         const int channels[] = {0};
-        cv::calcHist(&mat, 1, channels, cv::Mat(), histGray, 1, histSize, ranges);
-        double histAccumR[256] = {0.0};
+        cv::calcHist(&mat, 1, channels, cv::Mat(),
+                     histGray, 1, histSize, ranges);
+        float histAccumR[256] = {0.0};
         for (int i = 0; i < 256; i++){
             if (i == 0){
                 histAccumR[0] = histR[0];
@@ -155,21 +158,21 @@ bool PanImageHistProc::HistMatch(PanImage &inputImage, double* histR){
                 histAccumR[i] = histAccumR[i - 1] + histR[i];
             }
         }
-        double histAccumS[256] = {0.0};
+        float histAccumS[256] = {0.0};
         for (int i = 0; i < 256; i++){
             if (i == 0){
-                histAccumS[0] = histGray.at<double>(i);
+                histAccumS[0] = histGray.at<float>(i);
             }
             else {
-                histAccumS[i] = histAccumS[i - 1] + histGray.at<double>(i);
+                histAccumS[i] = histAccumS[i - 1] + histGray.at<float>(i);
             }
         }
         int histMap[256] = {};
         for (int i = 0; i < 256; i++){
             int m = 0;
-            long double min_value = 1.0f;
+            float min_value = 500.0f;
             for (int j = 0; j < 256; j++){
-                long double now_value = fabs(long double(histAccumR[j] - histAccumS[i]));
+                float now_value = fabs(histAccumR[j] - histAccumS[i]);
                 if (now_value < min_value){
                     m = j;
                     min_value = now_value;
@@ -184,6 +187,7 @@ bool PanImageHistProc::HistMatch(PanImage &inputImage, double* histR){
             }
         }
     }
+
     else if (mat.channels() == 3){
         std::vector<cv::Mat> v(mat.channels());
         cv::split(mat, v);
