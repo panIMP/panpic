@@ -37,6 +37,7 @@
 #include "panimageshift.h"
 #include "panimagehistproc.h"
 #include "uihistdialog.h"
+#include "panimagefilter.h"
 
 class UiMainWindow : public QMainWindow
 {
@@ -88,6 +89,10 @@ public slots:
     void EqualizeHist();
     void MatchHist();
 
+    void GradSharpen();
+    void OtsuBinary();
+    void HoughTransform();
+
     void CreateHistDialog();
 
 protected:
@@ -118,9 +123,13 @@ private:
     QPushButton* m_dispHist;
     QPushButton* m_histEqualize;
     QPushButton* m_histMatch;
+    QWidget* m_tab4;
     QPushButton* m_guassinBlur;
     QPushButton* m_medianBlur;
     QPushButton* m_meanBlur;
+    QPushButton* m_gradSharpen;
+    QPushButton* m_otsuBinary;
+    QPushButton* m_houghTransform;
 
     // Status bar
     QStatusBar* m_statusBar;

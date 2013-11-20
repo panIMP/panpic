@@ -94,10 +94,27 @@ void UiMainWindow::CreateTabWidgets(){
     hLay3->addStretch();
     m_tab3->setLayout(hLay3);
 
+    m_tab4 = new QWidget;
+    m_gradSharpen = new QPushButton("grad sharpen", this);
+    connect(m_gradSharpen, SIGNAL(clicked()), this, SLOT(GradSharpen()));
+    m_otsuBinary = new QPushButton("binary image", this);
+    connect(m_otsuBinary, SIGNAL(clicked()), this, SLOT(OtsuBinary()));
+    m_houghTransform = new QPushButton("hough transform", this);
+    connect(m_houghTransform, SIGNAL(clicked()), this, SLOT(HoughTransform()));
+    QHBoxLayout* hLay4 = new QHBoxLayout;
+    hLay4->addWidget(m_gradSharpen);
+    hLay4->addWidget(m_otsuBinary);
+    hLay4->addWidget(m_houghTransform);
+    hLay4->addStretch();
+    m_tab4->setLayout(hLay4);
+
+
     m_tabWidget = new QTabWidget(this);
     m_tabWidget->addTab(m_tab1, QIcon(":/icon/tab1.ico"), "File");
     m_tabWidget->addTab(m_tab2, QIcon(":/icon/tab2.ico"), "Shift");
-    m_tabWidget->addTab(m_tab3, QIcon(":/icon/tab2.ico"), "Pixel");
+    m_tabWidget->addTab(m_tab3, QIcon(":/icon/tab2.ico"), "Histogram");
+    m_tabWidget->addTab(m_tab4, "Filtering");
+
     m_tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 }
 
@@ -272,10 +289,10 @@ Input:          None
 Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::OpenPic(){
-    QString selectedFilter = tr("JPEG(*.jpg *.jpeg)");
+    QString selectedFilter = tr("BMP(*.bmp)");
     m_fileName = QFileDialog::getOpenFileName(this,
                                               tr("Open File"),
-                                              "../",
+                                              "G:/operation/",
                                               tr("JPEG(*.jpg *.jpeg);; BMP(*.bmp);;"\
                                                  "PNG(*.png);;TIFF(*.tif)"\
                                                  ";;GIF(*.gif);; ICO(*.ico);; ALL(*.*)"
@@ -600,6 +617,20 @@ void UiMainWindow::CreateHistDialog(){
     hist->show();
 }
 
+void UiMainWindow::GradSharpen(){
+    PanImageFilter::GetInstance()->GradSharpen(m_PanImage);
+    SetImage(m_PanImage);
+}
+
+void UiMainWindow::OtsuBinary(){
+    PanImageFilter::GetInstance()->OtsuBinary(m_PanImage);
+    SetImage(m_PanImage);
+}
+
+void UiMainWindow::HoughTransform(){
+    PanImageFilter::GetInstance()->HoughTransform(m_PanImage);
+    SetImage(m_PanImage);
+}
 
 /*---------------------------------------------------------------------
 Fuction:        SetHasImage(bool value)

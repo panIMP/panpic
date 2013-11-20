@@ -7,7 +7,8 @@ SOURCES += \
     panimageio.cpp \
     panimageshift.cpp \
     panimagehistproc.cpp \
-    uihistdialog.cpp
+    uihistdialog.cpp \
+    panimagefilter.cpp
 
 HEADERS += \
     uimainwindow.h \
@@ -15,7 +16,8 @@ HEADERS += \
     panimageio.h \
     panimageshift.h \
     panimagehistproc.h \
-    uihistdialog.h
+    uihistdialog.h \
+    panimagefilter.h
 
 RESOURCES += \
     icons.qrc
