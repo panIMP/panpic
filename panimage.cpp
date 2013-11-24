@@ -9,7 +9,9 @@
  */
 PanImage::PanImage()
 {
-    channelChangeState = false;
+	channelChangeState = false;
+	isBinary = false;
+	isGray = false;
 }
 /*  Function:        ~CvImage()
  *  Description:     Release of attributes allocation of class CvImage
@@ -21,14 +23,19 @@ PanImage::~PanImage(){
 }
 
 
+void PanImage::copyTo(PanImage& image){
+	image.channelChangeState  = channelChangeState;
+	image.SetMat(mat);
+}
+
 /*  Function:        SetMat(cv::Mat &newMat)
  *  Description:     Set the mat attribute
  *  Input:           cv::Mat instance
  *  Output:          None
  */
 void PanImage::SetMat(cv::Mat& newMat){
-    mat.create(newMat.cols, newMat.rows, newMat.type());
-    mat = newMat;
+	mat.create(newMat.cols, newMat.rows, newMat.type());
+	newMat.copyTo(mat);
 }
 
 
@@ -38,7 +45,7 @@ void PanImage::SetMat(cv::Mat& newMat){
  *  Output:          cv::Mat instance
  */
 cv::Mat& PanImage::GetMat(){
-    return mat;
+	return mat;
 }
 
 
@@ -48,7 +55,7 @@ cv::Mat& PanImage::GetMat(){
  *  Output:          None
  */
 void PanImage::SetChannelChangeState(bool state){
-    channelChangeState = state;
+	channelChangeState = state;
 }
 
 
@@ -58,8 +65,26 @@ void PanImage::SetChannelChangeState(bool state){
  *  Output:          True or False, isModified value
  */
 bool PanImage::GetChannelChangeState(){
-    return channelChangeState;
+	return channelChangeState;
 }
+
+
+void PanImage::SetIsBinary(bool state){
+	isBinary = state;
+}
+
+bool PanImage::IsBinary(){
+	return isBinary;
+}
+
+void PanImage::SetIsGray(bool state){
+	isGray = state;
+}
+
+bool PanImage::IsGray(){
+	return isGray;
+}
+
 
 
 /*  Function:       CvMat2QImage(const cv::Mat& image)
@@ -68,37 +93,37 @@ bool PanImage::GetChannelChangeState(){
  *  Output:         QImage object
  */
 QImage PanImage::PanImage2QImage(){
-    QImage qimage;
-    switch (mat.channels()){
-        case 1:     qimage = QImage((const unsigned char*)(mat.data),
-                                mat.cols,
-                                mat.rows,
-                                static_cast<int>(mat.step),
-                                QImage::Format_Indexed8);
-                    break;
+	QImage qimage;
+	switch (mat.channels()){
+		case 1:     qimage = QImage((const unsigned char*)(mat.data),
+								mat.cols,
+								mat.rows,
+								static_cast<int>(mat.step),
+								QImage::Format_Indexed8);
+					break;
 
-        case 3:     if (channelChangeState == false){
-                        cv::cvtColor(mat, mat, CV_BGR2RGB);
-                        channelChangeState = true;
-                    }
-                    qimage = QImage((const unsigned char*)(mat.data),
-                                           mat.cols,
-                                           mat.rows,
-                                           static_cast<int>(mat.step),
-                                           QImage::Format_RGB888);
-                    break;
+		case 3:     if (channelChangeState == false){
+						cv::cvtColor(mat, mat, CV_BGR2RGB);
+						channelChangeState = true;
+					}
+					qimage = QImage((const unsigned char*)(mat.data),
+										   mat.cols,
+										   mat.rows,
+										   static_cast<int>(mat.step),
+										   QImage::Format_RGB888);
+					break;
 
-        case 4:     if (channelChangeState == false){
-                        cv::cvtColor(mat, mat, CV_BGR2RGB);
-                        channelChangeState = true;
-                    }
-                    qimage = QImage((const unsigned char*)(mat.data),
-                                           mat.cols,
-                                           mat.rows,
-                                           static_cast<int>(mat.step),
-                                           QImage::Format_ARGB32);
-                    break;
-    }
+		case 4:     if (channelChangeState == false){
+						cv::cvtColor(mat, mat, CV_BGR2RGB);
+						channelChangeState = true;
+					}
+					qimage = QImage((const unsigned char*)(mat.data),
+										   mat.cols,
+										   mat.rows,
+										   static_cast<int>(mat.step),
+										   QImage::Format_ARGB32);
+					break;
+	}
 
-    return qimage;
+	return qimage;
 }

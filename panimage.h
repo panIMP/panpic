@@ -11,21 +11,30 @@
 class PanImage
 {
 private:
-    cv::Mat mat;
-    bool channelChangeState;
-
+	cv::Mat mat;
+	bool channelChangeState;
+	bool isBinary;
+	bool isGray;
 
 public:
-    PanImage();
-    ~PanImage();
+	PanImage();
+	~PanImage();
 
-    void SetMat(cv::Mat& newMat);
-    cv::Mat& GetMat();
+	void copyTo(PanImage& image);
 
-    void SetChannelChangeState(bool state);
-    bool GetChannelChangeState();
+	void SetMat(cv::Mat& newMat);
+	cv::Mat& GetMat();
 
-    QImage PanImage2QImage();
+	void SetChannelChangeState(bool state);
+	bool GetChannelChangeState();
+
+	void SetIsBinary(bool state);
+	bool IsBinary();
+
+	void SetIsGray(bool state);
+	bool IsGray();
+
+	QImage PanImage2QImage();
 };
 
 #endif // CVIMAGE_H
