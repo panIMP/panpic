@@ -38,6 +38,7 @@
 #include "panimagehistproc.h"
 #include "uihistdialog.h"
 #include "panimagefilter.h"
+#include "uihoughtransformparam.h"
 
 class UiMainWindow : public QMainWindow
 {

@@ -65,7 +65,7 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 	}
 }
 
-void PanImageFilter::MedianFilter(PanImage &image)
+void PanImageFilter::MedianFilter(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
 	cv::Mat tmpMat;
@@ -98,7 +98,7 @@ void PanImageFilter::MedianFilter(PanImage &image)
 	image.SetIsBinary(true);
 }
 
-void PanImageFilter::OtsuBinary(PanImage &image)
+void PanImageFilter::OtsuBinary(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
 	cv::MatND hist;
@@ -635,7 +635,7 @@ void PanImageFilter::TotalProcessing(PanImage& image)
 
 	SobelSharpen(image);
 	MedianFilter(image);
-	bigCircle = HoughTransform(image, BIG_CIRCLE_MIN, BIG_CIRCLE_MAX, 1, 0, WIDTH, 0, HEIGHT, 100);
+	bigCircle = HoughTransform(image, BIG_CIRCLE_MIN, BIG_CIRCLE_MAX, SEARCH_STEP, 0, WIDTH, 0, HEIGHT, 100);
 	if (bigCircle.hasValue)
 	{
 		smallCircle = HoughTransform(image, 

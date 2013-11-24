@@ -12,6 +12,8 @@
 
 #define CIRCLE_WIDTH 3
 
+#define SEARCH_STEP 1
+
 #define BIG_CIRCLE_MIN 93
 #define BIG_CIRCLE_MAX 98
 

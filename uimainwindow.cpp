@@ -3,6 +3,7 @@
 _Pan_Circle bigCircle;
 _Pan_Circle smallCircle;
 
+
 /*---------------------------------------------------------------------
 Fuction:        MainWindow(const QString& fileName, QWidget *parent)
 
@@ -668,16 +669,8 @@ void UiMainWindow::HoleFill(){
 void UiMainWindow::HoughTransform(){
 	if (m_PanImage.IsBinary())
 	{
-		bigCircle = PanImageFilter::GetInstance()->HoughTransform(m_PanImage, 
-																 BIG_CIRCLE_MIN, 
-																 BIG_CIRCLE_MAX,
-																 1, 
-																 0, 
-																 WIDTH, 
-																 0, 
-																 HEIGHT,
-																 100);
-		SetImage(m_PanImage);
+		UiHoughTransformParam* houghParamDialog = new UiHoughTransformParam(m_PanImage,bigCircle);
+		houghParamDialog->show();
 	}
 	else
 	{
