@@ -7,6 +7,9 @@
 #include <opencv2/video/tracking.hpp>
 #include <QImage>
 #include <QMessageBox>
+#include <QTime>
+#include <QDebug>
+#include <time.h>
 
 class PanImage
 {

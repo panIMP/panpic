@@ -2,6 +2,7 @@
 #include <qstring.h>
 #include <qmessagebox.h>
 #include <qicon.h>
+#include <time.h>
 
 PanImageFilter* PanImageFilter::instance = 0;
 
@@ -41,6 +42,8 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 	cv::Mat result;
 	result.create(mat.rows, mat.cols, CV_8UC1);
 
+	double time_start = clock();
+
 	for(int i = 1; i < WIDTH - 1; i++)
 	{
 		for (int j = 1; j < HEIGHT - 1; j++)
@@ -56,6 +59,9 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 
 	result.copyTo(mat);
 
+	double time_end = clock();
+	double interval = time_end - time_start;
+
 	for(int i = mat.cols - 100; i < mat.cols; ++i)
 	{
 		for(int j = 0; j < mat.rows; ++j)
@@ -69,6 +75,9 @@ void PanImageFilter::MedianFilter(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
 	cv::Mat tmpMat;
+
+	double time_start = clock();
+
 	mat.copyTo(tmpMat);
 
 	for (int j = 1; j < HEIGHT - 1; j++)
@@ -83,7 +92,7 @@ void PanImageFilter::MedianFilter(PanImage& image)
 			     +tmpMat.at<uchar>(j, i+1) 
 			     +tmpMat.at<uchar>(j+1, i+1) 
 			     +tmpMat.at<uchar>(j-1, i+1) 
-			     +tmpMat.at<uchar>(j+1, i-1)) < 4*255 + 128) 
+			     +tmpMat.at<uchar>(j+1, i-1)) < 5*255) 
 			{
 				mat.at<uchar>(j, i) = 0;
 			}
@@ -93,6 +102,9 @@ void PanImageFilter::MedianFilter(PanImage& image)
 			}
 		}
 	}
+
+	double time_end = clock();
+	double interval = time_end - time_start;
 
 	// extra
 	image.SetIsBinary(true);
@@ -110,6 +122,8 @@ void PanImageFilter::OtsuBinary(PanImage& image)
 	double maxVal = 0;
 	double minVal = 0;
 	cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
+
+	uchar* data;
 
 	double equ=0.0;				    // 使用大津法原始公式equ=w0*(u0-u)*(u0-u)+w1*(u1-u)*(u1-u)
 	double max=0.0;				    // equ的最大值，该处相应的横坐标值对应着最后的阈值
@@ -159,18 +173,22 @@ void PanImageFilter::OtsuBinary(PanImage& image)
 		}
 	}
 
-	for(int i = 0; i < WIDTH - 1; i++)
+	for (int j = 0; j < HEIGHT - 1; j++)
 	{
-		for (int j = 0; j < HEIGHT - 1; j++)
+		data = mat.ptr<uchar>(j);
+
+		for(int i = 0; i < WIDTH - 1; i++)
 		{
-			if(mat.at<uchar>(j, i) >= threshold)
+			if(*data >= threshold)
 			{
-				mat.at<uchar>(j, i) = 255;
+				*data = 255;
 			}
 			else
 			{
-				mat.at<uchar>(j, i) = 0;
+				*data = 0;
 			}
+
+			data ++;
 		}
 	}
 
@@ -234,22 +252,31 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 	int bMin = (int)jMin + (int)rMin;
 	int bMax = (int)jMax - (int)rMin;
 	int aMinTmp, aMaxTmp, bMinTmp, bMaxTmp;
+	int aStart, aEnd, bStart, bEnd;
 
-	unsigned int div2 = div > 1;
+	unsigned int div2 = div / 2;
 
 	unsigned int i,j,r2,r2Div;
 	int a,b;
 	int iDist = 0;
 	int jDist = 0;
 
+	unsigned int maxVal = 0;
+	unsigned int maxValNeighbourSum = 0;
+	unsigned int tmpMaxValNeighbourSum = 0;
+
+	uchar* data;
+
+	double time_start = clock();
+
 	memset(H, 0, WIDTH*HEIGHT*R2DIVNUM*sizeof(unsigned int));
-	memset(r2ValArray, 0, R2DIVNUM*sizeof(unsigned int));
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
 	{
-		uchar* data = mat.ptr<uchar>(j);
+		data = mat.ptr<uchar>(j);
 		data += iMin;
+
 		for (i = iMin; i < iMax; i+=step)
 		{
 			// if pixel is black
@@ -260,10 +287,15 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 				bMinTmp = (int)j - (int)rMax;
 				bMaxTmp = (int)j + (int)rMax;
 
+				aStart = aMinTmp > aMin ? aMinTmp : aMin;
+				aEnd = aMaxTmp < aMax ? aMaxTmp : aMax;
+				bStart = bMinTmp > bMin ? bMinTmp : bMin;
+				bEnd = bMaxTmp < bMax ? bMaxTmp : bMax;
+
 				// calculate only those within the frame
-				for (a = (aMinTmp > aMin ? aMinTmp : aMin); a < (aMaxTmp < aMax ? aMaxTmp : aMax); a++)  
+				for (a = aStart; a < aEnd; a++)
 				{
-					for (b = (bMinTmp > bMin ? bMinTmp : bMin); b < (bMaxTmp < bMax ? bMaxTmp : bMax); b++)
+					for (b = bStart; b < bEnd; b++)
 					{
 						iDist = (int)i - (int)a;
 						jDist = (int)j - (int)b;
@@ -274,7 +306,6 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 						{   
 							r2Div = (r2 + div2) / div;
 							H[a][b][r2Div] ++;
-							r2ValArray[r2Div] = r2;
 						}
 					}
 				}
@@ -283,20 +314,26 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 		}
 	}
 
-	unsigned int maxVal = 0;
-	unsigned int tmpVal = 0;
-
-	// get the r, a & b
+	// modification -- second scanning -- by hp 
 	for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
 	{
 		for (a = aMin; a < aMax; a ++)
 		{
 			for (b = bMin; b < bMax; b++)
 			{
-				tmpVal = H[a][b][r2Div];
-				if (tmpVal > maxVal)
+				tmpMaxValNeighbourSum =	  H[a][b][r2Div] 
+										+ H[a-1][b][r2Div]
+										+ H[a][b-1][r2Div]
+										+ H[a-1][b-1][r2Div]
+										+ H[a+1][b][r2Div]
+										+ H[a][b+1][r2Div]
+										+ H[a+1][b+1][r2Div]
+										+ H[a-1][b+1][r2Div]
+										+ H[a+1][b-1][r2Div];
+				if (tmpMaxValNeighbourSum > maxValNeighbourSum)
 				{
-					maxVal = tmpVal;
+					maxValNeighbourSum = tmpMaxValNeighbourSum;
+					maxVal = H[a][b][r2Div];
 					circle.a= a;
 					circle.b = b;
 					circle.r2Div = r2Div;
@@ -305,12 +342,16 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 		}
 	}
 
+
 	if (maxVal >= 8)
 	{
-		circle.r2 = r2ValArray[circle.r2Div];
+		circle.r2 = circle.r2Div * div - div2;
 		circle.r = (unsigned int)sqrtf(circle.r2);
 		circle.hasValue = true;	
 	}
+
+	double time_end = clock();
+	double interval = time_end - time_start;
 
 	return circle;
 }
@@ -347,11 +388,9 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 	int bMin = (int)jMin + (int)rMin;
 	int bMax = (int)jMax - (int)rMin;
 	int aMinTmp, aMaxTmp, bMinTmp, bMaxTmp;
+	int aStart, aEnd, bStart, bEnd;
 
 	unsigned int div2 = div / 2;
-
-	memset(H, 0, WIDTH*HEIGHT*R2DIVNUM*sizeof(unsigned int));
-	memset(r2ValArray, 0, R2DIVNUM*sizeof(unsigned int));
 
 	unsigned int i,j,r2,r2Div;
 	int a,b;
@@ -360,7 +399,14 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 	int iDistBorder = 0;
 	int jDistBorder = 0;
 
+	unsigned int tmpVal = 0;
+	unsigned int maxVal = 0;
+
 	uchar* data;
+
+	double time_start = clock();
+
+	memset(H, 0, WIDTH*HEIGHT*R2DIVNUM*sizeof(unsigned int));
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
@@ -368,6 +414,7 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 		jDistBorder = (int)j - (int)bigCircle.b;
 		data = mat.ptr<uchar>(j);
 		data += iMin;
+
 		for (i = iMin; i < iMax; i+=step)
 		{
 			iDistBorder = (int)i - (int)bigCircle.a;
@@ -386,10 +433,15 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 				bMinTmp = (int)j - (int)rMax;
 				bMaxTmp = (int)j + (int)rMax;
 
+				aStart = aMinTmp > aMin ? aMinTmp : aMin;
+				aEnd = aMaxTmp < aMax ? aMaxTmp : aMax;
+				bStart = bMinTmp > bMin ? bMinTmp : bMin;
+				bEnd = bMaxTmp < bMax ? bMaxTmp : bMax;
+
 				// calculate only those within the frame
-				for (a = (aMinTmp > aMin ? aMinTmp : aMin); a < (aMaxTmp < aMax ? aMaxTmp : aMax); a++)  
+				for (a = aStart; a < aEnd; a++)
 				{
-					for (b = (bMinTmp > bMin ? bMinTmp : bMin); b < (bMaxTmp < bMax ? bMaxTmp : bMax); b++)
+					for (b = bStart; b < bEnd; b++)
 					{
 						iDist = (int)i - (int)a;
 						jDist = (int)j - (int)b;
@@ -400,7 +452,6 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 						{   
 							r2Div = (r2 + div2) / div;
 							H[a][b][r2Div] ++;
-							r2ValArray[r2Div] = r2;
 						}
 					}
 				}
@@ -408,9 +459,6 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 			data += step;
 		}
 	}
-
-	unsigned int maxVal = 0;
-	unsigned int tmpVal = 0;
 
 	// get the r, a & b
 	for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
@@ -433,10 +481,13 @@ _Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
 
 	if (maxVal >= 8)
 	{
-		circle.r2 = r2ValArray[circle.r2Div];
+		circle.r2 = circle.r2Div * div - div2;
 		circle.r = (unsigned int)sqrtf(circle.r2);
 		circle.hasValue = true;	
 	}
+
+	double time_end = clock();
+	double interval = time_end - time_start;
 
 	return circle;
 }
@@ -445,7 +496,7 @@ void PanImageFilter::LabelString(PanImage& image, _Pan_Circle bigCircle, _Pan_Ci
 {
 	cv::Mat mat = image.GetMat();
 
-	unsigned int r2MinThresh = (bigCircle.r - 2*CIRCLE_WIDTH) * (bigCircle.r - 2*CIRCLE_WIDTH);
+	unsigned int r2MinThresh = (bigCircle.r - 3*CIRCLE_WIDTH) * (bigCircle.r - 3*CIRCLE_WIDTH);
 	unsigned int r2MaxThresh = (bigCircle.r - CIRCLE_WIDTH) * (bigCircle.r - CIRCLE_WIDTH);
 
 	unsigned int i, j;
@@ -469,6 +520,8 @@ void PanImageFilter::LabelString(PanImage& image, _Pan_Circle bigCircle, _Pan_Ci
 	int iDistSmall, jDistSmall;
 
 	uchar* data;
+
+	double time_start = clock();
 
 	// unlabel the big circle and label the string
 	if (bigCircle.hasValue)
@@ -540,6 +593,9 @@ void PanImageFilter::LabelString(PanImage& image, _Pan_Circle bigCircle, _Pan_Ci
 			}
 		}
 	}
+
+	double time_end = clock();
+	double interval = time_end - time_start;
 
 	// label big circle center point
 	if (bigCircle.hasValue)
@@ -631,7 +687,11 @@ void PanImageFilter::TotalProcessing(PanImage& image)
 	image.copyTo(tmpImage);
 
 	_Pan_Circle bigCircle;
+	bigCircle.hasValue = false;
 	_Pan_Circle smallCircle;
+	smallCircle.hasValue = false;
+
+	double time_start = clock();
 
 	SobelSharpen(image);
 	MedianFilter(image);
@@ -646,7 +706,7 @@ void PanImageFilter::TotalProcessing(PanImage& image)
 									bigCircle.a + bigCircle.r,
 									bigCircle.b - bigCircle.r, 
 									bigCircle.b + bigCircle.r,
-					                1,
+					                2,
 									bigCircle);
 	}
 
@@ -657,4 +717,8 @@ void PanImageFilter::TotalProcessing(PanImage& image)
 		QMessageBox warning(QMessageBox::Warning, "Alert!", "Reverse the chip");
 		warning.exec();	
 	}
+
+	double time_end = clock();
+	double interval = time_end - time_start;
+	printf("the time cost is %f", interval);
 }

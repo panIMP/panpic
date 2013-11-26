@@ -12,13 +12,13 @@
 
 #define CIRCLE_WIDTH 3
 
-#define SEARCH_STEP 1
+#define SEARCH_STEP 4
 
-#define BIG_CIRCLE_MIN 93
-#define BIG_CIRCLE_MAX 98
+#define BIG_CIRCLE_MIN 95
+#define BIG_CIRCLE_MAX 97
 
 #define SMALL_CIRCLE_MIN 2
-#define SMALL_CIRCLE_MAX 7
+#define SMALL_CIRCLE_MAX 8
 
 #define WIDTH 752
 #define HEIGHT 480
@@ -26,7 +26,6 @@
 #define WITHIN_CIRCLE 1
 #define NON_WITHIN_CIRCLE 0
 static unsigned int H[WIDTH][HEIGHT][R2DIVNUM];
-static unsigned int r2ValArray[R2DIVNUM];
 
 typedef struct
 {
