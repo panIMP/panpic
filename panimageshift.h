@@ -1,5 +1,5 @@
-#ifndef CVIMAGESHIFT_H
-#define CVIMAGESHIFT_H
+#ifndef PANIMAGESHIFT_H
+#define PANIMAGESHIFT_H
 
 #include <opencv2/highgui/highgui.hpp>
 

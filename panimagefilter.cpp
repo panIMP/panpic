@@ -26,7 +26,6 @@ PanImageFilter* PanImageFilter::GetInstance()
 	return instance;
 }
 
-
 void PanImageFilter::Destroy()
 {
 	if (instance != 0)
@@ -36,22 +35,48 @@ void PanImageFilter::Destroy()
 	}
 }
 
+void PanImageFilter::Gray(PanImage& image)
+{
+	cv::Mat mat = image.GetMat();
+	unsigned int channels = mat.channels();
+	
+	if (channels < 3)
+	{
+		return;
+	}
+
+	if (image.GetChannelChangeState())
+	{
+		cv::cvtColor(mat, mat, CV_RGB2GRAY);
+	}
+	else
+	{
+		cv::cvtColor(mat, mat, CV_BGR2GRAY);
+	}
+
+	image.SetIsGray(true);
+	image.SetMat(mat);
+}
+
 void PanImageFilter::SobelSharpen(PanImage &image)
 {
 	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+
 	cv::Mat result;
 	result.create(mat.rows, mat.cols, CV_8UC1);
 
 	double time_start = clock();
 
-	for(int i = 1; i < WIDTH - 1; i++)
+	for(unsigned int i = 1; i < width - 1; i++)
 	{
-		for (int j = 1; j < HEIGHT - 1; j++)
+		for (unsigned int j = 1; j < height - 1; j++)
 		{
 			result.at<uchar>(j, i) = cv::saturate_cast<uchar>(
 						fabs((float)(mat.at<uchar>(j+1, i-1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j+1, i)
 									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j-1, i+1) - 2*mat.at<uchar>(j-1, i)))
-					    +fabs((float)(mat.at<uchar>(j-1, i+1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j, i+1)
+						+fabs((float)(mat.at<uchar>(j-1, i+1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j, i+1)
 									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j+1, i-1) - 2*mat.at<uchar>(j, i-1)))
 						);
 		}
@@ -62,37 +87,52 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 	double time_end = clock();
 	double interval = time_end - time_start;
 
-	for(int i = mat.cols - 100; i < mat.cols; ++i)
+	for(unsigned int i = width - 100; i < width; ++i)
 	{
-		for(int j = 0; j < mat.rows; ++j)
+		for(unsigned int j = 0; j < height; ++j)
 		{
 			mat.at<uchar>(j, i) = 0;
 		}
 	}
 }
 
+void PanImageFilter::MedianBlur(PanImage& image)
+{
+	cv::Mat mat = image.GetMat();
+	cv::medianBlur(mat, mat, 5);
+}
+
+void PanImageFilter::GuassinBlur(PanImage& image)
+{
+	cv::Mat mat = image.GetMat();
+	cv::GaussianBlur(mat, mat, cv::Size(5,5), 0.0);
+}
+
 void PanImageFilter::MedianFilter(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+
 	cv::Mat tmpMat;
 
 	double time_start = clock();
 
 	mat.copyTo(tmpMat);
 
-	for (int j = 1; j < HEIGHT - 1; j++)
+	for (unsigned int j = 1; j < height - 1; j++)
 	{
-		for (int i = 1; i <WIDTH - 1; i++)
+		for (unsigned int i = 1; i <width - 1; i++)
 		{
 			if (( tmpMat.at<uchar>(j, i)
 				 +tmpMat.at<uchar>(j-1, i) 
-			     +tmpMat.at<uchar>(j, i-1) 
-			     +tmpMat.at<uchar>(j-1, i-1) 
-			     +tmpMat.at<uchar>(j+1, i) 
-			     +tmpMat.at<uchar>(j, i+1) 
-			     +tmpMat.at<uchar>(j+1, i+1) 
-			     +tmpMat.at<uchar>(j-1, i+1) 
-			     +tmpMat.at<uchar>(j+1, i-1)) < 5*255) 
+				 +tmpMat.at<uchar>(j, i-1) 
+				 +tmpMat.at<uchar>(j-1, i-1) 
+				 +tmpMat.at<uchar>(j+1, i) 
+				 +tmpMat.at<uchar>(j, i+1) 
+				 +tmpMat.at<uchar>(j+1, i+1) 
+				 +tmpMat.at<uchar>(j-1, i+1) 
+				 +tmpMat.at<uchar>(j+1, i-1)) < 5*255) 
 			{
 				mat.at<uchar>(j, i) = 0;
 			}
@@ -110,9 +150,37 @@ void PanImageFilter::MedianFilter(PanImage& image)
 	image.SetIsBinary(true);
 }
 
+void PanImageFilter::Engrave(PanImage& image)
+{
+	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+	unsigned int channels = mat.channels();
+
+	std::vector<cv::Mat> v(channels);
+	cv::split(mat, v);
+
+	for (unsigned int k = 0; k < channels; k++)
+	{
+		for (unsigned int j = 0; j < height - 1; j ++)
+		{
+			for (unsigned int i = 0; i < width - 1; i++)
+			{
+				v[k].at<uchar>(j,i) = cv::saturate_cast<uchar>(
+									fabsf(v[k].at<uchar>(j,i) - v[k].at<uchar>(j+1,i+1)));
+			}
+		}
+	}
+
+	cv::merge(v, mat);
+}
+
 void PanImageFilter::OtsuBinary(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+
 	cv::MatND hist;
 	int histSize[] = {256};
 	float hRanges[] = {0.0, 255.0};
@@ -173,11 +241,11 @@ void PanImageFilter::OtsuBinary(PanImage& image)
 		}
 	}
 
-	for (int j = 0; j < HEIGHT - 1; j++)
+	for (unsigned int j = 0; j < height - 1; j++)
 	{
 		data = mat.ptr<uchar>(j);
 
-		for(int i = 0; i < WIDTH - 1; i++)
+		for(unsigned int i = 0; i < width - 1; i++)
 		{
 			if(*data >= threshold)
 			{
@@ -192,9 +260,9 @@ void PanImageFilter::OtsuBinary(PanImage& image)
 		}
 	}
 
-	for(int i = mat.cols - 100; i < mat.cols; ++i)
+	for(unsigned int i = width - 100; i < width; ++i)
 	{
-		for(int j = 0; j < mat.rows; ++j)
+		for(unsigned int j = 0; j < height; ++j)
 		{
 			mat.at<uchar>(j, i) = 0;
 		}
@@ -223,386 +291,7 @@ unsigned int PanImageFilter::CalcCombosX2Y2R2(unsigned int r2)
 	return comboNum;
 }
 
-_Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
-									unsigned int rMin, 
-									unsigned int rMax,
-									unsigned int step,
-									unsigned int iMin,
-									unsigned int iMax,
-									unsigned int jMin,
-									unsigned int jMax,
-									unsigned int div)
-{
-	cv::Mat mat = image.GetMat();
-	
-	_Pan_Circle circle;
-	circle.a = 0;
-	circle.b = 0;
-	circle.hasValue = false;
-	circle.r = 0;
-	circle.r2 = 0;
-	circle.r2Div = 0;
 
-	unsigned int r2Min = rMin * rMin;
-	unsigned int r2Max = rMax * rMax;
-	unsigned int r2MinDiv = r2Min / div;
-	unsigned int r2MaxDiv = r2Max / div;
-	int aMin = (int)iMin + (int)rMin;
-	int aMax = (int)iMax - (int)rMin;
-	int bMin = (int)jMin + (int)rMin;
-	int bMax = (int)jMax - (int)rMin;
-	int aMinTmp, aMaxTmp, bMinTmp, bMaxTmp;
-	int aStart, aEnd, bStart, bEnd;
-
-	unsigned int div2 = div / 2;
-
-	unsigned int i,j,r2,r2Div;
-	int a,b;
-	int iDist = 0;
-	int jDist = 0;
-
-	unsigned int maxVal = 0;
-	unsigned int maxValNeighbourSum = 0;
-	unsigned int tmpMaxValNeighbourSum = 0;
-
-	uchar* data;
-
-	double time_start = clock();
-
-	memset(H, 0, WIDTH*HEIGHT*R2DIVNUM*sizeof(unsigned int));
-
-	// do by algorithm by every step pixels
-	for (j = jMin; j < jMax; j+=step)
-	{
-		data = mat.ptr<uchar>(j);
-		data += iMin;
-
-		for (i = iMin; i < iMax; i+=step)
-		{
-			// if pixel is black
-			if (*data != 0)
-			{
-				aMinTmp = (int)i - (int)rMax;
-				aMaxTmp = (int)i + (int)rMax;
-				bMinTmp = (int)j - (int)rMax;
-				bMaxTmp = (int)j + (int)rMax;
-
-				aStart = aMinTmp > aMin ? aMinTmp : aMin;
-				aEnd = aMaxTmp < aMax ? aMaxTmp : aMax;
-				bStart = bMinTmp > bMin ? bMinTmp : bMin;
-				bEnd = bMaxTmp < bMax ? bMaxTmp : bMax;
-
-				// calculate only those within the frame
-				for (a = aStart; a < aEnd; a++)
-				{
-					for (b = bStart; b < bEnd; b++)
-					{
-						iDist = (int)i - (int)a;
-						jDist = (int)j - (int)b;
-						r2 = iDist*iDist + jDist*jDist;
-
-						// calculate only those within the circle
-						if (r2 > r2Min && r2 < r2Max)
-						{   
-							r2Div = (r2 + div2) / div;
-							H[a][b][r2Div] ++;
-						}
-					}
-				}
-			}
-			data += step;
-		}
-	}
-
-	// modification -- second scanning -- by hp 
-	for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
-	{
-		for (a = aMin; a < aMax; a ++)
-		{
-			for (b = bMin; b < bMax; b++)
-			{
-				tmpMaxValNeighbourSum =	  H[a][b][r2Div] 
-										+ H[a-1][b][r2Div]
-										+ H[a][b-1][r2Div]
-										+ H[a-1][b-1][r2Div]
-										+ H[a+1][b][r2Div]
-										+ H[a][b+1][r2Div]
-										+ H[a+1][b+1][r2Div]
-										+ H[a-1][b+1][r2Div]
-										+ H[a+1][b-1][r2Div];
-				if (tmpMaxValNeighbourSum > maxValNeighbourSum)
-				{
-					maxValNeighbourSum = tmpMaxValNeighbourSum;
-					maxVal = H[a][b][r2Div];
-					circle.a= a;
-					circle.b = b;
-					circle.r2Div = r2Div;
-				}
-			}
-		}
-	}
-
-
-	if (maxVal >= 8)
-	{
-		circle.r2 = circle.r2Div * div - div2;
-		circle.r = (unsigned int)sqrtf(circle.r2);
-		circle.hasValue = true;	
-	}
-
-	double time_end = clock();
-	double interval = time_end - time_start;
-
-	return circle;
-}
-
-_Pan_Circle PanImageFilter::HoughTransform(PanImage &image,
-									unsigned int rMin, 
-									unsigned int rMax,
-									unsigned int step,
-									unsigned int iMin,
-									unsigned int iMax,
-									unsigned int jMin,
-									unsigned int jMax,
-									unsigned int div,
-									_Pan_Circle bigCircle)
-{
-	cv::Mat mat = image.GetMat();
-
-	_Pan_Circle circle;
-	circle.a = 0;
-	circle.b = 0;
-	circle.hasValue = false;
-	circle.r = 0;
-	circle.r2 = 0;
-	circle.r2Div = 0;
-
-	unsigned int r2Min = rMin * rMin;
-	unsigned int r2Max = rMax * rMax;
-	unsigned int r2MaxInsidebigCircle = (bigCircle.r - CIRCLE_WIDTH) * (bigCircle.r - CIRCLE_WIDTH);
-	unsigned int r2MinDiv = r2Min / div;
-	unsigned int r2MaxDiv = r2Max / div;
-
-	int aMin = (int)iMin + (int)rMin;
-	int aMax = (int)iMax - (int)rMin;
-	int bMin = (int)jMin + (int)rMin;
-	int bMax = (int)jMax - (int)rMin;
-	int aMinTmp, aMaxTmp, bMinTmp, bMaxTmp;
-	int aStart, aEnd, bStart, bEnd;
-
-	unsigned int div2 = div / 2;
-
-	unsigned int i,j,r2,r2Div;
-	int a,b;
-	int iDist = 0;
-	int jDist = 0;
-	int iDistBorder = 0;
-	int jDistBorder = 0;
-
-	unsigned int tmpVal = 0;
-	unsigned int maxVal = 0;
-
-	uchar* data;
-
-	double time_start = clock();
-
-	memset(H, 0, WIDTH*HEIGHT*R2DIVNUM*sizeof(unsigned int));
-
-	// do by algorithm by every step pixels
-	for (j = jMin; j < jMax; j+=step)
-	{
-		jDistBorder = (int)j - (int)bigCircle.b;
-		data = mat.ptr<uchar>(j);
-		data += iMin;
-
-		for (i = iMin; i < iMax; i+=step)
-		{
-			iDistBorder = (int)i - (int)bigCircle.a;
-			r2 = iDistBorder*iDistBorder + jDistBorder*jDistBorder;
-			if (r2 >= r2MaxInsidebigCircle)
-			{
-				data += step;
-				continue;
-			}
-			// if pixel is black
-			if (*data != 0)
-			{
-
-				aMinTmp = (int)i - (int)rMax;
-				aMaxTmp = (int)i + (int)rMax;
-				bMinTmp = (int)j - (int)rMax;
-				bMaxTmp = (int)j + (int)rMax;
-
-				aStart = aMinTmp > aMin ? aMinTmp : aMin;
-				aEnd = aMaxTmp < aMax ? aMaxTmp : aMax;
-				bStart = bMinTmp > bMin ? bMinTmp : bMin;
-				bEnd = bMaxTmp < bMax ? bMaxTmp : bMax;
-
-				// calculate only those within the frame
-				for (a = aStart; a < aEnd; a++)
-				{
-					for (b = bStart; b < bEnd; b++)
-					{
-						iDist = (int)i - (int)a;
-						jDist = (int)j - (int)b;
-						r2 = iDist*iDist + jDist*jDist;
-
-						// calculate only those within the circle
-						if (r2 > r2Min && r2 < r2Max)
-						{   
-							r2Div = (r2 + div2) / div;
-							H[a][b][r2Div] ++;
-						}
-					}
-				}
-			}
-			data += step;
-		}
-	}
-
-	// get the r, a & b
-	for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
-	{
-		for (a = aMin; a < aMax; a ++)
-		{
-			for (b = bMin; b < bMax; b++)
-			{
-				tmpVal = H[a][b][r2Div];
-				if (tmpVal > maxVal)
-				{
-					maxVal = tmpVal;
-					circle.a= a;
-					circle.b = b;
-					circle.r2Div = r2Div;
-				}
-			}
-		}
-	}
-
-	if (maxVal >= 8)
-	{
-		circle.r2 = circle.r2Div * div - div2;
-		circle.r = (unsigned int)sqrtf(circle.r2);
-		circle.hasValue = true;	
-	}
-
-	double time_end = clock();
-	double interval = time_end - time_start;
-
-	return circle;
-}
-
-void PanImageFilter::LabelString(PanImage& image, _Pan_Circle bigCircle, _Pan_Circle smallCircle)
-{
-	cv::Mat mat = image.GetMat();
-
-	unsigned int r2MinThresh = (bigCircle.r - 3*CIRCLE_WIDTH) * (bigCircle.r - 3*CIRCLE_WIDTH);
-	unsigned int r2MaxThresh = (bigCircle.r - CIRCLE_WIDTH) * (bigCircle.r - CIRCLE_WIDTH);
-
-	unsigned int i, j;
-
-	unsigned int iMax = bigCircle.a + bigCircle.r;
-	unsigned int iMin = bigCircle.a - bigCircle.r;
-	unsigned int jMax = bigCircle.b + bigCircle.r;
-	unsigned int jMin = bigCircle.b - bigCircle.r;
-	unsigned int distance = 0;
-	int iDist, jDist;
-
-	unsigned int stringCenterX = 0;
-	unsigned int stringCenterY = 0;
-	unsigned int stringPointNum = 1;
-
-	unsigned int iMaxSmall = smallCircle.a + smallCircle.r;
-	unsigned int iMinSmall = smallCircle.a - smallCircle.r;
-	unsigned int jMaxSmall = smallCircle.b + smallCircle.r;
-	unsigned int jMinSmall = smallCircle.b - smallCircle.r;
-	unsigned int distanceSmall = 0;
-	int iDistSmall, jDistSmall;
-
-	uchar* data;
-
-	double time_start = clock();
-
-	// unlabel the big circle and label the string
-	if (bigCircle.hasValue)
-	{
-		for (j = 0; j < HEIGHT; j++)
-		{
-			data = mat.ptr<uchar>(j);
-
-			for (i = 0; i < WIDTH; i++)
-			{
-				if (i >= iMin && i <= iMax && j >= jMin && j <= jMax)
-				{
-
-					if (*data != 0)
-					{
-						iDist = (int)i - (int)bigCircle.a;
-						jDist = (int)j - (int)bigCircle.b;
-						distance = iDist * iDist + jDist * jDist;
-
-						if (distance > r2MinThresh && distance < r2MaxThresh)
-						{
-							*data = 255;
-							stringCenterX += i;
-							stringCenterY += j;
-							stringPointNum ++;
-						}
-						else
-						{
-							*data = 30;
-						}
-					}
-				}
-				else
-				{
-					*data = 0;
-				}
-
-				data ++;
-			}
-		}
-		stringCenterX /= stringPointNum;
-		stringCenterY /= stringPointNum;
-	}
-
-	// label the small circle within the big circle
-	if (smallCircle.hasValue)
-	{
-		for (j = jMinSmall; j < jMaxSmall; j++)
-		{
-			uchar* data = mat.ptr<uchar>(j);
-			data += iMinSmall;
-			for (i = iMinSmall; i < iMaxSmall; i++)
-			{
-				if (*data++ != 0)
-				{
-					iDistSmall = (int)i - (int)smallCircle.a;
-					jDistSmall = (int)j - (int)smallCircle.b;
-					distanceSmall = iDistSmall * iDistSmall + jDistSmall * jDistSmall;
-
-					if (distanceSmall <= smallCircle.r2)
-					{
-						mat.at<uchar>(j, i) = 255;
-					}
-					else
-					{
-						mat.at<uchar>(j, i) = 0;
-					}
-				}		
-			}
-		}
-	}
-
-	double time_end = clock();
-	double interval = time_end - time_start;
-
-	// label big circle center point
-	if (bigCircle.hasValue)
-	{
-		mat.at<uchar>(bigCircle.b, bigCircle.a) = 255;
-	}
-}
 
 void PanImageFilter::Erode(PanImage& image)
 {
@@ -680,45 +369,31 @@ void PanImageFilter::HoleFill(PanImage& image)
 	}
 }
 
-void PanImageFilter::TotalProcessing(PanImage& image)
+void PanImageFilter::Negative(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
-	PanImage tmpImage;
-	image.copyTo(tmpImage);
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;	
+	unsigned int channels = mat.channels();
+	
+	std::vector<cv::Mat> v(channels);
+	cv::split(mat, v);
+	uchar* data;
 
-	_Pan_Circle bigCircle;
-	bigCircle.hasValue = false;
-	_Pan_Circle smallCircle;
-	smallCircle.hasValue = false;
-
-	double time_start = clock();
-
-	SobelSharpen(image);
-	MedianFilter(image);
-	bigCircle = HoughTransform(image, BIG_CIRCLE_MIN, BIG_CIRCLE_MAX, SEARCH_STEP, 0, WIDTH, 0, HEIGHT, 100);
-	if (bigCircle.hasValue)
+	for (unsigned int k = 0; k < channels; k++)
 	{
-		smallCircle = HoughTransform(image, 
-								    SMALL_CIRCLE_MIN, 
-									SMALL_CIRCLE_MAX, 
-									1, 
-									bigCircle.a - bigCircle.r, 
-									bigCircle.a + bigCircle.r,
-									bigCircle.b - bigCircle.r, 
-									bigCircle.b + bigCircle.r,
-					                2,
-									bigCircle);
+		for (unsigned int j = 0; j < height; j ++)
+		{
+			data = v[k].ptr<uchar>(j);
+
+			for (unsigned int i = 0; i < width; i++)
+			{
+				*data = 255 - *data;
+				data ++;
+			}
+		}
 	}
 
-	LabelString(image, bigCircle, smallCircle);
-
-	if (! smallCircle.hasValue)
-	{
-		QMessageBox warning(QMessageBox::Warning, "Alert!", "Reverse the chip");
-		warning.exec();	
-	}
-
-	double time_end = clock();
-	double interval = time_end - time_start;
-	printf("the time cost is %f", interval);
+	cv::merge(v, mat);
 }
+

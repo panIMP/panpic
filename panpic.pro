@@ -8,7 +8,8 @@ SOURCES += \
     panimageshift.cpp \
     panimagehistproc.cpp \
     uihistdialog.cpp \
-    panimagefilter.cpp
+    panimagefilter.cpp \
+    uihoughtransformparam.cpp
 
 HEADERS += \
     uimainwindow.h \
@@ -17,7 +18,8 @@ HEADERS += \
     panimageshift.h \
     panimagehistproc.h \
     uihistdialog.h \
-    panimagefilter.h
+    panimagefilter.h \
+    uihoughtransformparam.h
 
 RESOURCES += \
     icons.qrc

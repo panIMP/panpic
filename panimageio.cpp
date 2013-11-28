@@ -31,10 +31,10 @@ PanImageIO::~PanImageIO(){
  *  Output:         ImageIO*
  */
 PanImageIO* PanImageIO::GetInstance(){
-    if (instance == 0){
-        instance = new PanImageIO();
-    }
-    return instance;
+	if (instance == 0){
+		instance = new PanImageIO();
+	}
+	return instance;
 }
 
 
@@ -44,10 +44,10 @@ PanImageIO* PanImageIO::GetInstance(){
  *  Output:         None
  */
 void PanImageIO::Destroy(){
-    if (instance != 0){
-        delete instance;
-        instance = 0;
-    }
+	if (instance != 0){
+		delete instance;
+		instance = 0;
+	}
 }
 
 
@@ -57,13 +57,20 @@ void PanImageIO::Destroy(){
  *  Output:         Image of cv::Mat format
  */
 PanImage PanImageIO::ReadPanImage(const QString& str){
-    PanImage result;
-    result.SetChannelChangeState(false);
-    // Since here you want to read the image as it is,
-    // you should set the flag to be -1, so,
-    // if there exits alpha channel, it will also be read.
-    result.SetMat(cv::imread(str.toStdString(), -1));
-    return result;
+	PanImage result;
+	result.SetChannelChangeState(false);
+	// Since here you want to read the image as it is,
+	// you should set the flag to be -1, so,
+	// if there exits alpha channel, it will also be read.
+	cv::Mat mat = cv::imread(str.toStdString(), -1);
+	result.SetMat(mat);
+
+	if (mat.channels() == 1)
+	{
+		result.SetIsGray(true);
+	}
+
+	return result;
 }
 
 
@@ -73,12 +80,15 @@ PanImage PanImageIO::ReadPanImage(const QString& str){
  *  Output:         None
  */
 void PanImageIO::SavePanImage(PanImage& ImageToSave, const QString &str){
-    if (ImageToSave.GetMat().channels() == 3){
-        // transform the image back to opencv style channel order, since
-        // it has been converted to RGB format when loaded for QImage display
-        cv::cvtColor(ImageToSave.GetMat(), ImageToSave.GetMat(), CV_RGB2BGR);
-    }
-    cv::imwrite(str.toStdString(), ImageToSave.GetMat());
+	if (ImageToSave.GetMat().channels() == 3){
+		// transform the image back to opencv style channel order, since
+		// it has been converted to RGB format when loaded for QImage display
+		if (ImageToSave.GetChannelChangeState())
+		{
+			cv::cvtColor(ImageToSave.GetMat(), ImageToSave.GetMat(), CV_RGB2BGR);
+		}
+	}
+	cv::imwrite(str.toStdString(), ImageToSave.GetMat());
 }
 
 

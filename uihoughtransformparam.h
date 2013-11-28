@@ -1,3 +1,6 @@
+#ifndef UIHOUGHTRANSFORMPARAM_H
+#define UIHOUGHTRANSFORMPARAM_H
+
 #include <QWidget>
 #include <QPushButton>
 #include <QLineEdit>
@@ -5,7 +8,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-#include "panimagefilter.h"
+#include "panimagedetect.h"
 
 class UiHoughTransformParam :public QWidget
 {
@@ -37,3 +40,4 @@ private:
 	_Pan_Circle cle;
 };
 
+#endif

@@ -24,8 +24,11 @@ PanImage::~PanImage(){
 
 
 void PanImage::copyTo(PanImage& image){
-	image.channelChangeState  = channelChangeState;
 	image.SetMat(mat);
+
+	image.channelChangeState  = channelChangeState;
+	image.isBinary = isBinary;
+	image.isGray = isGray;
 }
 
 /*  Function:        SetMat(cv::Mat &newMat)
@@ -34,7 +37,6 @@ void PanImage::copyTo(PanImage& image){
  *  Output:          None
  */
 void PanImage::SetMat(cv::Mat& newMat){
-	mat.create(newMat.cols, newMat.rows, newMat.type());
 	newMat.copyTo(mat);
 }
 
@@ -44,7 +46,7 @@ void PanImage::SetMat(cv::Mat& newMat){
  *  Input:           None
  *  Output:          cv::Mat instance
  */
-cv::Mat& PanImage::GetMat(){
+cv::Mat PanImage::GetMat(){
 	return mat;
 }
 
@@ -94,6 +96,7 @@ bool PanImage::IsGray(){
  */
 QImage PanImage::PanImage2QImage(){
 	QImage qimage;
+
 	switch (mat.channels()){
 		case 1:     qimage = QImage((const unsigned char*)(mat.data),
 								mat.cols,

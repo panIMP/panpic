@@ -39,6 +39,8 @@
 #include "uihistdialog.h"
 #include "panimagefilter.h"
 #include "uihoughtransformparam.h"
+#include "panimagedetect.h"
+#include "panimageintegratedalg.h"
 
 class UiMainWindow : public QMainWindow
 {
@@ -91,16 +93,21 @@ public slots:
 	void MatchHist();
 	void CreateHistDialog();
 
+	void Gray();
 	void OtsuBinary();
 	void GradSharpen();
+	void MedianBlur();
+	void GuassinBlur();
 	void MedianFilter();
 	void Dilate();
 	void Erode();
-	void HoughTransform();
 	void HoleFill();
-	void LabelString();
-	void TotalProcessing();
+	void Engrave();
+	void Negative();
 
+	void HoughTransform();
+
+	void CircleIncisionDetection();
 
 protected:
 	bool eventFilter(QObject* watched, QEvent* event);
@@ -117,38 +124,43 @@ private:
 	// Tab tool bars
 	QSplitter* m_centerSplitter;
 	QTabWidget* m_tabWidget;
-	QWidget* m_tab1;
-	QPushButton* m_openPic;
-	QPushButton* m_save;
-	QPushButton* m_saveAs;
-	QWidget* m_tab2;
+
+	QWidget* m_shift_tab;
 	QPushButton* m_rotateClkwise;
 	QPushButton* m_rotateCntrClkwise;
 	QPushButton* m_mirrorH;
 	QPushButton* m_mirrorV;
-	QWidget* m_tab3;
+	QWidget* m_hist_tab;
 	QPushButton* m_dispHist;
 	QPushButton* m_histEqualize;
 	QPushButton* m_histMatch;
-	QWidget* m_tab4;
+	QWidget* m_filter_tab;
+	QPushButton* m_gray;
 	QPushButton* m_guassinBlur;
 	QPushButton* m_medianBlur;
+	QPushButton* m_medianFilter;
+	QPushButton* m_gradSharpen;
 	QPushButton* m_dilate;
 	QPushButton* m_erode;
-	QPushButton* m_gradSharpen;
 	QPushButton* m_otsuBinary;
-	QPushButton* m_houghTransform;
 	QPushButton* m_holeFill;
-	QPushButton* m_labelString;
-	QPushButton* m_totalProcess;
+	QPushButton* m_engrave;
+	QPushButton* m_negative;
+	QWidget* m_detect_tab;
+	QPushButton* m_houghTransform;
+	QWidget* m_integrated_tab;
+	QPushButton* m_cicle_incision_detect;
 
 	// Status bar
 	QStatusBar* m_statusBar;
 	QLineEdit* m_zoomRateBox;
 	static int const ZOOM_SAME = 100;
 	QLineEdit* m_curPicIndexBox;
-	QPushButton* m_prevPic2;
-	QPushButton* m_nextPic2;
+	QPushButton* m_openPic;
+	QPushButton* m_save;
+	QPushButton* m_saveAs;
+	QPushButton* m_prevPic;
+	QPushButton* m_nextPic;
 
 	// Picture display area components
 	QScrollArea* m_dispFrame;
@@ -156,7 +168,7 @@ private:
 
 	// Image to be processed
 	PanImage m_PanImage;
-	std::vector<PanImage> m_PanImageList;
+	QImage m_QImage;
 	QFileInfoList m_curFileList;
 	QString m_fileName;
 	int m_curFileIndex;

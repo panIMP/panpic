@@ -1,5 +1,5 @@
-#ifndef CVIMAGEIO_H
-#define CVIMAGEIO_H
+#ifndef PANIMAGEIO_H
+#define PANIMAGEIO_H
 
 
 #include <opencv2/highgui/highgui.hpp>

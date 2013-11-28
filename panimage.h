@@ -26,7 +26,7 @@ public:
 	void copyTo(PanImage& image);
 
 	void SetMat(cv::Mat& newMat);
-	cv::Mat& GetMat();
+	cv::Mat GetMat();
 
 	void SetChannelChangeState(bool state);
 	bool GetChannelChangeState();

@@ -15,5 +15,8 @@
         <file>icon/equalizehist.ico</file>
         <file>icon/matchhist.jpg</file>
         <file>icon/alert.ico</file>
+        <file>icon/binary.ico</file>
+        <file>icon/sobel.ico</file>
+        <file>icon/holefill.ico</file>
     </qresource>
 </RCC>

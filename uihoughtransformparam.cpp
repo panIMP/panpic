@@ -136,7 +136,7 @@ void UiHoughTransformParam::HoughTransform()
 	unsigned int rMaxValue = rMax->text().toInt();
 	unsigned int step = searchStep->text().toInt();
 
-	cle = PanImageFilter::GetInstance()->HoughTransform(img, 
+	cle = PanImageDetect::GetInstance()->HoughTransform(img, 
 														rMinValue, 
 														rMaxValue,
 														step, 
