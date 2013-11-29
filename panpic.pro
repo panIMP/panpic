@@ -18,7 +18,7 @@ HEADERS += \
     panimageshift.h \
     panimagehistproc.h \
     uihistdialog.h \
-    panimagefilter.h \
+    panimagefilter.h \ 
     uihoughtransformparam.h
 
 RESOURCES += \

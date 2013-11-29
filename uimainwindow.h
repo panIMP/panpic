@@ -35,7 +35,7 @@
 #include "panimage.h"
 #include "panimageio.h"
 #include "panimageshift.h"
-#include "panimagehistproc.h"
+#include "panimagehist.h"
 #include "uihistdialog.h"
 #include "panimagefilter.h"
 #include "uihoughtransformparam.h"
@@ -92,10 +92,12 @@ public slots:
 	void EqualizeHist();
 	void MatchHist();
 	void CreateHistDialog();
+	void Enhance();
 
 	void Gray();
 	void OtsuBinary();
-	void GradSharpen();
+	void SobelSharpen();
+	void LaplaceSharpen();
 	void MedianBlur();
 	void GuassinBlur();
 	void MedianFilter();
@@ -104,6 +106,8 @@ public slots:
 	void HoleFill();
 	void Engrave();
 	void Negative();
+	void ComFog();
+	void Sketch();
 
 	void HoughTransform();
 
@@ -134,18 +138,22 @@ private:
 	QPushButton* m_dispHist;
 	QPushButton* m_histEqualize;
 	QPushButton* m_histMatch;
+	QPushButton* m_enhance;
 	QWidget* m_filter_tab;
 	QPushButton* m_gray;
 	QPushButton* m_guassinBlur;
 	QPushButton* m_medianBlur;
 	QPushButton* m_medianFilter;
-	QPushButton* m_gradSharpen;
+	QPushButton* m_sobelSharpen;
+	QPushButton* m_laplaceSharpen;
 	QPushButton* m_dilate;
 	QPushButton* m_erode;
 	QPushButton* m_otsuBinary;
 	QPushButton* m_holeFill;
 	QPushButton* m_engrave;
 	QPushButton* m_negative;
+	QPushButton* m_comFog;
+	QPushButton* m_sketch;
 	QWidget* m_detect_tab;
 	QPushButton* m_houghTransform;
 	QWidget* m_integrated_tab;

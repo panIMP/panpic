@@ -37,9 +37,10 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateTabWidgets(){
+void UiMainWindow::CreateTabWidgets()
+{
 	m_shift_tab = new QWidget;
-	QHBoxLayout* hLay2 = new QHBoxLayout;
+	QHBoxLayout* hLayShift = new QHBoxLayout;
 	m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
 	m_rotateClkwise->setToolTip("Rotate the picture clockwise");
 	connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
@@ -53,90 +54,96 @@ void UiMainWindow::CreateTabWidgets(){
 	m_mirrorV->setToolTip("Get the vertically mirror image of the picture");
 	connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_shift_tab, SLOT(setEnabled(bool)));
-	hLay2->addWidget(m_rotateClkwise);
-	hLay2->addWidget(m_rotateCntrClkwise);
-	hLay2->addWidget(m_mirrorH);
-	hLay2->addWidget(m_mirrorV);
-	hLay2->addStretch();
-	m_shift_tab->setLayout(hLay2);
+	hLayShift->addWidget(m_rotateClkwise);
+	hLayShift->addWidget(m_rotateCntrClkwise);
+	hLayShift->addWidget(m_mirrorH);
+	hLayShift->addWidget(m_mirrorV);
+	hLayShift->addStretch();
+	m_shift_tab->setLayout(hLayShift);
 
 	m_hist_tab = new QWidget;
-	QHBoxLayout* hLay3 = new QHBoxLayout;
-	m_dispHist = new QPushButton(QIcon(":/icon/hist.ico"), "", this);
-	m_dispHist->setToolTip("Show the histogram of the picture");
+	QHBoxLayout* hLayHist = new QHBoxLayout;
+	m_dispHist = new QPushButton("hist", this);
 	connect(m_dispHist, SIGNAL(clicked()), this, SLOT(CreateHistDialog()));
-	m_histEqualize = new QPushButton(QIcon(":/icon/equalizehist.ico"), "", this);
-	m_histEqualize->setToolTip("Do histogram equalization for the picture");
+	m_histEqualize = new QPushButton("equalize", this);
 	connect(m_histEqualize, SIGNAL(clicked()), this, SLOT(EqualizeHist()));
-	m_histMatch = new QPushButton(QIcon(":/icon/matchhist.jpg"), "", this);
-	m_histMatch->setToolTip("Do histogram match for the picture");
+	m_histMatch = new QPushButton("match", this);
 	connect(m_histMatch, SIGNAL(clicked()), this, SLOT(MatchHist()));
+	m_enhance = new QPushButton("enhance", this);
+	connect(m_enhance, SIGNAL(clicked()), this, SLOT(Enhance()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_hist_tab, SLOT(setEnabled(bool)));
-	hLay3->addWidget(m_dispHist);
-	hLay3->addWidget(m_histEqualize);
-	hLay3->addWidget(m_histMatch);
-	hLay3->addStretch();
-	m_hist_tab->setLayout(hLay3);
+	hLayHist->addWidget(m_dispHist);
+	hLayHist->addWidget(m_histEqualize);
+	hLayHist->addWidget(m_histMatch);
+	hLayHist->addWidget(m_enhance);
+	hLayHist->addStretch();
+	m_hist_tab->setLayout(hLayHist);
 
 	m_filter_tab = new QWidget;
-	m_gray = new QPushButton("Gray", this);
+	m_gray = new QPushButton("gray", this);
 	connect(m_gray, SIGNAL(clicked()), this, SLOT(Gray()));
-	m_gradSharpen = new QPushButton(QIcon(":/icon/sobel.ico"), "", this);
-	m_gradSharpen->setToolTip("Sobel sharpen");
-	connect(m_gradSharpen, SIGNAL(clicked()), this, SLOT(GradSharpen()));
-	m_medianFilter = new QPushButton("median filter", this);
+	m_sobelSharpen = new QPushButton("sobel", this);
+	connect(m_sobelSharpen, SIGNAL(clicked()), this, SLOT(SobelSharpen()));
+	m_laplaceSharpen = new QPushButton("laplace", this);
+	connect(m_laplaceSharpen, SIGNAL(clicked()), this, SLOT(LaplaceSharpen()));
+	m_medianFilter = new QPushButton("medianF", this);
 	connect(m_medianFilter, SIGNAL(clicked()), this, SLOT(MedianFilter()));
-	m_medianBlur = new QPushButton("median blur", this);
+	m_medianBlur = new QPushButton("medianB", this);
 	connect(m_medianBlur, SIGNAL(clicked()), this, SLOT(MedianBlur()));
-	m_guassinBlur = new QPushButton("guassin blur", this);
+	m_guassinBlur = new QPushButton("guassin", this);
 	connect(m_guassinBlur, SIGNAL(clicked()), this, SLOT(GuassinBlur()));
-	m_otsuBinary = new QPushButton(QIcon(":/icon/binary.ico"), "", this);
-	m_otsuBinary->setToolTip("Binarize the image using otsu");
+	m_otsuBinary = new QPushButton("otsu", this);
 	connect(m_otsuBinary, SIGNAL(clicked()), this, SLOT(OtsuBinary()));
 	m_erode = new QPushButton("erode", this);
 	connect(m_erode, SIGNAL(clicked()), this, SLOT(Erode()));
 	m_dilate = new QPushButton("dilate", this);
 	connect(m_dilate, SIGNAL(clicked()), this, SLOT(Dilate()));
-	m_holeFill = new QPushButton(QIcon(":/icon/holefill.ico"), "", this);
-	m_holeFill->setToolTip("fill the holes of the binary image");
+	m_holeFill = new QPushButton("hole", this);
 	connect(m_holeFill, SIGNAL(clicked()), this, SLOT(HoleFill()));
 	m_engrave = new QPushButton("engrave", this);
 	connect(m_engrave, SIGNAL(clicked()), this, SLOT(Engrave()));
 	m_negative = new QPushButton("negative", this);
 	connect(m_negative, SIGNAL(clicked()), this, SLOT(Negative()));
+	m_comFog = new QPushButton("fog", this);
+	connect(m_comFog, SIGNAL(clicked()), this, SLOT(ComFog()));
+	m_sketch = new QPushButton("sketch", this);
+	connect(m_sketch, SIGNAL(clicked()), this, SLOT(Sketch()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_filter_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLay4 = new QHBoxLayout;
-	hLay4->addWidget(m_gray);
-	hLay4->addWidget(m_gradSharpen);
-	hLay4->addWidget(m_medianFilter);
-	hLay4->addWidget(m_medianBlur);
-	hLay4->addWidget(m_guassinBlur);
-	hLay4->addWidget(m_otsuBinary);
-	hLay4->addWidget(m_holeFill);
-	hLay4->addWidget(m_dilate);
-	hLay4->addWidget(m_erode);
-	hLay4->addWidget(m_engrave);
-	hLay4->addWidget(m_negative);
-	hLay4->addStretch();
-	m_filter_tab->setLayout(hLay4);
+	QHBoxLayout* hLayFilter = new QHBoxLayout;
+	hLayFilter->addWidget(m_gray);
+	hLayFilter->addWidget(m_sobelSharpen);
+	hLayFilter->addWidget(m_laplaceSharpen);
+	hLayFilter->addWidget(m_medianFilter);
+	hLayFilter->addWidget(m_medianBlur);
+	hLayFilter->addWidget(m_guassinBlur);
+	hLayFilter->addWidget(m_otsuBinary);
+	hLayFilter->addWidget(m_holeFill);
+	hLayFilter->addWidget(m_dilate);
+	hLayFilter->addWidget(m_erode);
+	hLayFilter->addWidget(m_engrave);
+	hLayFilter->addWidget(m_negative);
+	hLayFilter->addWidget(m_comFog);
+	hLayFilter->addWidget(m_sketch);
+	hLayFilter->addStretch();
+	m_filter_tab->setLayout(hLayFilter);
 
 	m_detect_tab = new QWidget;
-	m_houghTransform = new QPushButton("hough transform", this);
+	m_houghTransform = new QPushButton("hough", this);
 	connect(m_houghTransform, SIGNAL(clicked()), this, SLOT(HoughTransform()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_detect_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLay6 = new QHBoxLayout;
-	hLay6->addWidget(m_houghTransform);
-	hLay6->addStretch();
-	m_detect_tab->setLayout(hLay6);
+	QHBoxLayout* hLayDetect = new QHBoxLayout;
+	hLayDetect->addWidget(m_houghTransform);
+	hLayDetect->addStretch();
+	m_detect_tab->setLayout(hLayDetect);
 
 	m_integrated_tab = new QWidget;
 	m_cicle_incision_detect = new QPushButton("circle incision detect", this);
 	connect(m_cicle_incision_detect, SIGNAL(clicked()), this, SLOT(CircleIncisionDetection()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_integrated_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLay7 = new QHBoxLayout;
-	hLay7->addWidget(m_cicle_incision_detect);
-	hLay7->addStretch();
-	m_integrated_tab->setLayout(hLay7);
+	QHBoxLayout* hLayIntegrate = new QHBoxLayout;
+	hLayIntegrate->addWidget(m_cicle_incision_detect);
+	hLayIntegrate->addStretch();
+	m_integrated_tab->setLayout(hLayIntegrate);
 
 	m_tabWidget = new QTabWidget(this);
 	m_tabWidget->addTab(m_shift_tab, "Shift");
@@ -159,7 +166,8 @@ Input:          File path of the image file to display
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreatePicDispWidgets(const QString &fileName){
+void UiMainWindow::CreatePicDispWidgets(const QString &fileName)
+{
 	m_dispArea = new QLabel;
 	m_dispArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	m_dispArea->setAlignment(Qt::AlignCenter);
@@ -193,7 +201,8 @@ Input:          File path of the image file to display
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateCenterWidget(const QString& fileName){
+void UiMainWindow::CreateCenterWidget(const QString& fileName)
+{
 	CreateTabWidgets();
 	CreatePicDispWidgets(fileName);
 
@@ -219,7 +228,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateStatusBar(){
+void UiMainWindow::CreateStatusBar()
+{
 	m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "", this);
 	m_openPic->setToolTip("Open a picture");
 	connect(m_openPic, SIGNAL(clicked()), this, SLOT(OpenPic()));
@@ -287,7 +297,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateGlobalSigSlotLink(){
+void UiMainWindow::CreateGlobalSigSlotLink()
+{
 	// mouse wheeled -- > zoom pic & change zoom rate box
 	connect(this, SIGNAL(MouseOnPicWheeled(int)), this, SLOT(ZoomPic(int)));
 	connect(this, SIGNAL(MouseOnPicWheeled(int)), this, SLOT(ZoomRateDisp(int)));
@@ -306,7 +317,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateMainWindowStyle(){
+void UiMainWindow::CreateMainWindowStyle()
+{
 	setAcceptDrops(true);
 }
 
@@ -320,7 +332,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateOthers(){
+void UiMainWindow::CreateOthers()
+{
 	m_curFileIndex = 0;
 	m_curFileRange = 0;
 }
@@ -335,7 +348,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::OpenPic(){
+void UiMainWindow::OpenPic()
+{
 	QString selectedFilter = tr("BMP(*.bmp)");
 	m_fileName = QFileDialog::getOpenFileName(this,
 											  tr("Open File"),
@@ -374,7 +388,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::PrevPic(){
+void UiMainWindow::PrevPic()
+{
 	m_curFileIndex --;
 	if (m_curFileIndex >= 0){
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
@@ -402,7 +417,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::NextPic(){
+void UiMainWindow::NextPic()
+{
 	m_curFileIndex ++;
 	if (m_curFileIndex < m_curFileRange){
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
@@ -430,7 +446,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::Save(){
+void UiMainWindow::Save()
+{
 	PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
 	setWindowModified(false);
 	setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
@@ -447,7 +464,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::SaveAs(){
+void UiMainWindow::SaveAs()
+{
 	QString selectedFilter = tr("JPEG(*.jpg *.jpeg)");
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Open File"),
@@ -475,7 +493,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::RotateClkwise(){
+void UiMainWindow::RotateClkwise()
+{
 	PanImageShift::GetInstance()->RotateClockWise(m_PanImage);
 	SetImage(m_PanImage);
 }
@@ -490,7 +509,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::RotateCntrClkwise(){
+void UiMainWindow::RotateCntrClkwise()
+{
 	PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage);
 	SetImage(m_PanImage);
 }
@@ -505,7 +525,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::MirrorH(){
+void UiMainWindow::MirrorH()
+{
 	PanImageShift::GetInstance()->MirrorH(m_PanImage);
 	SetImage(m_PanImage);
 }
@@ -520,7 +541,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::MirrorV(){
+void UiMainWindow::MirrorV()
+{
 	PanImageShift::GetInstance()->MirrorV(m_PanImage);
 	SetImage(m_PanImage);
 }
@@ -540,7 +562,8 @@ Input:          Relative value of zoomed piture by comparison of border length
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::ZoomPic(int curValue){
+void UiMainWindow::ZoomPic(int curValue)
+{
 	int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
 	if (m_PanImage.IsGray()){
 		m_dispArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
@@ -566,7 +589,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::ZoomPic(){
+void UiMainWindow::ZoomPic()
+{
 	QString tmpStr = QString(m_zoomRateBox->text());
 	tmpStr.chop(1);
 	float value = tmpStr.toFloat() / 100.0;
@@ -594,7 +618,8 @@ Input:          Relative value
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::ZoomRateDisp(int value){
+void UiMainWindow::ZoomRateDisp(int value)
+{
 	int rate = static_cast<int>(float(value) / float(ZOOM_SAME) * 100.0);
 	m_zoomRateBox->setText(QString("%1%").arg(rate));
 }
@@ -609,7 +634,8 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::ShowCurIndexPic(){
+void UiMainWindow::ShowCurIndexPic()
+{
 	QString str = m_curPicIndexBox->text();
 	QStringList strList = str.split('/');
 
@@ -642,27 +668,36 @@ Input:          indexVal -- picture index in picture file list
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal){
+void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal)
+{
 	m_curPicIndexBox->setText(QString("%1/%2").arg(indexVal + 1).arg(rangeVal));
 }
 
 
-void UiMainWindow::EqualizeHist(){
-	PanImageHistProc::GetInstance()->HistEqalization(m_PanImage);
+void UiMainWindow::EqualizeHist()
+{
+	PanImageHist::GetInstance()->HistEqalization(m_PanImage);
 	SetImage(m_PanImage);
 }
 
-void UiMainWindow::MatchHist(){
+void UiMainWindow::MatchHist()
+{
 	float histV[256] = {0.0};
 	for (int i = 0; i < 256; i++){
 		histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256.0;
 	}
-	PanImageHistProc::GetInstance()->HistMatch(m_PanImage, histV);
+	PanImageHist::GetInstance()->HistMatch(m_PanImage, histV);
 	SetImage(m_PanImage);
 }
 
+void UiMainWindow::Enhance()
+{
+	PanImageHist::GetInstance()->Enhance(m_PanImage);
+	SetImage(m_PanImage);
+}
 
-void UiMainWindow::CreateHistDialog(){
+void UiMainWindow::CreateHistDialog()
+{
 	UiHistDialog* hist = new UiHistDialog(m_PanImage, m_fileName);
 	hist->show();
 }
@@ -681,7 +716,8 @@ void UiMainWindow::Gray()
 	}	
 }
 
-void UiMainWindow::GradSharpen(){
+void UiMainWindow::SobelSharpen()
+{
 	if (m_PanImage.IsGray())
 	{
 		PanImageFilter::GetInstance()->SobelSharpen(m_PanImage);
@@ -694,7 +730,14 @@ void UiMainWindow::GradSharpen(){
 	}
 }
 
-void UiMainWindow::MedianFilter(){
+void UiMainWindow::LaplaceSharpen()
+{
+	PanImageFilter::GetInstance()->LaplaceSharpen(m_PanImage);
+	SetImage(m_PanImage);
+}
+
+void UiMainWindow::MedianFilter()
+{
 	if (m_PanImage.IsGray())
 	{
 		PanImageFilter::GetInstance()->MedianFilter(m_PanImage);
@@ -719,7 +762,8 @@ void UiMainWindow::GuassinBlur()
 	SetImage(m_PanImage);
 }
 
-void UiMainWindow::OtsuBinary(){
+void UiMainWindow::OtsuBinary()
+{
 	if (m_PanImage.IsGray())
 	{
 		PanImageFilter::GetInstance()->OtsuBinary(m_PanImage);
@@ -732,7 +776,8 @@ void UiMainWindow::OtsuBinary(){
 	}
 }
 
-void UiMainWindow::HoleFill(){
+void UiMainWindow::HoleFill()
+{
 	if (m_PanImage.IsBinary())
 	{
 		PanImageFilter::GetInstance()->HoleFill(m_PanImage);
@@ -745,7 +790,8 @@ void UiMainWindow::HoleFill(){
 	}
 }
 
-void UiMainWindow::HoughTransform(){
+void UiMainWindow::HoughTransform()
+{
 	if (m_PanImage.IsBinary())
 	{
 		UiHoughTransformParam* houghParamDialog = new UiHoughTransformParam(m_PanImage,bigCircle);
@@ -775,12 +821,26 @@ void UiMainWindow::Erode(){
 	SetImage(m_PanImage);
 }
 
-void UiMainWindow::Dilate(){
+void UiMainWindow::Dilate()
+{
 	PanImageFilter::GetInstance()->Dilate(m_PanImage);
 	SetImage(m_PanImage);
 }
 
-void UiMainWindow::CircleIncisionDetection(){
+void UiMainWindow::ComFog()
+{
+	PanImageFilter::GetInstance()->ComFog(m_PanImage, 5);
+	SetImage(m_PanImage);
+}
+
+void UiMainWindow::Sketch()
+{
+	PanImageFilter::GetInstance()->Sketch(m_PanImage);
+	SetImage(m_PanImage);
+}
+
+void UiMainWindow::CircleIncisionDetection()
+{
 	if (m_PanImage.IsGray())
 	{
 		PanImageIntegratedAlg::GetInstance()->CicleIncisionDetection(m_PanImage);
@@ -802,7 +862,8 @@ Input:          True or false
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::SetHasImage(bool value){
+void UiMainWindow::SetHasImage(bool value)
+{
 	m_hasImage = value;
 	emit(ImageLoaded(value));
 }
@@ -818,7 +879,8 @@ Input:          cv::Mat instance
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::SetImage(PanImage& newImage){
+void UiMainWindow::SetImage(PanImage& newImage)
+{
 	m_QImage = newImage.PanImage2QImage();
 	m_dispArea->setPixmap(QPixmap::fromImage(m_QImage));
 	emit(ImageChanged());
@@ -841,7 +903,8 @@ Input:          1. QObject* of the operation upon
 
 Output:         True or False
 ----------------------------------------------------------------------*/
-bool UiMainWindow::eventFilter(QObject* watched, QEvent* event){
+bool UiMainWindow::eventFilter(QObject* watched, QEvent* event)
+{
 	if (watched == this){
 		if (event->type() == QEvent::DragEnter){
 			QDragEnterEvent* dragEnter = dynamic_cast<QDragEnterEvent*>(event);
@@ -875,7 +938,8 @@ Input:          1. Event that trigged
 
 Output:         True or False
 ----------------------------------------------------------------------*/
-void UiMainWindow::wheelEvent(QWheelEvent *event){
+void UiMainWindow::wheelEvent(QWheelEvent *event)
+{
 	QString tmpStr = QString(m_zoomRateBox->text());
 	tmpStr.chop(1);
 	float value = tmpStr.toFloat() / 100.0 * ZOOM_SAME;

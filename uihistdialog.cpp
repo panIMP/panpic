@@ -5,7 +5,7 @@ UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *p
     QLabel* histLabel = new QLabel;
     histLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     histLabel->setAlignment(Qt::AlignCenter);
-    PanImage histimg = PanImageHistProc::GetInstance()->GetHistImage(image);
+    PanImage histimg = PanImageHist::GetInstance()->GetHistImage(image);
     histLabel->setPixmap(QPixmap::fromImage(histimg.PanImage2QImage()));
 
     img = new PanImage;

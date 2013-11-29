@@ -1,24 +1,25 @@
-#ifndef PANIMAGEHISTPROC_H
-#define PANIMAGEHISTPROC_H
+#ifndef PANIMAGEHIST_H
+#define PANIMAGEHIST_H
 
 #include "panimage.h"
 
 
-class PanImageHistProc
+class PanImageHist
 {
-    static PanImageHistProc* instance;
+	static PanImageHist* instance;
 
 
 public:
-    PanImageHistProc();
-    ~PanImageHistProc();
+	PanImageHist();
+	~PanImageHist();
 
-    static PanImageHistProc* GetInstance();
-    static void Destroy();
+	static PanImageHist* GetInstance();
+	static void Destroy();
 
-    PanImage GetHistImage(PanImage& inputImage);
-    bool HistEqalization(PanImage& inputImage);
-    bool HistMatch(PanImage& inputImage,  float* histR);
+	PanImage GetHistImage(PanImage& inputImage);
+	bool HistEqalization(PanImage& inputImage);
+	bool HistMatch(PanImage& inputImage,  float* histR);
+	void Enhance(PanImage& image);
 };
 
 #endif // PANIMAGEHISTPROC_H

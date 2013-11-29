@@ -12,7 +12,7 @@
 
 #include "panimage.h"
 #include "panimageio.h"
-#include "panimagehistproc.h"
+#include "panimagehist.h"
 
 class UiHistDialog : public QWidget
 {

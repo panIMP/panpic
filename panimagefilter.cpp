@@ -58,6 +58,162 @@ void PanImageFilter::Gray(PanImage& image)
 	image.SetMat(mat);
 }
 
+void PanImageFilter::ComFog(PanImage& image, unsigned int randRange)
+{
+	cv::Mat mat = image.GetMat();
+	unsigned int width = mat.cols;
+	unsigned int height = mat.rows;
+	unsigned int channels = mat.channels();
+	cv::Mat tmpMat;
+	mat.copyTo(tmpMat);
+
+	unsigned int randNum, randDirection, m, n;
+
+	std::vector<cv::Mat> v(channels);
+	cv::split(mat, v);
+	std::vector<cv::Mat> tmpV(channels);
+	cv::split(mat, tmpV);
+
+	for (unsigned int k = 0; k < channels; k++)
+	{
+		for (unsigned int j = 0; j < height; j++)
+		{	
+			for (unsigned int i = 0; i < width; i++)
+			{
+				randNum = rand() % randRange;
+				randDirection = rand() % 4;
+				
+				switch (randDirection)
+				{
+				case 0:		
+					m = i + randNum;
+					n = j + randNum;
+					break;
+
+				case 1:
+					m = i - randNum;
+					n = j - randNum;
+					break;
+
+				case 2:
+					m = i + randNum;
+					n = j - randNum;
+					break;
+
+				case 3:
+					m = i - randNum;
+					n = j + randNum;
+					break;
+
+				default:
+					break;
+				}
+
+				if (m >= width)
+				{
+					m = width - 1;
+				}
+				if (n >= height)
+				{
+					n = height - 1;
+				}
+				if (m < 0)
+				{
+					m = 0;
+				}
+				if (n < 0)
+				{
+					n = 0;
+				}
+
+				v[k].at<uchar>(j, i) = tmpV[k].at<uchar>(n, m);
+			}
+		}
+	}
+
+	cv::merge(v, mat);
+}
+
+unsigned int PanImageFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y)
+{
+	int i, j, px, py, m;
+	m = 0;
+
+	for (j = 0; j < tw; j++)
+	{
+		for (i = 0; i < tw; i++)
+		{
+			px = x - tw / 2 + i;
+			py = y - tw / 2 + j;
+			m += mat.at<uchar>(py, px) * templt[j*tw + i];
+		}
+	}
+
+	if (m < 0)
+	{
+		m = -m;
+	}
+
+	return (unsigned int)m;
+}
+
+void PanImageFilter::Sketch(PanImage& image)
+{	
+	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+
+	cv::Mat tmpMat1, tmpMat2;
+	mat.copyTo(tmpMat1);
+	mat.copyTo(tmpMat2);
+
+	int templt[9] = {1, 1, 1, 1, -8, 1, 1, 1, 1};
+	int templtTest1[9] = {1, 1, -1, 1, 0, -1, -1, 1, -1};
+	int templtTest2[9] = {1, 1, 1, -1, 0, -1, -1, -1, 1};
+	int templtTest3[9] = {1, -1, 1, 1, 0, -1, 1, -1, -1};
+	int templtTest4[9] = {-1, 1, 1, 1, 0, 1, -1, -1, -1};
+	int templtAve[9] = {1, 1, 1, 1, 4, 1, 1, 1, 1};
+	int a,b,b1,b2;
+
+	for (unsigned int j = 1; j < height - 1; j++)
+	{
+		for (unsigned int i = 1; i < width - 1; i++)
+		{
+			a = TempltExcuteCl(tmpMat1, templt, 3, i, j);
+			b1 = TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
+			b2 = TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
+			b = b1 > b2 ? b1 : b2;
+			if (b < 25)
+			{
+				a = 0;
+			}
+			else
+			{
+				a = (int)(a*2);
+				if (a > 255)
+				{
+					a = 255;
+				}
+				else if (a < 32)
+				{
+					a = 0;
+				}
+			}
+			a = 255 - a;
+			tmpMat2.at<uchar>(j, i) = a;
+		}
+	}	
+
+	/*for (unsigned int j = 1; j < height - 1; j++)
+	{
+		for (unsigned int i = 1; i < width - 1; i++)
+		{
+			a = TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
+			mat.at<uchar>(j, i) = a;
+		}
+	}*/
+}
+
 void PanImageFilter::SobelSharpen(PanImage &image)
 {
 	cv::Mat mat = image.GetMat();
@@ -94,6 +250,26 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 			mat.at<uchar>(j, i) = 0;
 		}
 	}
+
+	/*cv::Mat mat = image.GetMat();
+	cv::Mat mat1, mat2;
+	mat.copyTo(mat1);
+	mat.copyTo(mat2);
+
+	cv::Mat kernel0, kernel1;
+	kernel0 = (cv::Mat_<int>(3,3) << -1, -2, -1, 0, 0, 0, 1, 2, 1);
+	kernel1 = (cv::Mat_<int>(3,3) << -1, 0, 1, -2, 0, 2, -1, 0, 1);
+
+	cv::filter2D(mat1, mat1, CV_8U, kernel0);
+	cv::filter2D(mat2, mat2, CV_8U, kernel1);
+
+	cv::add(mat1, mat2, mat);*/
+}
+
+void PanImageFilter::LaplaceSharpen(PanImage& image)
+{
+	cv::Mat mat = image.GetMat();
+	cv::Laplacian(mat, mat, CV_8U);
 }
 
 void PanImageFilter::MedianBlur(PanImage& image)
@@ -105,7 +281,7 @@ void PanImageFilter::MedianBlur(PanImage& image)
 void PanImageFilter::GuassinBlur(PanImage& image)
 {
 	cv::Mat mat = image.GetMat();
-	cv::GaussianBlur(mat, mat, cv::Size(5,5), 0.0);
+	cv::GaussianBlur(mat, mat, cv::Size(5,5), 1.5, 1.5);
 }
 
 void PanImageFilter::MedianFilter(PanImage& image)
