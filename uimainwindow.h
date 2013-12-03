@@ -1,36 +1,35 @@
 #ifndef UIMAINWINDOW_H
 #define UIMAINWINDOW_H
 
-#include <QMainWindow>
-#include <QString>
-#include <QAction>
-#include <QMenu>
-#include <QMenuBar>
-#include <QImage>
-#include <QLabel>
-#include <QScrollArea>
-#include <QToolBar>
-#include <QFileInfoList>
+#include <QtWidgets/QMainWindow>
+#include <QtCore/QString>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMenuBar>
+#include <QtGui/QImage>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QScrollArea>
+#include <QtWidgets/QToolBar>
+#include <QtCore/QFileInfoList>
 #include <QObject>
-#include <QWheelEvent>
-#include <QTabWidget>
-#include <QSlider>
-#include <QLineEdit>
-#include <QRegExpValidator>
-#include <QStatusBar>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QString>
-#include <QHBoxLayout>
-#include <QMatrix>
-#include <QIcon>
-#include <QtMath>
-#include <QDir>
+#include <QtGui/QWheelEvent>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QLineEdit>
+#include <QtGui/QRegExpValidator>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHBoxLayout>
+#include <QtGui//QMatrix>
+#include <QtGui/QIcon>
+#include <QtCore/QtMath>
+#include <QtCore/QDir>
 #include <QApplication>
-#include <QUrl>
-#include <QMimeData>
-#include <QSplitter>
-#include <QDialog>
+#include <QtCore/QUrl>
+#include <QtCore/QMimeData>
+#include <QtWidgets/QSplitter>
+#include <QtWidgets/QDialog>
 
 #include "panimage.h"
 #include "panimageio.h"
@@ -114,7 +113,8 @@ public slots:
 	void CircleIncisionDetection();
 
 protected:
-	bool eventFilter(QObject* watched, QEvent* event);
+	void dragEnterEvent(QDragEnterEvent *event);
+	void dropEvent(QDropEvent* event);
 	void wheelEvent(QWheelEvent *event);
 
 
@@ -169,6 +169,8 @@ private:
 	QPushButton* m_saveAs;
 	QPushButton* m_prevPic;
 	QPushButton* m_nextPic;
+	QLabel* m_curPicWidth;
+	QLabel* m_curPicHeight;
 
 	// Picture display area components
 	QScrollArea* m_dispFrame;

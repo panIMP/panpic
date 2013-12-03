@@ -171,8 +171,7 @@ void UiMainWindow::CreatePicDispWidgets(const QString &fileName)
 	m_dispArea = new QLabel;
 	m_dispArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	m_dispArea->setAlignment(Qt::AlignCenter);
-	m_dispArea->setAcceptDrops(true);
-	//m_dispArea->setScaledContents(true);
+	m_dispArea->setAcceptDrops(false);
 
 	if (fileName != 0){
 		m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
@@ -186,7 +185,7 @@ void UiMainWindow::CreatePicDispWidgets(const QString &fileName)
 	m_dispFrame->setAutoFillBackground(true);
 	m_dispFrame->setBackgroundRole(QPalette::Light);
 	m_dispFrame->setWidgetResizable(true);
-	m_dispFrame->setAcceptDrops(true);
+	m_dispFrame->setAcceptDrops(false);
 	m_dispFrame->setWidget(m_dispArea);
 }
 
@@ -212,7 +211,7 @@ void UiMainWindow::CreateCenterWidget(const QString& fileName)
 	m_centerSplitter->setStretchFactor(1,1);
 
 	setCentralWidget(m_centerSplitter);
-	setAcceptDrops(true);
+	setAcceptDrops(false);
 	setMinimumSize(m_minWidth, m_minHeight);
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
@@ -277,6 +276,15 @@ void UiMainWindow::CreateStatusBar()
 	connect(m_zoomRateBox, SIGNAL(returnPressed()), this, SLOT(ZoomPic()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_zoomRateBox, SLOT(setEnabled(bool)));
 
+	QLabel* widthSentence = new QLabel("Width:", this);
+	connect(this, SIGNAL(ImageLoaded(bool)), widthSentence, SLOT(setEnabled(bool)));
+	m_curPicWidth = new QLabel("", this);
+	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicWidth, SLOT(setEnabled(bool)));
+	QLabel* heightSentence = new QLabel("Height:", this);
+	connect(this, SIGNAL(ImageLoaded(bool)), heightSentence, SLOT(setEnabled(bool)));
+	m_curPicHeight = new QLabel("", this);
+	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicHeight, SLOT(setEnabled(bool)));
+
 	m_statusBar = statusBar();
 	m_statusBar->addWidget(m_openPic);
 	m_statusBar->addWidget(m_save);
@@ -285,6 +293,10 @@ void UiMainWindow::CreateStatusBar()
 	m_statusBar->addWidget(m_curPicIndexBox);
 	m_statusBar->addWidget(m_nextPic);
 	m_statusBar->addWidget(m_zoomRateBox);
+	m_statusBar->addWidget(widthSentence);
+	m_statusBar->addWidget(m_curPicWidth);
+	m_statusBar->addWidget(heightSentence);
+	m_statusBar->addWidget(m_curPicHeight);
 }
 
 
@@ -357,25 +369,25 @@ void UiMainWindow::OpenPic()
 											  tr("JPEG(*.jpg *.jpeg);; BMP(*.bmp);;"\
 												 "PNG(*.png);;TIFF(*.tif)"\
 												 ";;GIF(*.gif);; ICO(*.ico);; ALL(*.*)"
-												 ),
+												),
 											  &selectedFilter);
 	if (m_fileName != NULL){
 		m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
 		SetImage(m_PanImage);
+
+		// once open the picture, get its fileindex and filerange
+		QDir dir;
+		dir.setPath(QFileInfo(m_fileName).dir().absolutePath());
+		QStringList filter;
+		filter<<"*.jpg"<<"*.jpeg"<<"*.bmp"<<"*.png"<<"*gif" <<"*.ico"<<"*.tif";
+		dir.setNameFilters(filter);
+		m_curFileList = dir.entryInfoList();
+		m_curFileIndex = m_curFileList.indexOf(QFileInfo(m_fileName));
+		m_curFileRange = m_curFileList.size();
+
+		// emit the signal that fileindex and filerange has changed
+		emit(PicIndexSwitched(m_curFileIndex, m_curFileRange));
 	}
-
-	// once open the picture, get its fileindex and filerange
-	QDir dir;
-	dir.setPath(QFileInfo(m_fileName).dir().absolutePath());
-	QStringList filter;
-	filter<<"*.jpg"<<"*.jpeg"<<"*.bmp"<<"*.png"<<"*gif" <<"*.ico"<<"*.tif";
-	dir.setNameFilters(filter);
-	m_curFileList = dir.entryInfoList();
-	m_curFileIndex = m_curFileList.indexOf(QFileInfo(m_fileName));
-	m_curFileRange = m_curFileList.size();
-
-	// emit the signal that fileindex and filerange has changed
-	emit(PicIndexSwitched(m_curFileIndex, m_curFileRange));
 }
 
 
@@ -671,6 +683,7 @@ Output:         None
 void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal)
 {
 	m_curPicIndexBox->setText(QString("%1/%2").arg(indexVal + 1).arg(rangeVal));
+	m_zoomRateBox->setText("100%");
 }
 
 
@@ -883,51 +896,62 @@ void UiMainWindow::SetImage(PanImage& newImage)
 {
 	m_QImage = newImage.PanImage2QImage();
 	m_dispArea->setPixmap(QPixmap::fromImage(m_QImage));
+
+	m_curPicWidth->setText(QString("%1").arg(m_QImage.width()));
+	m_curPicHeight->setText(QString("%1").arg(m_QImage.height()));
+
 	emit(ImageChanged());
-	setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
+	setWindowTitle("panpic - " + m_fileName);
 	update();
 	updateGeometry();
 
 	SetHasImage(true);
 }
 
-
-/*---------------------------------------------------------------------
-Fuction:        Overload -- eventFilter(QObject* watched, QEvent* event)
-
-Description:    1. To implement of dragging and placing image on frame
-				   through mouse
-
-Input:          1. QObject* of the operation upon
-				2. Event that trigged
-
-Output:         True or False
-----------------------------------------------------------------------*/
-bool UiMainWindow::eventFilter(QObject* watched, QEvent* event)
+void UiMainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-	if (watched == this){
-		if (event->type() == QEvent::DragEnter){
-			QDragEnterEvent* dragEnter = dynamic_cast<QDragEnterEvent*>(event);
-			dragEnter->acceptProposedAction();
-			return true;
-		}
-		else if (event->type() == QEvent::Drop){
-			QDropEvent* drop = dynamic_cast<QDropEvent*>(event);
-			QList<QUrl> urls = drop->mimeData()->urls();
-			if (urls.isEmpty()){
-				return true;
-			}
-			QString path = urls.first().toLocalFile();
-			if (!path.isNull()){
-				SetImage(PanImageIO::GetInstance()->ReadPanImage(path));
-			}
-			return true;
-		}
+	QString str = event->mimeData()->formats().first();
+	
+	if (str.isEmpty())
+	{
+		return;
 	}
-
-	return QWidget::eventFilter(watched, event);
+	
+	event->acceptProposedAction();
 }
 
+void UiMainWindow::dropEvent(QDropEvent* event)
+{
+	QList<QUrl> urls = event->mimeData()->urls();
+
+	if (urls.isEmpty())
+	{
+		return;
+	}
+
+	m_fileName = urls.first().toLocalFile();
+
+	if (m_fileName.isEmpty())
+	{
+		return;
+	}
+
+	m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
+	SetImage(m_PanImage);
+
+	// once open the picture, get its fileindex and filerange
+	QDir dir;
+	dir.setPath(QFileInfo(m_fileName).dir().absolutePath());
+	QStringList filter;
+	filter<<"*.jpg"<<"*.jpeg"<<"*.bmp"<<"*.png"<<"*gif" <<"*.ico"<<"*.tif";
+	dir.setNameFilters(filter);
+	m_curFileList = dir.entryInfoList();
+	m_curFileIndex = m_curFileList.indexOf(QFileInfo(m_fileName));
+	m_curFileRange = m_curFileList.size();
+
+	// emit the signal that fileindex and filerange has changed
+	emit(PicIndexSwitched(m_curFileIndex, m_curFileRange));
+}
 
 /*---------------------------------------------------------------------
 Fuction:        Overload -- wheelEvent(QWheelEvent *event)
