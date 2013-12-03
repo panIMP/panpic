@@ -6,4 +6,7 @@ int main(int argc, char* argv[]){
     UiMainWindow mainWin;
     mainWin.show();
     return app.exec();
+
+    QMimeData k;
+    k.hasFormat("");
 }

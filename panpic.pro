@@ -6,20 +6,25 @@ SOURCES += \
     panimage.cpp \
     panimageio.cpp \
     panimageshift.cpp \
-    panimagehistproc.cpp \
     uihistdialog.cpp \
     panimagefilter.cpp \
-    uihoughtransformparam.cpp
+    uihoughtransformparam.cpp \
+    panimageintegratedalg.cpp \
+    panimagehist.cpp \
+    panimagedetect.cpp
 
 HEADERS += \
     uimainwindow.h \
     panimage.h \
     panimageio.h \
     panimageshift.h \
-    panimagehistproc.h \
     uihistdialog.h \
     panimagefilter.h \ 
-    uihoughtransformparam.h
+    uihoughtransformparam.h \
+    resource.h \
+    panimageintegratedalg.h \
+    panimagehist.h \
+    panimagedetect.h
 
 RESOURCES += \
     icons.qrc
