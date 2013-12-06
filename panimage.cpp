@@ -46,7 +46,7 @@ void PanImage::SetMat(cv::Mat& newMat){
  *  Input:           None
  *  Output:          cv::Mat instance
  */
-cv::Mat PanImage::GetMat(){
+cv::Mat& PanImage::GetMat(){
 	return mat;
 }
 

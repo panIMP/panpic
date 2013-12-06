@@ -1,94 +1,85 @@
 #include "panimageshift.h"
 
 
-
-// Important! Never foget
+/*
+/*	Important! Never foget -- five steps for a single instance pattern
+*/
+//	Step1:
 PanImageShift* PanImageShift::instance = 0;
 
-
-/*  Function:        ImageShift()
- *  Description:     Initiation for attributes of class ImageShift
- *  Input:           None
- *  Output:          None
- */
+//	Step2:
 PanImageShift::PanImageShift()
 {
 
 }
-/*  Function:        ~ImageShift()
- *  Description:     Release of attributes allocation of class ImageShift
- *  Input:           None
- *  Output:          None
- */
+
+//	Step3:
 PanImageShift::~PanImageShift(){
 
 }
 
-
-/*  Funtion:        GetInstance()
- *  Description:    Get the instance of class ImageShift, and avoid duplicate allocation
- *  Input:          None
- *  Output:         ImageShift*
- */
+//	Step4:
 PanImageShift* PanImageShift::GetInstance(){
-    if (instance == 0){
-        instance = new PanImageShift();
-    }
-    return instance;
+	if (instance == 0){
+		instance = new PanImageShift();
+	}
+	return instance;
 }
 
-
-/*  Function:       Destroy()
- *  Description:    Destroy the instance of class ImageShift to avoid memory leak
- *  Input:          None
- *  Output:         None
- */
+//	Step5:
 void PanImageShift::Destroy(){
-    if (instance != 0){
-        delete instance;
-        instance = 0;
-    }
+	if (instance != 0){
+		delete instance;
+		instance = 0;
+	}
+}
+
+//	Interface to create corresponding transform
+FlipTransform* PanImageShift::MirrorV(PanImage& image)
+{
+	return new FlipTransform(0, image);
+}
+
+FlipTransform* PanImageShift::MirrorH(PanImage& image)
+{
+	return new FlipTransform(1, image);
+}
+
+RotateTransform* PanImageShift::RotateClockWise(PanImage& image)
+{
+	return new RotateTransform(0, image);
+}
+
+RotateTransform* PanImageShift::RotateCntrClockWise(PanImage& image)
+{
+	return new RotateTransform(1, image);
 }
 
 
-/*  Function:        MirrorV(cv::Mat& image)
- *  Description:     Mirror the image vertically
- *  Input:           cv::Mat object -- image to be processed and modified
- *  Output:          None
- */
-void PanImageShift::MirrorV(PanImage& image){
-    cv::flip(image.GetMat(), image.GetMat(), 0);
+/*
+/*	Function definitions for transform class RotateTransform;
+*/
+RotateTransform::RotateTransform(int orientation, PanImage& image) : image(image)
+{
+	this->orientation = orientation;
+}
+
+void RotateTransform::apply()
+{
+	cv::transpose(image.GetMat(), image.GetMat());
+	cv::flip(image.GetMat(), image.GetMat(), orientation);
 }
 
 
-/*  Function:        MirrorH(cv::Mat& image)
- *  Description:     Mirror the image horizontally
- *  Input:           cv::Mat object -- image to be processed and modified
- *  Output:          None
- */
-void PanImageShift::MirrorH(PanImage& image){
-    cv::flip(image.GetMat(), image.GetMat(), 1);
+/*
+/*	Function definitions for transform class FlipTransForm;
+*/
+FlipTransform::FlipTransform(int orientation, PanImage& image) : image(image)
+{
+	this->orientation = orientation;
 }
 
-
-/*  Function:        RotateClockWise(cv::Mat& image)
- *  Description:     Rotate the image clockWise
- *  Input:           cv::Mat object -- image to be processed and modified
- *  Output:          None
- */
-void PanImageShift::RotateClockWise(PanImage& image){
-    cv::transpose(image.GetMat(), image.GetMat());
-    cv::flip(image.GetMat(), image.GetMat(), 0);
+void FlipTransform::apply()
+{
+	cv::flip(image.GetMat(), image.GetMat(), orientation);
 }
-
-
-/*  Function:        RotateClockWise(cv::Mat& image)
- *  Description:     Rotate the image counter clockWise
- *  Input:           cv::Mat object -- image to be processed and modified
- *  Output:          None
- */
-void PanImageShift::RotateCntrClockWise(PanImage& image){
-    cv::transpose(image.GetMat(), image.GetMat());
-    cv::flip(image.GetMat(), image.GetMat(), 1);
-}
-

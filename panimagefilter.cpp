@@ -1,8 +1,9 @@
-#include "panimagefilter.h"
 #include <qstring.h>
 #include <qmessagebox.h>
 #include <qicon.h>
 #include <time.h>
+
+#include "panimagefilter.h"
 
 PanImageFilter* PanImageFilter::instance = 0;
 
@@ -170,8 +171,6 @@ void PanImageFilter::Sketch(PanImage& image)
 	int templt[9] = {1, 1, 1, 1, -8, 1, 1, 1, 1};
 	int templtTest1[9] = {1, 1, -1, 1, 0, -1, -1, 1, -1};
 	int templtTest2[9] = {1, 1, 1, -1, 0, -1, -1, -1, 1};
-	int templtTest3[9] = {1, -1, 1, 1, 0, -1, 1, -1, -1};
-	int templtTest4[9] = {-1, 1, 1, 1, 0, 1, -1, -1, -1};
 	int templtAve[9] = {1, 1, 1, 1, 4, 1, 1, 1, 1};
 	int a,b,b1,b2;
 
@@ -204,14 +203,14 @@ void PanImageFilter::Sketch(PanImage& image)
 		}
 	}	
 
-	/*for (unsigned int j = 1; j < height - 1; j++)
+    for (unsigned int j = 1; j < height - 1; j++)
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
 			a = TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
 			mat.at<uchar>(j, i) = a;
 		}
-	}*/
+    }
 }
 
 void PanImageFilter::SobelSharpen(PanImage &image)

@@ -17,11 +17,11 @@ Output:         None
 ----------------------------------------------------------------------*/
 UiMainWindow::UiMainWindow(const QString& fileName, QWidget *parent) : QMainWindow(parent)
 {
-	CreateStatusBar();
+	InitGlobalVariables();
 	CreateCenterWidget(fileName);
+	CreateStatusBar();
 	CreateGlobalSigSlotLink();
 	CreateMainWindowStyle();
-	CreateOthers();
 }
 
 
@@ -332,6 +332,8 @@ Output:         None
 void UiMainWindow::CreateMainWindowStyle()
 {
 	setAcceptDrops(true);
+	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
+	connect(&subThread, SIGNAL(allTransformDone()), this, SLOT(AllTransformDone()));
 }
 
 
@@ -344,12 +346,31 @@ Input:          None
 
 Output:         None
 ----------------------------------------------------------------------*/
-void UiMainWindow::CreateOthers()
+void UiMainWindow::InitGlobalVariables()
 {
 	m_curFileIndex = 0;
 	m_curFileRange = 0;
 }
 
+void UiMainWindow::AddTransform(Transform* transform)
+{
+	subThread.addTransform(transform);
+
+	m_openPic->setEnabled(false);
+	m_nextPic->setEnabled(false);
+	m_prevPic->setEnabled(false);
+}
+
+void UiMainWindow::AllTransformDone()
+{
+	SetImage(m_PanImage);
+
+	m_openPic->setEnabled(true);
+	m_nextPic->setEnabled(true);
+	m_prevPic->setEnabled(true);
+
+	setWindowModified(true);
+}
 
 /*---------------------------------------------------------------------
 Fuction:        OpenPic()
@@ -462,7 +483,7 @@ void UiMainWindow::Save()
 {
 	PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
 	setWindowModified(false);
-	setWindowTitle("panpic - " + QFileInfo(m_fileName).fileName());
+	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
 	setWindowModified(false);
 }
 
@@ -507,8 +528,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::RotateClkwise()
 {
-	PanImageShift::GetInstance()->RotateClockWise(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageShift::GetInstance()->RotateClockWise(m_PanImage));
 }
 
 
@@ -523,8 +543,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::RotateCntrClkwise()
 {
-	PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage));
 }
 
 
@@ -539,8 +558,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::MirrorH()
 {
-	PanImageShift::GetInstance()->MirrorH(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageShift::GetInstance()->MirrorH(m_PanImage));
 }
 
 
@@ -555,8 +573,7 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::MirrorV()
 {
-	PanImageShift::GetInstance()->MirrorV(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageShift::GetInstance()->MirrorV(m_PanImage));
 }
 
 
@@ -856,7 +873,7 @@ void UiMainWindow::CircleIncisionDetection()
 {
 	if (m_PanImage.IsGray())
 	{
-		PanImageIntegratedAlg::GetInstance()->CicleIncisionDetection(m_PanImage);
+		PanImageDetect::GetInstance()->CicleIncisionDetection(m_PanImage);
 		SetImage(m_PanImage);
 	}
 	else
@@ -901,7 +918,7 @@ void UiMainWindow::SetImage(PanImage& newImage)
 	m_curPicHeight->setText(QString("%1").arg(m_QImage.height()));
 
 	emit(ImageChanged());
-	setWindowTitle("panpic - " + m_fileName);
+	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
 	update();
 	updateGeometry();
 
@@ -910,13 +927,6 @@ void UiMainWindow::SetImage(PanImage& newImage)
 
 void UiMainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-	QString str = event->mimeData()->formats().first();
-	
-	if (str.isEmpty())
-	{
-		return;
-	}
-	
 	event->acceptProposedAction();
 }
 

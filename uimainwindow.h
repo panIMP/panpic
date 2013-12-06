@@ -39,7 +39,7 @@
 #include "panimagefilter.h"
 #include "uihoughtransformparam.h"
 #include "panimagedetect.h"
-#include "panimageintegratedalg.h"
+#include "transformthread.h"
 
 class UiMainWindow : public QMainWindow
 {
@@ -55,13 +55,16 @@ public:
 	PanImage& Image(){return m_PanImage;}
 	void SetImage(PanImage& newImage);
 
+	void InitGlobalVariables();
+
 	void CreateTabWidgets();
 	void CreatePicDispWidgets(const QString& fileName = 0);
 	void CreateCenterWidget(const QString& fileName = 0);
 	void CreateStatusBar();
 	void CreateGlobalSigSlotLink();
 	void CreateMainWindowStyle();
-	void CreateOthers();
+
+	void AddTransform(Transform* transform);
 
 signals:
 	void ImageChanged();
@@ -70,6 +73,8 @@ signals:
 	void PicIndexSwitched(int, int);
 
 public slots:
+	void AllTransformDone();
+
 	void OpenPic();
 	void NextPic();
 	void PrevPic();
@@ -119,13 +124,16 @@ protected:
 
 
 private:
-	// Signals and const values
+	//	Transform threads
+	TransformThread subThread;
+
+	//	Signals and const values
 	bool m_hasImage;
 
 	static const int m_minWidth = 800;
 	static const int m_minHeight = 600;
 
-	// Tab tool bars
+	//	Tab tool bars
 	QSplitter* m_centerSplitter;
 	QTabWidget* m_tabWidget;
 
@@ -159,7 +167,7 @@ private:
 	QWidget* m_integrated_tab;
 	QPushButton* m_cicle_incision_detect;
 
-	// Status bar
+	//	Status bar
 	QStatusBar* m_statusBar;
 	QLineEdit* m_zoomRateBox;
 	static int const ZOOM_SAME = 100;
@@ -172,11 +180,11 @@ private:
 	QLabel* m_curPicWidth;
 	QLabel* m_curPicHeight;
 
-	// Picture display area components
+	//	Picture display area components
 	QScrollArea* m_dispFrame;
 	QLabel* m_dispArea;
 
-	// Image to be processed
+	//	Image to be processed
 	PanImage m_PanImage;
 	QImage m_QImage;
 	QFileInfoList m_curFileList;

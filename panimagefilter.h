@@ -3,7 +3,7 @@
 
 #include "panimage.h"
 #include "panimagehist.h"
-
+#include "transform.h"
 
 
 class PanImageFilter
@@ -34,6 +34,9 @@ public:
 	void Engrave(PanImage& image);
 	void Negative(PanImage& image);
 	void HoleFill(PanImage& image);
+
+private:
+	
 };
 
 #endif // PANIMAGEFILTER_H
