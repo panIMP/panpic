@@ -9,22 +9,24 @@
 
 class PanImageIO
 {
-private:
-    // instance attribute -- only one instance can be created
-    static PanImageIO* instance;
-
+	PanImageIO();
+	~PanImageIO();
+	PanImageIO(const PanImageIO&);
+	PanImageIO& operator = (const PanImageIO&);
 
 public:
-    PanImageIO();
-    ~PanImageIO();
 
-    // Instance get and destroy
-    static PanImageIO* GetInstance();
-    static void Destroy();
+	// Instance get and destroy
+	static PanImageIO* GetInstance();
+	static void Destroy();
 
-    // Image input and output
-    PanImage ReadPanImage(const QString& str);
-    void SavePanImage(PanImage& ImageToSave, const QString& str);
+	// Image input and output
+	PanImage ReadPanImage(const QString& str);
+	void SavePanImage(PanImage& ImageToSave, const QString& str);
+
+private:
+	// instance attribute -- only one instance can be created
+	static PanImageIO* instance;
 };
 
 #endif // IMAGEIO_H

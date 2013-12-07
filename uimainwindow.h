@@ -125,7 +125,7 @@ protected:
 
 private:
 	//	Transform threads
-	TransformThread subThread;
+	TransformThread* subThread;
 
 	//	Signals and const values
 	bool m_hasImage;
@@ -191,6 +191,10 @@ private:
 	QString m_fileName;
 	int m_curFileIndex;
 	int m_curFileRange;
+
+	// 
+	_Pan_Circle bigCircle;
+	_Pan_Circle smallCircle;
 };
 
 #endif // MAINWINDOW_H

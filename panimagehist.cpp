@@ -1,49 +1,16 @@
 #include "panimagehist.h"
 
-PanImageHist* PanImageHist::instance = 0;
 
-PanImageHist::PanImageHist()
+GetHistImageTransform::GetHistImageTransform(PanImage& image, PanImage& histImage) : image(image), histImage(histImage)
 {
 
 }
 
 
-PanImageHist::~PanImageHist(){
-
-}
-
-
-PanImageHist* PanImageHist::GetInstance(){
-	if (instance == 0){
-		instance = new PanImageHist();
-	}
-
-	return instance;
-}
-
-
-void PanImageHist::Destroy(){
-	if (instance != 0){
-		delete instance;
-		instance = 0;
-	}
-}
-
-
-/*  Function:        GetHistImage(PanImage& inputImage)
- *  Description:     Calculate the histogram of panimage
- *                   Gray image:  calculate the gray histogram
- *                   Color image: calculate the hsv format image histogram,
- *                                2 histograms:
- *                                1. h(hue) - s(saturation) histogram
- *                                2. v(value) hitogram
- *  Input:           PanImage instance
- *  Output:          PanImage containing histogram
- */
-PanImage PanImageHist::GetHistImage(PanImage& inputImage){
-	cv::Mat mat = inputImage.GetMat();
+void GetHistImageTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
 	cv::MatND hist;
-	PanImage histPanImg;
 
 	if (mat.channels() == 1){
 		int histSize[] = {256};
@@ -54,16 +21,16 @@ PanImage PanImageHist::GetHistImage(PanImage& inputImage){
 		double maxVal = 0;
 		double minVal = 0;
 		cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
-		cv::Mat histImg(histSize[0], histSize[0], CV_8UC1, cv::Scalar(255));
+		cv::Mat histMat(histSize[0], histSize[0], CV_8UC1, cv::Scalar(255));
 		int hpt = static_cast<int>(0.9 * histSize[0]);
 		for (int h = 0; h < histSize[0]; h ++){
 			float binVal = hist.at<float>(h);
 			int intensity = static_cast<int>(binVal * hpt / maxVal);
-			cv::line(histImg, cv::Point(h, histSize[0]),
+			cv::line(histMat, cv::Point(h, histSize[0]),
 					cv::Point(h, histSize[0] - intensity),
 					cv::Scalar(0));
 		}
-		histPanImg.SetMat(histImg);
+		histImage.SetMat(histMat);
 	}
 
 	else if (mat.channels() == 3){
@@ -91,7 +58,7 @@ PanImage PanImageHist::GetHistImage(PanImage& inputImage){
 		cv::minMaxLoc(hist, 0, &maxVal, 0, 0);
 		int height = 360;
 		int width = (hbins*sbins*1);
-		cv::Mat histImg(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+		cv::Mat histMat(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
 		cv::Mat hsv_color(1,1,CV_8UC3, cv::Scalar(0,0,0));
 		cv::Mat rgb_color(1,1,CV_8UC3, cv::Scalar(0,0,0));
 		int bin_w = width / (hbins * sbins);
@@ -103,27 +70,25 @@ PanImage PanImageHist::GetHistImage(PanImage& inputImage){
 				hsv_color.setTo(cv::Scalar(h*180.f / hbins,s*255.f/sbins, 255));
 				cv::cvtColor(hsv_color,rgb_color,CV_HSV2BGR);
 				cv::Scalar color = rgb_color.at<cv::Vec3b>(0,0);
-				cv::rectangle(histImg, cv::Point(i*bin_w,height),
+				cv::rectangle(histMat, cv::Point(i*bin_w,height),
 							  cv::Point((i+1)*bin_w,height - intensity),
 							  color, -1);
 			}
 		}
-		histPanImg.SetMat(histImg);
+		histImage.SetMat(histMat);
 	}
-
-	return histPanImg;
 }
 
 
-/*  Function:        HistEqalization(PanImage& inputImage)
- *  Description:     Calculate histogram equalization:
- *                   Gray image:    equalize the gray histogram
- *                   Color image:   equalize R, G, B channel independently
- *  Input:           PanImage instance
- *  Output:          PanImage histogram equalized
- */
-bool PanImageHist::HistEqalization(PanImage &inputImage){
-	cv::Mat mat = inputImage.GetMat();
+HistEqualizeTransform::HistEqualizeTransform(PanImage& image) : image(image)
+{
+
+}
+
+
+void HistEqualizeTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
 	if (mat.channels() == 1){
 		cv::equalizeHist(mat, mat);
 	}
@@ -135,12 +100,18 @@ bool PanImageHist::HistEqalization(PanImage &inputImage){
 		cv::equalizeHist(v[2], v[2]);
 		cv::merge(v, mat);
 	}
-
-	return true;
 }
 
-bool PanImageHist::HistMatch(PanImage &inputImage, float* histMatch){
-	cv::Mat mat = inputImage.GetMat();
+
+HistMatchTransform::HistMatchTransform(PanImage& image, float* histMatch) : image(image)
+{
+	this->histMatch = histMatch;
+}
+
+
+void HistMatchTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
 	unsigned int height = mat.rows;
 	unsigned int channelNum = mat.channels();
@@ -216,11 +187,15 @@ bool PanImageHist::HistMatch(PanImage &inputImage, float* histMatch){
 	}
 	
 	cv::merge(v, mat);
-
-	return true;
 }
 
-void PanImageHist::Enhance(PanImage& image)
+
+EnhanceTransform::EnhanceTransform(PanImage& image) : image(image)
+{
+
+}
+
+void EnhanceTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
@@ -255,6 +230,55 @@ void PanImageHist::Enhance(PanImage& image)
 	}
 
 	cv::merge(v, mat);
+}
+
+
+PanImageHist* PanImageHist::instance = 0;
+
+PanImageHist::PanImageHist()
+{
+
+}
+
+
+PanImageHist::~PanImageHist(){
+
+}
+
+
+PanImageHist* PanImageHist::GetInstance(){
+	if (instance == 0){
+		instance = new PanImageHist();
+	}
+
+	return instance;
+}
+
+
+void PanImageHist::Destroy(){
+	if (instance != 0){
+		delete instance;
+		instance = 0;
+	}
+}
+
+
+GetHistImageTransform* PanImageHist::GetHistImage(PanImage& image, PanImage& histImage){
+	return new GetHistImageTransform(image, histImage);
+}
+
+
+HistEqualizeTransform* PanImageHist::HistEqalization(PanImage &image){
+	return new HistEqualizeTransform(image);
+}
+
+HistMatchTransform* PanImageHist::HistMatch(PanImage &image, float* histMatch){
+	return new HistMatchTransform(image, histMatch);
+}
+
+EnhanceTransform* PanImageHist::Enhance(PanImage& image)
+{
+	return new EnhanceTransform(image);
 }
 
 

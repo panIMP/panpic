@@ -1,8 +1,5 @@
 #include "uimainwindow.h"
 
-_Pan_Circle bigCircle;
-_Pan_Circle smallCircle;
-
 
 /*---------------------------------------------------------------------
 Fuction:        MainWindow(const QString& fileName, QWidget *parent)
@@ -333,7 +330,7 @@ void UiMainWindow::CreateMainWindowStyle()
 {
 	setAcceptDrops(true);
 	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
-	connect(&subThread, SIGNAL(allTransformDone()), this, SLOT(AllTransformDone()));
+	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(AllTransformDone()));
 }
 
 
@@ -348,13 +345,18 @@ Output:         None
 ----------------------------------------------------------------------*/
 void UiMainWindow::InitGlobalVariables()
 {
+	subThread = TransformThread::GetInstance();
+
 	m_curFileIndex = 0;
 	m_curFileRange = 0;
+
+	bigCircle.hasValue = false;
+	smallCircle.hasValue = false;
 }
 
 void UiMainWindow::AddTransform(Transform* transform)
 {
-	subThread.addTransform(transform);
+	subThread->addTransform(transform);
 
 	m_openPic->setEnabled(false);
 	m_nextPic->setEnabled(false);
@@ -706,8 +708,7 @@ void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal)
 
 void UiMainWindow::EqualizeHist()
 {
-	PanImageHist::GetInstance()->HistEqalization(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageHist::GetInstance()->HistEqalization(m_PanImage));
 }
 
 void UiMainWindow::MatchHist()
@@ -716,14 +717,12 @@ void UiMainWindow::MatchHist()
 	for (int i = 0; i < 256; i++){
 		histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256.0;
 	}
-	PanImageHist::GetInstance()->HistMatch(m_PanImage, histV);
-	SetImage(m_PanImage);
+	AddTransform(PanImageHist::GetInstance()->HistMatch(m_PanImage, histV));
 }
 
 void UiMainWindow::Enhance()
 {
-	PanImageHist::GetInstance()->Enhance(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageHist::GetInstance()->Enhance(m_PanImage));
 }
 
 void UiMainWindow::CreateHistDialog()
@@ -736,8 +735,7 @@ void UiMainWindow::Gray()
 {
 	if (! m_PanImage.IsGray())
 	{
-		PanImageFilter::GetInstance()->Gray(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageFilter::GetInstance()->Gray(m_PanImage));
 	}
 	else
 	{
@@ -750,8 +748,7 @@ void UiMainWindow::SobelSharpen()
 {
 	if (m_PanImage.IsGray())
 	{
-		PanImageFilter::GetInstance()->SobelSharpen(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageFilter::GetInstance()->SobelSharpen(m_PanImage));
 	}
 	else
 	{
@@ -762,16 +759,14 @@ void UiMainWindow::SobelSharpen()
 
 void UiMainWindow::LaplaceSharpen()
 {
-	PanImageFilter::GetInstance()->LaplaceSharpen(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->LaplaceSharpen(m_PanImage));
 }
 
 void UiMainWindow::MedianFilter()
 {
 	if (m_PanImage.IsGray())
 	{
-		PanImageFilter::GetInstance()->MedianFilter(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageFilter::GetInstance()->MedianFilter(m_PanImage));
 	}
 	else
 	{
@@ -782,22 +777,19 @@ void UiMainWindow::MedianFilter()
 
 void UiMainWindow::MedianBlur()
 {
-	PanImageFilter::GetInstance()->MedianBlur(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->MedianBlur(m_PanImage));
 }
 
 void UiMainWindow::GuassinBlur()
 {
-	PanImageFilter::GetInstance()->GuassinBlur(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->GuassinBlur(m_PanImage));
 }
 
 void UiMainWindow::OtsuBinary()
 {
 	if (m_PanImage.IsGray())
 	{
-		PanImageFilter::GetInstance()->OtsuBinary(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageFilter::GetInstance()->OtsuBinary(m_PanImage));
 	}
 	else
 	{
@@ -810,8 +802,7 @@ void UiMainWindow::HoleFill()
 {
 	if (m_PanImage.IsBinary())
 	{
-		PanImageFilter::GetInstance()->HoleFill(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageFilter::GetInstance()->HoleFill(m_PanImage));
 	}
 	else
 	{
@@ -836,45 +827,48 @@ void UiMainWindow::HoughTransform()
 
 void UiMainWindow::Engrave()
 {
-	PanImageFilter::GetInstance()->Engrave(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->Engrave(m_PanImage));
 }
 
 void UiMainWindow::Negative()
 {
-	PanImageFilter::GetInstance()->Negative(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->Negative(m_PanImage));
 }
 
 void UiMainWindow::Erode(){
-	PanImageFilter::GetInstance()->Erode(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->Erode(m_PanImage));
 }
 
 void UiMainWindow::Dilate()
 {
-	PanImageFilter::GetInstance()->Dilate(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->Dilate(m_PanImage));
 }
 
 void UiMainWindow::ComFog()
 {
-	PanImageFilter::GetInstance()->ComFog(m_PanImage, 5);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->ComFog(m_PanImage, 5));
 }
 
 void UiMainWindow::Sketch()
 {
-	PanImageFilter::GetInstance()->Sketch(m_PanImage);
-	SetImage(m_PanImage);
+	AddTransform(PanImageFilter::GetInstance()->Sketch(m_PanImage));
 }
 
 void UiMainWindow::CircleIncisionDetection()
 {
 	if (m_PanImage.IsGray())
 	{
-		PanImageDetect::GetInstance()->CicleIncisionDetection(m_PanImage);
-		SetImage(m_PanImage);
+		AddTransform(PanImageDetect::GetInstance()->CicleIncisionDetection(m_PanImage,
+															GlobalParams::BIG_CIRCLE_MIN,
+															GlobalParams::BIG_CIRCLE_MAX,
+															GlobalParams::SEARCH_STEP,
+															0,
+															GlobalParams::WIDTH,
+															0,
+															GlobalParams::HEIGHT,
+															100,
+															bigCircle,
+															smallCircle));
 	}
 	else
 	{

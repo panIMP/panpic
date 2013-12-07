@@ -13,22 +13,29 @@
 #include "panimage.h"
 #include "panimageio.h"
 #include "panimagehist.h"
+#include "transformthread.h"
 
 class UiHistDialog : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent = 0);
-    
+	explicit UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent = 0);
+	
+	void AddTransform(Transform* transform);
+
 signals:
-    
+	
 public slots:
-    void Save();
+	void ShowResult();
+	void Save();
 
 private:
-    QPushButton* save;
-    PanImage* img;
+	//	Transform threads
+	TransformThread* subThread;
 
+	QLabel* histLabel;
+	QPushButton* save;
+	PanImage histimg;
 };
 
 #endif // UIHISTDIALOG_H

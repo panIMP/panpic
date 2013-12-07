@@ -1,6 +1,7 @@
 #include "transformthread.h"
 
 Transform* const TransformThread::endTransform = 0;
+TransformThread* TransformThread::instance = 0;
 
 TransformThread::TransformThread(void)
 {
@@ -22,7 +23,26 @@ TransformThread::~TransformThread(void)
 		transformAdded.wakeOne();
 	}
 
-    wait();
+	wait();
+}
+
+TransformThread* TransformThread::GetInstance()
+{
+	if (instance == 0)
+	{
+		instance = new TransformThread();
+	}
+
+	return instance;
+}
+
+void TransformThread::Destroy()
+{
+	if (instance != 0)
+	{
+		delete instance;
+		instance = 0;
+	}
 }
 
 void TransformThread::addTransform(Transform* trans)

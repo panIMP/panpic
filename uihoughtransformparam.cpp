@@ -3,6 +3,9 @@
 
 UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circle, QWidget* parent) : QWidget(parent)
 {
+	this->subThread = TransformThread::GetInstance();
+	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
+
 	image.copyTo(img);
 	cle = circle;
 
@@ -25,22 +28,22 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	iMin->setText("0");
 	iMax = new QLineEdit;
 	iMax->setAlignment(Qt::AlignCenter);
-	iMax->setText(QString("%1").arg(PanImageDetect::WIDTH));
+	iMax->setText(QString("%1").arg(GlobalParams::WIDTH));
 	jMin = new QLineEdit;
 	jMin->setAlignment(Qt::AlignCenter);
 	jMin->setText("0");
 	jMax = new QLineEdit;
 	jMax->setAlignment(Qt::AlignCenter);
-	jMax->setText(QString("%1").arg(PanImageDetect::HEIGHT));
+	jMax->setText(QString("%1").arg(GlobalParams::HEIGHT));
 	rMin = new QLineEdit;
 	rMin->setAlignment(Qt::AlignCenter);
-	rMin->setText(QString("%1").arg(PanImageDetect::BIG_CIRCLE_MIN));
+	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
 	rMax = new QLineEdit;
 	rMax->setAlignment(Qt::AlignCenter);
-	rMax->setText(QString("%1").arg(PanImageDetect::BIG_CIRCLE_MAX));
+	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
 	searchStep = new QLineEdit;
 	searchStep->setAlignment(Qt::AlignCenter);
-	searchStep->setText(QString("%1").arg(PanImageDetect::SEARCH_STEP));
+	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));
 
 	QHBoxLayout* hLay1 = new QHBoxLayout;
 	hLay1->addStretch();
@@ -136,31 +139,48 @@ void UiHoughTransformParam::HoughTransform()
 	unsigned int rMaxValue = rMax->text().toInt();
 	unsigned int step = searchStep->text().toInt();
 
-	cle = PanImageDetect::GetInstance()->HoughTransform(img, 
-														rMinValue, 
-														rMaxValue,
-														step, 
-														iMinValue, 
-														iMaxValue, 
-														jMinValue, 
-														jMaxValue,
-														100);
-	
-	a->setText(QString("%1").arg(cle.a));
-	b->setText(QString("%1").arg(cle.b));
-	r->setText(QString("%1").arg(cle.r));
+	AddTransform(PanImageDetect::GetInstance()->HoughTransform(	img, 
+																rMinValue, 
+																rMaxValue,
+																step, 
+																iMinValue, 
+																iMaxValue, 
+																jMinValue, 
+																jMaxValue,
+																100,
+																cle));
 }
 
 void UiHoughTransformParam::ResetParams()
 {
 	iMin->setText("0");
-	iMax->setText(QString("%1").arg(PanImageDetect::WIDTH));
+	iMax->setText(QString("%1").arg(GlobalParams::WIDTH));
 	jMin->setText("0");
-	jMax->setText(QString("%1").arg(PanImageDetect::HEIGHT));
-	rMin->setText(QString("%1").arg(PanImageDetect::BIG_CIRCLE_MIN));
-	rMax->setText(QString("%1").arg(PanImageDetect::BIG_CIRCLE_MAX));
-	searchStep->setText(QString("%1").arg(PanImageDetect::SEARCH_STEP));
+	jMax->setText(QString("%1").arg(GlobalParams::HEIGHT));
+	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
+	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
+	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));
 	a->setText("");
 	b->setText("");
 	r->setText("");
+}
+
+void UiHoughTransformParam::AddTransform(Transform* transform)
+{
+	subThread->addTransform(transform);
+}
+
+void UiHoughTransformParam::ShowResult()
+{
+	if (cle.hasValue)
+	{
+		a->setText(QString("%1").arg(cle.a));
+		b->setText(QString("%1").arg(cle.b));
+		r->setText(QString("%1").arg(cle.r));
+	}
+	else
+	{
+		QMessageBox warning(QMessageBox::Warning, "Alert!",  "No circle found under this condition!");
+		warning.exec();	
+	}
 }

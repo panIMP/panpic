@@ -5,38 +5,13 @@
 
 #include "panimagefilter.h"
 
-PanImageFilter* PanImageFilter::instance = 0;
 
-PanImageFilter::PanImageFilter()
-{
-}
-
-
-PanImageFilter::~PanImageFilter()
+GrayTransform::GrayTransform(PanImage& image) : image(image) 
 {
 
 }
 
-PanImageFilter* PanImageFilter::GetInstance()
-{
-	if (instance == 0)
-	{
-		instance = new PanImageFilter();
-	}
-
-	return instance;
-}
-
-void PanImageFilter::Destroy()
-{
-	if (instance != 0)
-	{
-		delete instance;
-		instance = 0;
-	}
-}
-
-void PanImageFilter::Gray(PanImage& image)
+void GrayTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int channels = mat.channels();
@@ -59,7 +34,34 @@ void PanImageFilter::Gray(PanImage& image)
 	image.SetMat(mat);
 }
 
-void PanImageFilter::ComFog(PanImage& image, unsigned int randRange)
+MedianBlurTransform::MedianBlurTransform(PanImage& image) : image(image)
+{
+
+}
+	
+void MedianBlurTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
+	cv::medianBlur(mat, mat, 5);
+}
+
+GuassinBlurTransform::GuassinBlurTransform(PanImage& image) : image(image)
+{
+
+}
+
+void GuassinBlurTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
+	cv::GaussianBlur(mat, mat, cv::Size(5,5), 1.5, 1.5);
+}
+
+ComFogTransform::ComFogTransform(PanImage& image, int randRange) : image(image)
+{
+	this->randRange = randRange;
+}
+
+void ComFogTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
@@ -135,31 +137,13 @@ void PanImageFilter::ComFog(PanImage& image, unsigned int randRange)
 	cv::merge(v, mat);
 }
 
-unsigned int PanImageFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y)
+SketchTransform::SketchTransform(PanImage& image) : image(image)
 {
-	int i, j, px, py, m;
-	m = 0;
 
-	for (j = 0; j < tw; j++)
-	{
-		for (i = 0; i < tw; i++)
-		{
-			px = x - tw / 2 + i;
-			py = y - tw / 2 + j;
-			m += mat.at<uchar>(py, px) * templt[j*tw + i];
-		}
-	}
-
-	if (m < 0)
-	{
-		m = -m;
-	}
-
-	return (unsigned int)m;
 }
 
-void PanImageFilter::Sketch(PanImage& image)
-{	
+void SketchTransform::apply()
+{
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
 	unsigned int width = mat.cols;
@@ -178,9 +162,9 @@ void PanImageFilter::Sketch(PanImage& image)
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-			a = TempltExcuteCl(tmpMat1, templt, 3, i, j);
-			b1 = TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
-			b2 = TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
+			a = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templt, 3, i, j);
+			b1 = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
+			b2 = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
 			b = b1 > b2 ? b1 : b2;
 			if (b < 25)
 			{
@@ -203,17 +187,22 @@ void PanImageFilter::Sketch(PanImage& image)
 		}
 	}	
 
-    for (unsigned int j = 1; j < height - 1; j++)
+	for (unsigned int j = 1; j < height - 1; j++)
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-			a = TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
+			a = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
 			mat.at<uchar>(j, i) = a;
 		}
-    }
+	}
 }
 
-void PanImageFilter::SobelSharpen(PanImage &image)
+SobelSharpenTransform::SobelSharpenTransform(PanImage& image) : image(image)
+{
+	
+}
+
+void SobelSharpenTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -265,25 +254,23 @@ void PanImageFilter::SobelSharpen(PanImage &image)
 	cv::add(mat1, mat2, mat);*/
 }
 
-void PanImageFilter::LaplaceSharpen(PanImage& image)
+LaplaceSharpenTransform::LaplaceSharpenTransform(PanImage& image) : image(image)
+{
+
+}
+
+void LaplaceSharpenTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::Laplacian(mat, mat, CV_8U);
 }
 
-void PanImageFilter::MedianBlur(PanImage& image)
+MedianFilterTransform::MedianFilterTransform(PanImage& image) : image(image)
 {
-	cv::Mat mat = image.GetMat();
-	cv::medianBlur(mat, mat, 5);
+
 }
 
-void PanImageFilter::GuassinBlur(PanImage& image)
-{
-	cv::Mat mat = image.GetMat();
-	cv::GaussianBlur(mat, mat, cv::Size(5,5), 1.5, 1.5);
-}
-
-void PanImageFilter::MedianFilter(PanImage& image)
+void MedianFilterTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -325,32 +312,35 @@ void PanImageFilter::MedianFilter(PanImage& image)
 	image.SetIsBinary(true);
 }
 
-void PanImageFilter::Engrave(PanImage& image)
+
+ErodeTransform::ErodeTransform(PanImage& image) : image(image)
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
-	unsigned int channels = mat.channels();
 
-	std::vector<cv::Mat> v(channels);
-	cv::split(mat, v);
-
-	for (unsigned int k = 0; k < channels; k++)
-	{
-		for (unsigned int j = 0; j < height - 1; j ++)
-		{
-			for (unsigned int i = 0; i < width - 1; i++)
-			{
-				v[k].at<uchar>(j,i) = cv::saturate_cast<uchar>(
-									fabsf(v[k].at<uchar>(j,i) - v[k].at<uchar>(j+1,i+1)));
-			}
-		}
-	}
-
-	cv::merge(v, mat);
 }
 
-void PanImageFilter::OtsuBinary(PanImage& image)
+void ErodeTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
+	cv::erode(mat, mat, cv::Mat());
+}
+
+DilateTransform::DilateTransform(PanImage& image) : image(image)
+{
+
+}
+
+void DilateTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
+	cv::dilate(mat, mat, cv::Mat());
+}
+
+OtsuBinaryTransform::OtsuBinaryTransform(PanImage& image) : image(image)
+{
+
+}
+
+void OtsuBinaryTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -447,40 +437,75 @@ void PanImageFilter::OtsuBinary(PanImage& image)
 	image.SetIsBinary(true);
 }
 
-unsigned int PanImageFilter::CalcCombosX2Y2R2(unsigned int r2)
+EngraveTransform::EngraveTransform(PanImage& image) : image(image)
 {
-	unsigned int x = 0;
-	unsigned int y = 0;
-	unsigned int comboNum = 0;
-	for (x = 0; x <= r2; x ++)
+
+}
+
+void EngraveTransform::apply()
+{
+	cv::Mat mat = image.GetMat();
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;
+	unsigned int channels = mat.channels();
+
+	std::vector<cv::Mat> v(channels);
+	cv::split(mat, v);
+
+	for (unsigned int k = 0; k < channels; k++)
 	{
-		for (y = 0; y <= r2; y++)
+		for (unsigned int j = 0; j < height - 1; j ++)
 		{
-			if (x*x + y*y == r2*r2)
+			for (unsigned int i = 0; i < width - 1; i++)
 			{
-				comboNum ++;
+				v[k].at<uchar>(j,i) = cv::saturate_cast<uchar>(
+									fabsf(v[k].at<uchar>(j,i) - v[k].at<uchar>(j+1,i+1)));
 			}
 		}
 	}
 
-	return comboNum;
+	cv::merge(v, mat);
 }
 
+NegativeTransform::NegativeTransform(PanImage& image) : image(image)
+{
 
+}
 
-void PanImageFilter::Erode(PanImage& image)
+void NegativeTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
-	cv::erode(mat, mat, cv::Mat());
+	unsigned int height = mat.rows;
+	unsigned int width = mat.cols;	
+	unsigned int channels = mat.channels();
+	
+	std::vector<cv::Mat> v(channels);
+	cv::split(mat, v);
+	uchar* data;
+
+	for (unsigned int k = 0; k < channels; k++)
+	{
+		for (unsigned int j = 0; j < height; j ++)
+		{
+			data = v[k].ptr<uchar>(j);
+
+			for (unsigned int i = 0; i < width; i++)
+			{
+				*data = 255 - *data;
+				data ++;
+			}
+		}
+	}
+
+	cv::merge(v, mat);
 }
 
-void PanImageFilter::Dilate(PanImage& image)
+HoleFillTransform::HoleFillTransform(PanImage& image) : image(image)
 {
-	cv::Mat mat = image.GetMat();
-	cv::dilate(mat, mat, cv::Mat());
+
 }
 
-void PanImageFilter::HoleFill(PanImage& image)
+void HoleFillTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width	= mat.cols;
@@ -544,31 +569,149 @@ void PanImageFilter::HoleFill(PanImage& image)
 	}
 }
 
-void PanImageFilter::Negative(PanImage& image)
+
+
+PanImageFilter* PanImageFilter::instance = 0;
+
+PanImageFilter::PanImageFilter()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;	
-	unsigned int channels = mat.channels();
-	
-	std::vector<cv::Mat> v(channels);
-	cv::split(mat, v);
-	uchar* data;
+}
 
-	for (unsigned int k = 0; k < channels; k++)
+
+PanImageFilter::~PanImageFilter()
+{
+
+}
+
+PanImageFilter* PanImageFilter::GetInstance()
+{
+	if (instance == 0)
 	{
-		for (unsigned int j = 0; j < height; j ++)
-		{
-			data = v[k].ptr<uchar>(j);
+		instance = new PanImageFilter();
+	}
 
-			for (unsigned int i = 0; i < width; i++)
+	return instance;
+}
+
+void PanImageFilter::Destroy()
+{
+	if (instance != 0)
+	{
+		delete instance;
+		instance = 0;
+	}
+}
+
+int PanImageFilter::CalcCombosX2Y2R2(int r2)
+{
+	int x = 0;
+	int y = 0;
+	int comboNum = 0;
+
+	for (x = 0; x <= r2; x ++)
+	{
+		for (y = 0; y <= r2; y++)
+		{
+			if (x*x + y*y == r2*r2)
 			{
-				*data = 255 - *data;
-				data ++;
+				comboNum ++;
 			}
 		}
 	}
 
-	cv::merge(v, mat);
+	return comboNum;
+}
+
+int PanImageFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y)
+{
+	int i, j, px, py, m;
+	m = 0;
+
+	for (j = 0; j < tw; j++)
+	{
+		for (i = 0; i < tw; i++)
+		{
+			px = x - tw / 2 + i;
+			py = y - tw / 2 + j;
+			m += mat.at<uchar>(py, px) * templt[j*tw + i];
+		}
+	}
+
+	if (m < 0)
+	{
+		m = -m;
+	}
+
+	return m;
+}
+
+GrayTransform* PanImageFilter::Gray(PanImage& image)
+{
+	return new GrayTransform(image);
+}
+
+ComFogTransform* PanImageFilter::ComFog(PanImage& image, unsigned int randRange)
+{
+	return new ComFogTransform(image, randRange);
+}
+
+SketchTransform* PanImageFilter::Sketch(PanImage& image)
+{	
+	return new SketchTransform(image);
+}
+
+SobelSharpenTransform* PanImageFilter::SobelSharpen(PanImage &image)
+{
+	return new SobelSharpenTransform(image);
+}
+
+LaplaceSharpenTransform* PanImageFilter::LaplaceSharpen(PanImage& image)
+{
+	return new LaplaceSharpenTransform(image);
+}
+
+MedianBlurTransform* PanImageFilter::MedianBlur(PanImage& image)
+{
+	return new MedianBlurTransform(image);
+}
+
+GuassinBlurTransform* PanImageFilter::GuassinBlur(PanImage& image)
+{
+	return new GuassinBlurTransform(image);
+}
+
+MedianFilterTransform* PanImageFilter::MedianFilter(PanImage& image)
+{
+	return new MedianFilterTransform(image);
+}
+
+EngraveTransform* PanImageFilter::Engrave(PanImage& image)
+{
+	return new EngraveTransform(image);
+}
+
+OtsuBinaryTransform* PanImageFilter::OtsuBinary(PanImage& image)
+{
+	return new OtsuBinaryTransform(image);
+}
+
+ErodeTransform* PanImageFilter::Erode(PanImage& image)
+{
+	return new ErodeTransform(image);
+}
+
+DilateTransform* PanImageFilter::Dilate(PanImage& image)
+{
+	return new DilateTransform(image);
+}
+
+HoleFillTransform* PanImageFilter::HoleFill(PanImage& image)
+{
+	return new HoleFillTransform(image);
+}
+
+NegativeTransform* PanImageFilter::Negative(PanImage& image)
+{
+	return new NegativeTransform(image);
 }
 

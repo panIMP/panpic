@@ -30,14 +30,12 @@ private:
 
 class PanImageShift
 {
-private:
-	// Instance attribute
-	static PanImageShift *instance;
-
-public:
 	PanImageShift();
 	~PanImageShift();
+	PanImageShift(const PanImageShift&);
+	PanImageShift& operator = (const PanImageShift&);
 
+public:
 	// Instance get and destroy
 	static PanImageShift* GetInstance();
 	static void Destroy();
@@ -47,6 +45,10 @@ public:
 	FlipTransform* MirrorH(PanImage& image);
 	RotateTransform* RotateClockWise(PanImage& image);
 	RotateTransform* RotateCntrClockWise(PanImage& image);
+
+private:
+	// Instance attribute
+	static PanImageShift *instance;
 };
 
 

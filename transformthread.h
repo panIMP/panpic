@@ -13,9 +13,14 @@ class TransformThread : public QThread
 {
 	Q_OBJECT
 
-public:
 	TransformThread(void);
 	~TransformThread(void);
+	TransformThread(TransformThread&);
+	TransformThread& operator = (TransformThread&);
+
+public:
+	static TransformThread* GetInstance();
+	static void Destroy();
 
 	void addTransform(Transform* trans);
 
@@ -27,6 +32,7 @@ protected:
 	void run();
 
 private:
+	static TransformThread* instance;
 	static Transform* const endTransform;  
 
 	QQueue<Transform*> transformQuene;

@@ -1,5 +1,33 @@
 #include "panimageshift.h"
 
+/*
+/*	Function definitions for transform class RotateTransform;
+*/
+RotateTransform::RotateTransform(int orientation, PanImage& image) : image(image)
+{
+	this->orientation = orientation;
+}
+
+void RotateTransform::apply()
+{
+	cv::transpose(image.GetMat(), image.GetMat());
+	cv::flip(image.GetMat(), image.GetMat(), orientation);
+}
+
+
+/*
+/*	Function definitions for transform class FlipTransForm;
+*/
+FlipTransform::FlipTransform(int orientation, PanImage& image) : image(image)
+{
+	this->orientation = orientation;
+}
+
+void FlipTransform::apply()
+{
+	cv::flip(image.GetMat(), image.GetMat(), orientation);
+}
+
 
 /*
 /*	Important! Never foget -- five steps for a single instance pattern
@@ -23,6 +51,7 @@ PanImageShift* PanImageShift::GetInstance(){
 	if (instance == 0){
 		instance = new PanImageShift();
 	}
+
 	return instance;
 }
 
@@ -55,31 +84,3 @@ RotateTransform* PanImageShift::RotateCntrClockWise(PanImage& image)
 	return new RotateTransform(1, image);
 }
 
-
-/*
-/*	Function definitions for transform class RotateTransform;
-*/
-RotateTransform::RotateTransform(int orientation, PanImage& image) : image(image)
-{
-	this->orientation = orientation;
-}
-
-void RotateTransform::apply()
-{
-	cv::transpose(image.GetMat(), image.GetMat());
-	cv::flip(image.GetMat(), image.GetMat(), orientation);
-}
-
-
-/*
-/*	Function definitions for transform class FlipTransForm;
-*/
-FlipTransform::FlipTransform(int orientation, PanImage& image) : image(image)
-{
-	this->orientation = orientation;
-}
-
-void FlipTransform::apply()
-{
-	cv::flip(image.GetMat(), image.GetMat(), orientation);
-}
