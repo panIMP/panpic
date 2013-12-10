@@ -2,11 +2,11 @@
 
 UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent) :QWidget(parent)
 {
-	histLabel = new QLabel(this);
+	histLabel = new QLabel;
 	histLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	histLabel->setAlignment(Qt::AlignCenter);	
 
-	save = new QPushButton("Save", this);
+	save = new QPushButton("Save");
 	connect(save, SIGNAL(clicked()), this, SLOT(Save()));
 
 	QVBoxLayout* vLay1 = new QVBoxLayout;

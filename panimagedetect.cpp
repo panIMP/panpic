@@ -127,7 +127,7 @@ void HoughTransformTransform::apply()
 
 	uchar* data;
 
-	double time_start = clock();
+	//double time_start = clock();
 	//	initialize the Hnew
 	for (i = 0; i < width; i++)
 	{
@@ -211,8 +211,8 @@ void HoughTransformTransform::apply()
 		}
 	}
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 
 	if (maxVal >= 8)
 	{

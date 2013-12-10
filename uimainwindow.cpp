@@ -27,21 +27,21 @@ UiMainWindow::~UiMainWindow()
 void UiMainWindow::CreatePicEditorApp()
 {
 	//	create picture editor tabs
-	m_shift_tab = new QWidget(this);
-	m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
+	m_shift_tab = new QWidget;
+	m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "");
 	m_rotateClkwise->setToolTip("Rotate the picture clockwise");
 	connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
-	m_rotateCntrClkwise = new QPushButton(QIcon(":/icon/rotate_cntrclockwise.ico"), "", this);
+	m_rotateCntrClkwise = new QPushButton(QIcon(":/icon/rotate_cntrclockwise.ico"), "");
 	m_rotateCntrClkwise->setToolTip("Rotate the picture counter clockwise");
 	connect(m_rotateCntrClkwise, SIGNAL(clicked()), this, SLOT(RotateCntrClkwise()));
-	m_mirrorH = new QPushButton(QIcon(":/icon/mirror_horizontally.ico"), "", this);
+	m_mirrorH = new QPushButton(QIcon(":/icon/mirror_horizontally.ico"), "");
 	m_mirrorH->setToolTip("Get the horizontal mirror image of the picture");
 	connect(m_mirrorH, SIGNAL(clicked()), this, SLOT(MirrorH()));
-	m_mirrorV = new QPushButton(QIcon(":/icon/mirror_vertically.ico"), "", this);
+	m_mirrorV = new QPushButton(QIcon(":/icon/mirror_vertically.ico"), "");
 	m_mirrorV->setToolTip("Get the vertically mirror image of the picture");
 	connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_shift_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayShift = new QHBoxLayout(this);
+	QHBoxLayout* hLayShift = new QHBoxLayout();
 	hLayShift->addWidget(m_rotateClkwise);
 	hLayShift->addWidget(m_rotateCntrClkwise);
 	hLayShift->addWidget(m_mirrorH);
@@ -49,17 +49,17 @@ void UiMainWindow::CreatePicEditorApp()
 	hLayShift->addStretch();
 	m_shift_tab->setLayout(hLayShift);
 
-	m_hist_tab = new QWidget(this);
-	m_dispHist = new QPushButton("hist", this);
+	m_hist_tab = new QWidget;
+	m_dispHist = new QPushButton("hist");
 	connect(m_dispHist, SIGNAL(clicked()), this, SLOT(CreateHistDialog()));
-	m_histEqualize = new QPushButton("equalize", this);
+	m_histEqualize = new QPushButton("equalize");
 	connect(m_histEqualize, SIGNAL(clicked()), this, SLOT(EqualizeHist()));
 	m_histMatch = new QPushButton("match", this);
 	connect(m_histMatch, SIGNAL(clicked()), this, SLOT(MatchHist()));
 	m_enhance = new QPushButton("enhance", this);
 	connect(m_enhance, SIGNAL(clicked()), this, SLOT(Enhance()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_hist_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayHist = new QHBoxLayout(this);
+	QHBoxLayout* hLayHist = new QHBoxLayout();
 	hLayHist->addWidget(m_dispHist);
 	hLayHist->addWidget(m_histEqualize);
 	hLayHist->addWidget(m_histMatch);
@@ -67,8 +67,8 @@ void UiMainWindow::CreatePicEditorApp()
 	hLayHist->addStretch();
 	m_hist_tab->setLayout(hLayHist);
 
-	m_filter_tab = new QWidget(this);
-	m_gray = new QPushButton("gray", this);
+	m_filter_tab = new QWidget;
+	m_gray = new QPushButton("gray");
 	connect(m_gray, SIGNAL(clicked()), this, SLOT(Gray()));
 	m_sobelSharpen = new QPushButton("sobel", this);
 	connect(m_sobelSharpen, SIGNAL(clicked()), this, SLOT(SobelSharpen()));
@@ -97,7 +97,7 @@ void UiMainWindow::CreatePicEditorApp()
 	m_sketch = new QPushButton("sketch", this);
 	connect(m_sketch, SIGNAL(clicked()), this, SLOT(Sketch()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_filter_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayFilter = new QHBoxLayout(this);
+	QHBoxLayout* hLayFilter = new QHBoxLayout();
 	hLayFilter->addWidget(m_gray);
 	hLayFilter->addWidget(m_sobelSharpen);
 	hLayFilter->addWidget(m_laplaceSharpen);
@@ -115,25 +115,25 @@ void UiMainWindow::CreatePicEditorApp()
 	hLayFilter->addStretch();
 	m_filter_tab->setLayout(hLayFilter);
 
-	m_detect_tab = new QWidget(this);
-	m_houghTransform = new QPushButton("hough", this);
+	m_detect_tab = new QWidget;
+	m_houghTransform = new QPushButton("hough");
 	connect(m_houghTransform, SIGNAL(clicked()), this, SLOT(HoughTransform()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_detect_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayDetect = new QHBoxLayout(this);
+	QHBoxLayout* hLayDetect = new QHBoxLayout();
 	hLayDetect->addWidget(m_houghTransform);
 	hLayDetect->addStretch();
 	m_detect_tab->setLayout(hLayDetect);
 
-	m_integrated_tab = new QWidget(this);
-	m_cicle_incision_detect = new QPushButton("circle incision detect", this);
+	m_integrated_tab = new QWidget;
+	m_cicle_incision_detect = new QPushButton("circle incision detect");
 	connect(m_cicle_incision_detect, SIGNAL(clicked()), this, SLOT(CircleIncisionDetection()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_integrated_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayIntegrate = new QHBoxLayout(this);
+	QHBoxLayout* hLayIntegrate = new QHBoxLayout();
 	hLayIntegrate->addWidget(m_cicle_incision_detect);
 	hLayIntegrate->addStretch();
 	m_integrated_tab->setLayout(hLayIntegrate);
 
-	m_picEditorTabWidget = new QTabWidget(this);
+	m_picEditorTabWidget = new QTabWidget;
 	m_picEditorTabWidget->addTab(m_shift_tab, "Shift");
 	m_picEditorTabWidget->addTab(m_hist_tab, "Histogram");
 	m_picEditorTabWidget->addTab(m_filter_tab, "Filtering");
@@ -141,30 +141,113 @@ void UiMainWindow::CreatePicEditorApp()
 	m_picEditorTabWidget->addTab(m_integrated_tab, "Integrated");
 
 	//	create picture editor display frame
-	m_dispArea = new QLabel(this);
-	m_dispArea->setAlignment(Qt::AlignCenter);
-	m_dispArea->setAcceptDrops(false);
+	m_editArea = new QLabel;
+	m_editArea->setAlignment(Qt::AlignCenter);
+	m_editArea->setAcceptDrops(false);
 
-	m_dispFrame = new QScrollArea(this);
-	m_dispFrame->setAutoFillBackground(true);
-	m_dispFrame->setBackgroundRole(QPalette::Light);
-	m_dispFrame->setWidgetResizable(true);
-	m_dispFrame->setAcceptDrops(false);
-	m_dispFrame->setWidget(m_dispArea);
+	m_editFrame = new QScrollArea;
+	m_editFrame->setAutoFillBackground(true);
+	m_editFrame->setBackgroundRole(QPalette::Light);
+	m_editFrame->setWidgetResizable(true);
+	m_editFrame->setAcceptDrops(false);
+	m_editFrame->setWidget(m_editArea);
 
-	m_picEditorSplitter = new QSplitter(Qt::Vertical, this);
+	m_picEditorSplitter = new QSplitter(Qt::Vertical);
 	m_picEditorSplitter->addWidget(m_picEditorTabWidget);
-	m_picEditorSplitter->addWidget(m_dispFrame);
+	m_picEditorSplitter->addWidget(m_editFrame);
 	m_picEditorSplitter->setStretchFactor(1,1);
 }
+
+
+void UiMainWindow::CreatePicSearcherApp()
+{
+	m_searchArea = new QLabel;
+	m_searchArea->setAlignment(Qt::AlignCenter);
+	m_searchArea->setAcceptDrops(false);
+	m_searchArea->setFrameStyle(QFrame::Box);
+	m_searchArea->setFixedWidth(320);
+
+	m_traverseArea = new QLabel;
+	m_traverseArea->setAlignment(Qt::AlignCenter);
+	m_traverseArea->setAcceptDrops(false);
+	m_traverseArea->setFrameStyle(QFrame::Box);
+	m_traverseArea->setFixedWidth(320);
+
+	m_setSearchFolder = new QPushButton("Search Folder");
+	m_setSearchFolder->setFixedSize(100,20);
+	m_setSearchMethod = new QComboBox;
+	m_setSearchMethod->setFixedSize(100,20);
+	m_startSearch = new QPushButton("Start");
+	m_startSearch->setFixedSize(100,20);
+
+	QVBoxLayout* vLay1 = new QVBoxLayout();
+	vLay1->addWidget(m_setSearchFolder);
+	vLay1->addWidget(m_setSearchMethod);
+	vLay1->addWidget(m_startSearch);
+
+	QHBoxLayout* hLay1 = new QHBoxLayout();
+	hLay1->addWidget(m_searchArea);
+	hLay1->addLayout(vLay1);
+	hLay1->addWidget(m_traverseArea);
+	m_searchLine = new QWidget;
+	m_searchLine->setLayout(hLay1);
+
+	m_resultArea1 = new QLabel;
+	m_resultArea1->setFixedHeight(100);
+	m_resultArea1->setFrameStyle(QFrame::Box);
+	m_resultArea2 = new QLabel;
+	m_resultArea2->setFixedHeight(100);
+	m_resultArea2->setFrameStyle(QFrame::Box);
+	m_resultArea3 = new QLabel;
+	m_resultArea3->setFixedHeight(100);
+	m_resultArea3->setFrameStyle(QFrame::Box);
+	m_resultArea4 = new QLabel;
+	m_resultArea4->setFixedHeight(100);
+	m_resultArea4->setFrameStyle(QFrame::Box);
+	m_resultArea5 = new QLabel;
+	m_resultArea5->setFixedHeight(100);
+	m_resultArea5->setFrameStyle(QFrame::Box);
+	m_resultArea6 = new QLabel;
+	m_resultArea6->setFixedHeight(100);
+	m_resultArea6->setFrameStyle(QFrame::Box);
+	m_resultArea7 = new QLabel;
+	m_resultArea7->setFixedHeight(100);
+	m_resultArea7->setFrameStyle(QFrame::Box);
+	m_resultArea8 = new QLabel;
+	m_resultArea8->setFixedHeight(100);
+	m_resultArea8->setFrameStyle(QFrame::Box);
+
+	QHBoxLayout* hLay2 = new QHBoxLayout();
+	hLay2->addWidget(m_resultArea1);
+	hLay2->addWidget(m_resultArea2);
+	hLay2->addWidget(m_resultArea3);
+	hLay2->addWidget(m_resultArea4);
+	m_resultLine1 = new QWidget;
+	m_resultLine1->setLayout(hLay2);
+
+	QHBoxLayout* hLay3 = new QHBoxLayout();
+	hLay3->addWidget(m_resultArea5);
+	hLay3->addWidget(m_resultArea6);
+	hLay3->addWidget(m_resultArea7);
+	hLay3->addWidget(m_resultArea8);
+	m_resultLine2 = new QWidget;
+	m_resultLine2->setLayout(hLay3);
+
+	m_picSearchSplitter = new QSplitter(Qt::Vertical);
+	m_picSearchSplitter->addWidget(m_searchLine);
+	m_picSearchSplitter->addWidget(m_resultLine1);
+	m_picSearchSplitter->addWidget(m_resultLine2);
+	m_picSearchSplitter->setStretchFactor(0,1);
+}
+
 
 void UiMainWindow::CreateCenterWidget()
 {
 	//	create app list on the left and app frame
-	m_centerWidget = new QWidget(this);
-	m_appList = new QListWidget(this);
+	m_centerWidget = new QWidget;
+	m_appList = new QListWidget;
 	m_appList->setFixedWidth(100);
-	m_appFrame = new QStackedLayout(this);
+	m_appFrame = new QStackedLayout;
 
 	//	app mode 1 -- picture editor
 	CreatePicEditorApp();
@@ -172,40 +255,38 @@ void UiMainWindow::CreateCenterWidget()
 	m_appFrame->addWidget(m_picEditorSplitter);
 
 	//	app mode 2 -- picture searcher
-
-
+	CreatePicSearcherApp();
+	m_appList->addItem("Picture Search");
+	m_appFrame->addWidget(m_picSearchSplitter);
 
 	//	connet app list with app frame
 	connect(m_appList, SIGNAL(currentRowChanged(int)), m_appFrame, SLOT(setCurrentIndex(int)));
 	m_appList->setCurrentRow(0);
 
-	QHBoxLayout* hLay = new QHBoxLayout(this);
+	QHBoxLayout* hLay = new QHBoxLayout();
 	hLay->addWidget(m_appList);
 	hLay->addLayout(m_appFrame);
 	m_centerWidget->setLayout(hLay);
 
 	setCentralWidget(m_centerWidget);
-	setAcceptDrops(false);
-	setMinimumSize(m_minWidth, m_minHeight);
-	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
 
 void UiMainWindow::CreateStatusBar()
 {
-	m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "", this);
+	m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "");
 	m_openPic->setToolTip("Open a picture");
 	connect(m_openPic, SIGNAL(clicked()), this, SLOT(OpenPic()));
-	m_save = new QPushButton(QIcon(":/icon/save.ico"), "", this);
+	m_save = new QPushButton(QIcon(":/icon/save.ico"), "");
 	m_save->setToolTip("Save and cover current picture");
 	connect(m_save, SIGNAL(clicked()), this, SLOT(Save()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_save, SLOT(setEnabled(bool)));
-	m_saveAs = new QPushButton(QIcon(":/icon/saveAs.ico"), "", this);
+	m_saveAs = new QPushButton(QIcon(":/icon/saveAs.ico"), "");
 	m_saveAs->setToolTip("Save current picture as another file");
 	connect(m_saveAs, SIGNAL(clicked()), this, SLOT(SaveAs()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_saveAs, SLOT(setEnabled(bool)));
 
-	m_curPicIndexBox = new QLineEdit(this);
+	m_curPicIndexBox = new QLineEdit;
 	m_curPicIndexBox->setText("0/0");
 	m_curPicIndexBox->setMaximumWidth(50);
 	m_curPicIndexBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -221,14 +302,14 @@ void UiMainWindow::CreateStatusBar()
 	connect(m_curPicIndexBox, SIGNAL(returnPressed()), this, SLOT(ShowCurIndexPic()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicIndexBox, SLOT(setEnabled(bool)));
 
-	m_prevPic = new QPushButton(QIcon(":/icon/previous_pic.ico"),"", this);
+	m_prevPic = new QPushButton(QIcon(":/icon/previous_pic.ico"),"");
 	connect(m_prevPic, SIGNAL(clicked()), this, SLOT(PrevPic()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_prevPic, SLOT(setEnabled(bool)));
 	m_nextPic = new QPushButton(QIcon(":/icon/next_pic.ico"),"", this);
 	connect(m_nextPic, SIGNAL(clicked()), this, SLOT(NextPic()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_nextPic, SLOT(setEnabled(bool)));
 
-	m_zoomRateBox = new QLineEdit(this);
+	m_zoomRateBox = new QLineEdit;
 	m_zoomRateBox->setText("100%");
 	m_zoomRateBox->setMaximumWidth(40);
 	m_zoomRateBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -240,14 +321,14 @@ void UiMainWindow::CreateStatusBar()
 	connect(m_zoomRateBox, SIGNAL(returnPressed()), this, SLOT(ZoomPic()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_zoomRateBox, SLOT(setEnabled(bool)));
 
-	QLabel* widthSentence = new QLabel("Width:", this);
+	QLabel* widthSentence = new QLabel("Width:");
 	connect(this, SIGNAL(ImageLoaded(bool)), widthSentence, SLOT(setEnabled(bool)));
-	m_curPicWidth = new QLabel("", this);
+	m_curPicWidth = new QLabel("");
 	m_curPicWidth->setFixedWidth(50);
 	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicWidth, SLOT(setEnabled(bool)));
-	QLabel* heightSentence = new QLabel("Height:", this);
+	QLabel* heightSentence = new QLabel("Height:");
 	connect(this, SIGNAL(ImageLoaded(bool)), heightSentence, SLOT(setEnabled(bool)));
-	m_curPicHeight = new QLabel("", this);
+	m_curPicHeight = new QLabel("");
 	m_curPicHeight->setFixedWidth(50);
 	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicHeight, SLOT(setEnabled(bool)));
 
@@ -281,6 +362,8 @@ void UiMainWindow::CreateMainWindowStyle()
 {
 	SetHasImage(false);
 	setAcceptDrops(true);
+	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	setMinimumSize(m_minWidth,m_minHeight);
 	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -451,11 +534,11 @@ void UiMainWindow::ZoomPic(int curValue)
 {
 	int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
 	if (m_PanImage.IsGray()){
-		m_dispArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
+		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
 	}
 	else
 	{
-		m_dispArea->setPixmap(QPixmap::fromImage(m_QImage.scaledToWidth(curWidth)));
+		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.scaledToWidth(curWidth)));
 	}
 	update();
 	updateGeometry();
@@ -470,11 +553,11 @@ void UiMainWindow::ZoomPic()
 	int curWidth = static_cast<int>(value * float(m_PanImage.GetMat().cols));
 	if (m_PanImage.IsGray())
 	{
-		m_dispArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
+		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
 	}
 	else 
 	{
-		m_dispArea->setPixmap(QPixmap::fromImage(m_QImage.scaledToWidth(curWidth)));
+		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.scaledToWidth(curWidth)));
 	}
 	update();
 	updateGeometry();
@@ -700,7 +783,27 @@ void UiMainWindow::SetHasImage(bool value)
 void UiMainWindow::SetImage(PanImage& newImage)
 {
 	m_QImage = newImage.PanImage2QImage();
-	m_dispArea->setPixmap(QPixmap::fromImage(m_QImage));
+
+	switch (m_appList->currentRow())
+	{
+	case 0:
+		m_editArea->setPixmap(QPixmap::fromImage(m_QImage));
+		break;
+	case 1:
+		if (m_PanImage.IsGray()){
+			m_searchArea->setPixmap(QPixmap::fromImage(
+			m_QImage.convertToFormat(QImage::Format_RGB888).
+			scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+		}
+		else
+		{
+			m_searchArea->setPixmap(QPixmap::fromImage(
+			m_QImage.scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+		}
+		break;
+	default:
+		break;
+	}
 
 	m_curPicWidth->setText(QString("%1").arg(m_QImage.width()));
 	m_curPicHeight->setText(QString("%1").arg(m_QImage.height()));

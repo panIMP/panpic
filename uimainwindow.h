@@ -32,6 +32,7 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QStackedLayout>
 #include <QtWidgets/QListWidget>
+#include <QtWidgets/QComboBox>
 
 #include "panimage.h"
 #include "panimageio.h"
@@ -65,11 +66,8 @@ public:
 	void CreatePicSearcherApp();
 
 	void CreateStatusBar();
-
 	void CreateGlobalSigSlotLink();
-	
 	void CreateMainWindowStyle();
-
 
 	void AddTransform(Transform* transform);
 
@@ -141,7 +139,7 @@ private:
 	//	Signals and const values
 	bool m_hasImage;
 
-	static const int m_minWidth = 800;
+	static const int m_minWidth = 900;
 	static const int m_minHeight = 600;
 
 	//	Center widgets
@@ -153,10 +151,8 @@ private:
 	QSplitter* m_picEditorSplitter;
 	QTabWidget* m_picEditorTabWidget;
 
-	QScrollArea* m_dispFrame;
-	QLabel* m_dispArea;
-	PanImage m_PanImage;
-	QImage m_QImage;
+	QScrollArea* m_editFrame;
+	QLabel* m_editArea;
 	QWidget* m_shift_tab;
 	QPushButton* m_rotateClkwise;
 	QPushButton* m_rotateCntrClkwise;
@@ -190,9 +186,24 @@ private:
 	_Pan_Circle smallCircle;
 
 	//	pic searcher app widgets
-	QSplitter* m_picSearcherSplitter;
-	QTabWidget* m_picSearcherTabWidget;
+	QSplitter* m_picSearchSplitter;
+	QWidget* m_searchLine;
+	QWidget* m_resultLine1;
+	QWidget* m_resultLine2;
 
+	QLabel* m_searchArea;
+	QLabel* m_traverseArea;
+	QLabel* m_resultArea1;
+	QLabel* m_resultArea2;
+	QLabel* m_resultArea3;
+	QLabel* m_resultArea4;
+	QLabel* m_resultArea5;
+	QLabel* m_resultArea6;
+	QLabel* m_resultArea7;
+	QLabel* m_resultArea8;
+	QPushButton* m_setSearchFolder;
+	QPushButton* m_startSearch;
+	QComboBox* m_setSearchMethod;
 
 	//	Status bar
 	QStatusBar* m_statusBar;
@@ -212,6 +223,10 @@ private:
 	QPushButton* m_nextPic;
 	QLabel* m_curPicWidth;
 	QLabel* m_curPicHeight;
+
+	//	shared global variables
+	PanImage m_PanImage;
+	QImage m_QImage;
 };
 
 #endif // MAINWINDOW_H
