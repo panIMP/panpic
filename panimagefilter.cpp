@@ -211,7 +211,7 @@ void SobelSharpenTransform::apply()
 	cv::Mat result;
 	result.create(mat.rows, mat.cols, CV_8UC1);
 
-	double time_start = clock();
+	//double time_start = clock();
 
 	for(unsigned int i = 1; i < width - 1; i++)
 	{
@@ -228,8 +228,8 @@ void SobelSharpenTransform::apply()
 
 	result.copyTo(mat);
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 
 	for(unsigned int i = width - 100; i < width; ++i)
 	{
@@ -278,7 +278,7 @@ void MedianFilterTransform::apply()
 
 	cv::Mat tmpMat;
 
-	double time_start = clock();
+	//double time_start = clock();
 
 	mat.copyTo(tmpMat);
 
@@ -305,8 +305,8 @@ void MedianFilterTransform::apply()
 		}
 	}
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 
 	// extra
 	image.SetIsBinary(true);

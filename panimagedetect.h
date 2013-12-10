@@ -1,5 +1,5 @@
-#ifndef PANIMAGEDETECT_H
-#define PANIMAGEDETECT_H
+#ifndef PANIMAGE_DETECT_H
+#define PANIMAGE_DETECT_H
 
 
 #include "panimage.h"
@@ -20,6 +20,9 @@ typedef struct
 
 class GlobalParams
 {
+public:
+	
+
 private:
 	GlobalParams();
 	GlobalParams(const GlobalParams&);
@@ -31,6 +34,7 @@ private:
 	friend class LabelStringTransform;
 	friend class UiHoughTransformParam;
 	friend class UiMainWindow;
+	friend class PanImageDetect;
 
 	/*
 	/*	Global params for detect algorithms
@@ -41,17 +45,14 @@ private:
 	static const int BIG_CIRCLE_MAX = 97;
 	static const int SMALL_CIRCLE_MIN = 2;
 	static const int SMALL_CIRCLE_MAX = 8;
-
-	static const int WIDTH = 752;
-	static const int HEIGHT = 480;
-	static const int R2DIVNUM = 200;
-	static const int WITHIN_CIRCLE = 1;
 	static const int NON_WITHIN_CIRCLE = 0;
+	static const int WITHIN_CIRCLE = 1;
 
 	static const int sinValue[360];
 	static const int cosValue[360];
 
-	static int H[WIDTH][HEIGHT][R2DIVNUM];
+	static int*** H;
+	static int _r2DivNum;
 };
 
 
@@ -169,14 +170,14 @@ private:
 
 class PanImageDetect
 {
-	PanImageDetect(void);
+	PanImageDetect(PanImage& image);
 	~PanImageDetect(void);
 
 	PanImageDetect(const PanImageDetect&);
 	PanImageDetect& operator = (const PanImageDetect&);
 
 public:
-	static PanImageDetect* GetInstance();
+	static PanImageDetect* GetInstance(PanImage& image);
 	static void Destroy();
 
 	HoughTransformTransform* HoughTransform(PanImage &image,
@@ -220,6 +221,7 @@ public:
 
 private:
 	static PanImageDetect* instance;
+	PanImage& image;
 };
 
 

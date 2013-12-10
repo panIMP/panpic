@@ -1,51 +1,75 @@
 #include "uihoughtransformparam.h"
 
 
-UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circle, QWidget* parent) : QWidget(parent)
+UiHoughTransformParam::UiHoughTransformParam(_Pan_Circle& circle, PanImage& image, QWidget* parent) : cle(circle) , img(image), QWidget(parent)
 {
 	this->subThread = TransformThread::GetInstance();
 	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
 
-	image.copyTo(img);
-	cle = circle;
+	QLabel* iRangeText = new QLabel("x range is", this);
+	QLabel* iText = new QLabel("x", this);
+	QLabel* jRangeText = new QLabel("y range is", this);
+	QLabel* jText = new QLabel("y", this);
+	QLabel* rRangeText = new QLabel("r range is", this);
+	QLabel* rText = new QLabel("r", this);
+	QLabel* compareMark0 = new QLabel(" =< ", this);
+	QLabel* compareMark1 = new QLabel(" < ", this);
+	QLabel* compareMark2 = new QLabel(" =< ", this);
+	QLabel* compareMark3 = new QLabel(" < ", this);
+	QLabel* compareMark4 = new QLabel(" =< ", this);
+	QLabel* compareMark5 = new QLabel(" < ", this);
+	QLabel* searchStepText = new QLabel("search step is", this);
 
-	QLabel* iRangeText = new QLabel("x range is");
-	QLabel* iText = new QLabel("x");
-	QLabel* jRangeText = new QLabel("y range is");
-	QLabel* jText = new QLabel("y");
-	QLabel* rRangeText = new QLabel("r range is");
-	QLabel* rText = new QLabel("r");
-	QLabel* compareMark0 = new QLabel(" < ");
-	QLabel* compareMark1 = new QLabel(" < ");
-	QLabel* compareMark2 = new QLabel(" < ");
-	QLabel* compareMark3 = new QLabel(" < ");
-	QLabel* compareMark4 = new QLabel(" < ");
-	QLabel* compareMark5 = new QLabel(" < ");
-	QLabel* searchStepText = new QLabel("search step is");
-
-	iMin = new QLineEdit;
+	iMin = new QLineEdit(this);
 	iMin->setAlignment(Qt::AlignCenter);
 	iMin->setText("0");
-	iMax = new QLineEdit;
+	QRegExp iMinRegExp("[0-9]+$");
+	iMinValidator = new QRegExpValidator(iMinRegExp, iMin);
+	iMin->setValidator(iMinValidator);
+	
+	iMax = new QLineEdit(this);
 	iMax->setAlignment(Qt::AlignCenter);
-	iMax->setText(QString("%1").arg(GlobalParams::WIDTH));
-	jMin = new QLineEdit;
+	iMax->setText(QString("%1").arg(image.width()));
+	QRegExp iMaxRegExp("[1-9]+$");
+	iMaxValidator = new QRegExpValidator(iMaxRegExp, iMax);
+	iMax->setValidator(iMaxValidator);
+	
+	jMin = new QLineEdit(this);
 	jMin->setAlignment(Qt::AlignCenter);
 	jMin->setText("0");
-	jMax = new QLineEdit;
+	QRegExp jMinRegExp("[0-9]+$");
+	jMinValidator = new QRegExpValidator(jMinRegExp, jMin);
+	jMin->setValidator(jMinValidator);
+	
+	jMax = new QLineEdit(this);
 	jMax->setAlignment(Qt::AlignCenter);
-	jMax->setText(QString("%1").arg(GlobalParams::HEIGHT));
-	rMin = new QLineEdit;
+	jMax->setText(QString("%1").arg(image.height()));
+	QRegExp jMaxRegExp("[1-9]+$");
+	jMaxValidator = new QRegExpValidator(jMaxRegExp, jMax);
+	jMax->setValidator(jMaxValidator);
+
+	rMin = new QLineEdit(this);
 	rMin->setAlignment(Qt::AlignCenter);
 	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
-	rMax = new QLineEdit;
+	QRegExp rMinRegExp("[1-9]+$");
+	rMinValidator = new QRegExpValidator(rMinRegExp, rMin);
+	rMin->setValidator(rMinValidator);
+	
+	rMax = new QLineEdit(this);
 	rMax->setAlignment(Qt::AlignCenter);
 	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
-	searchStep = new QLineEdit;
+	QRegExp rMaxRegExp("[1-9]+$");
+	rMaxValidator = new QRegExpValidator(rMaxRegExp, rMax);
+	rMax->setValidator(rMaxValidator);
+	
+	searchStep = new QLineEdit(this);
 	searchStep->setAlignment(Qt::AlignCenter);
 	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));
+	QRegExp searchStepRegExp("[1-9]+$");
+	searchStepValidator = new QRegExpValidator(searchStepRegExp, searchStep);
+	searchStep->setValidator(searchStepValidator);
 
-	QHBoxLayout* hLay1 = new QHBoxLayout;
+	QHBoxLayout* hLay1 = new QHBoxLayout();
 	hLay1->addStretch();
 	hLay1->addWidget(iRangeText);
 	hLay1->addWidget(iMin);
@@ -55,7 +79,7 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	hLay1->addWidget(iMax);
 	hLay1->addStretch();
 
-	QHBoxLayout* hLay2 = new QHBoxLayout;
+	QHBoxLayout* hLay2 = new QHBoxLayout();
 	hLay2->addStretch();
 	hLay2->addWidget(jRangeText);
 	hLay2->addWidget(jMin);
@@ -65,7 +89,7 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	hLay2->addWidget(jMax);
 	hLay2->addStretch();
 
-	QHBoxLayout* hLay3 = new QHBoxLayout;
+	QHBoxLayout* hLay3 = new QHBoxLayout();
 	hLay3->addStretch();
 	hLay3->addWidget(rRangeText);
 	hLay3->addWidget(rMin);
@@ -75,7 +99,7 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	hLay3->addWidget(rMax);
 	hLay3->addStretch();
 
-	QHBoxLayout* hLay4 = new QHBoxLayout;
+	QHBoxLayout* hLay4 = new QHBoxLayout();
 	hLay4->addStretch();
 	hLay4->addWidget(searchStepText);
 	hLay4->addWidget(searchStep);
@@ -86,26 +110,26 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	paramReset = new QPushButton("Reset", this);
 	connect(paramReset, SIGNAL(clicked()), this, SLOT(ResetParams()));
 
-	QHBoxLayout* hLay5 = new QHBoxLayout;
+	QHBoxLayout* hLay5 = new QHBoxLayout();
 	hLay5->addStretch();
 	hLay5->addWidget(paramOk);
 	hLay5->addStretch();
 	hLay5->addWidget(paramReset);
 	hLay5->addStretch();
 
-	QLabel* cValue = new QLabel("The circle point is");
-	QLabel* rValue = new QLabel("The r of the circle is");
-	QLabel* aValue = new QLabel("a:");
-	QLabel* bValue = new QLabel("b:");
+	QLabel* cValue = new QLabel("The circle point is", this);
+	QLabel* rValue = new QLabel("The r of the circle is", this);
+	QLabel* aValue = new QLabel("a:", this);
+	QLabel* bValue = new QLabel("b:", this);
 
-	a = new QLineEdit;
+	a = new QLineEdit(this);
 	a->setAlignment(Qt::AlignCenter);
-	b = new QLineEdit;
+	b = new QLineEdit(this);
 	b->setAlignment(Qt::AlignCenter);
-	r = new QLineEdit;
+	r = new QLineEdit(this);
 	r->setAlignment(Qt::AlignCenter);
 
-	QHBoxLayout* hLay6 = new QHBoxLayout;
+	QHBoxLayout* hLay6 = new QHBoxLayout();
 	hLay6->addStretch();
 	hLay6->addWidget(cValue);
 	hLay6->addWidget(aValue);
@@ -116,18 +140,30 @@ UiHoughTransformParam::UiHoughTransformParam(PanImage& image, _Pan_Circle& circl
 	hLay6->addWidget(r);
 	hLay6->addStretch();
 
-	QVBoxLayout* vLay = new QVBoxLayout;
+	QVBoxLayout* vLay = new QVBoxLayout(this);
 	vLay->addLayout(hLay1);
 	vLay->addLayout(hLay2);
 	vLay->addLayout(hLay3);
 	vLay->addLayout(hLay4);
-	vLay->addLayout(hLay5);
 	vLay->addStretch(1);
+	vLay->addLayout(hLay5);
 	vLay->addLayout(hLay6);
 
 	setLayout(vLay);
-	setFixedSize(400, 200);
+	setFixedSize(450, 200);
+	setAttribute(Qt::WA_DeleteOnClose);
 }
+
+UiHoughTransformParam::~UiHoughTransformParam()
+{
+	delete iMinValidator;
+	delete iMaxValidator;
+	delete jMinValidator;
+	delete jMaxValidator;
+	delete rMinValidator;
+	delete rMaxValidator;
+	delete searchStepValidator;
+};
 
 void UiHoughTransformParam::HoughTransform()
 {
@@ -139,7 +175,7 @@ void UiHoughTransformParam::HoughTransform()
 	unsigned int rMaxValue = rMax->text().toInt();
 	unsigned int step = searchStep->text().toInt();
 
-	AddTransform(PanImageDetect::GetInstance()->HoughTransform(	img, 
+	AddTransform(PanImageDetect::GetInstance(img)->HoughTransform(img, 
 																rMinValue, 
 																rMaxValue,
 																step, 
@@ -154,9 +190,9 @@ void UiHoughTransformParam::HoughTransform()
 void UiHoughTransformParam::ResetParams()
 {
 	iMin->setText("0");
-	iMax->setText(QString("%1").arg(GlobalParams::WIDTH));
+	iMax->setText(QString("%1").arg(img.width()));
 	jMin->setText("0");
-	jMax->setText(QString("%1").arg(GlobalParams::HEIGHT));
+	jMax->setText(QString("%1").arg(img.height()));
 	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
 	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
 	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));

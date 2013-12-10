@@ -1,5 +1,5 @@
-#ifndef UIMAINWINDOW_H
-#define UIMAINWINDOW_H
+#ifndef UI_MAINWINDOW_H
+#define UI_MAINWINDOW_H
 
 #include <QtWidgets/QMainWindow>
 #include <QtCore/QString>
@@ -30,6 +30,8 @@
 #include <QtCore/QMimeData>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QStackedLayout>
+#include <QtWidgets/QListWidget>
 
 #include "panimage.h"
 #include "panimageio.h"
@@ -47,7 +49,8 @@ class UiMainWindow : public QMainWindow
 	Q_PROPERTY(bool HasImage READ HasImage WRITE SetHasImage NOTIFY ImageLoaded)
 
 public:
-	explicit UiMainWindow(const QString& fileName = 0, QWidget *parent = 0);
+	explicit UiMainWindow(QWidget *parent = 0);
+	~UiMainWindow();
 
 	bool HasImage() const {return m_hasImage;}
 	void SetHasImage(bool value);
@@ -57,12 +60,16 @@ public:
 
 	void InitGlobalVariables();
 
-	void CreateTabWidgets();
-	void CreatePicDispWidgets(const QString& fileName = 0);
-	void CreateCenterWidget(const QString& fileName = 0);
+	void CreateCenterWidget();
+	void CreatePicEditorApp();
+	void CreatePicSearcherApp();
+
 	void CreateStatusBar();
+
 	void CreateGlobalSigSlotLink();
+	
 	void CreateMainWindowStyle();
+
 
 	void AddTransform(Transform* transform);
 
@@ -124,6 +131,10 @@ protected:
 
 
 private:
+	// Independent Dialogs
+	UiHistDialog* hist;
+	UiHoughTransformParam* houghParamDialog;
+
 	//	Transform threads
 	TransformThread* subThread;
 
@@ -133,10 +144,19 @@ private:
 	static const int m_minWidth = 800;
 	static const int m_minHeight = 600;
 
-	//	Tab tool bars
-	QSplitter* m_centerSplitter;
-	QTabWidget* m_tabWidget;
+	//	Center widgets
+	QWidget* m_centerWidget;
+	QListWidget* m_appList;
+	QStackedLayout*m_appFrame;
 
+	//	pic editor app widgets
+	QSplitter* m_picEditorSplitter;
+	QTabWidget* m_picEditorTabWidget;
+
+	QScrollArea* m_dispFrame;
+	QLabel* m_dispArea;
+	PanImage m_PanImage;
+	QImage m_QImage;
 	QWidget* m_shift_tab;
 	QPushButton* m_rotateClkwise;
 	QPushButton* m_rotateCntrClkwise;
@@ -166,12 +186,25 @@ private:
 	QPushButton* m_houghTransform;
 	QWidget* m_integrated_tab;
 	QPushButton* m_cicle_incision_detect;
+	_Pan_Circle bigCircle;
+	_Pan_Circle smallCircle;
+
+	//	pic searcher app widgets
+	QSplitter* m_picSearcherSplitter;
+	QTabWidget* m_picSearcherTabWidget;
+
 
 	//	Status bar
 	QStatusBar* m_statusBar;
 	QLineEdit* m_zoomRateBox;
 	static int const ZOOM_SAME = 100;
+	QValidator* zoomValidator;
+	QValidator* picIndexValidator;
 	QLineEdit* m_curPicIndexBox;
+	int m_curFileIndex;
+	int m_curFileRange;
+	QFileInfoList m_curFileList;
+	QString m_fileName;
 	QPushButton* m_openPic;
 	QPushButton* m_save;
 	QPushButton* m_saveAs;
@@ -179,22 +212,6 @@ private:
 	QPushButton* m_nextPic;
 	QLabel* m_curPicWidth;
 	QLabel* m_curPicHeight;
-
-	//	Picture display area components
-	QScrollArea* m_dispFrame;
-	QLabel* m_dispArea;
-
-	//	Image to be processed
-	PanImage m_PanImage;
-	QImage m_QImage;
-	QFileInfoList m_curFileList;
-	QString m_fileName;
-	int m_curFileIndex;
-	int m_curFileRange;
-
-	// 
-	_Pan_Circle bigCircle;
-	_Pan_Circle smallCircle;
 };
 
 #endif // MAINWINDOW_H

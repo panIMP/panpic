@@ -2,10 +2,7 @@
 
 UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent) :QWidget(parent)
 {
-	subThread = TransformThread::GetInstance();
-	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
-
-	histLabel = new QLabel;
+	histLabel = new QLabel(this);
 	histLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	histLabel->setAlignment(Qt::AlignCenter);	
 
@@ -20,9 +17,13 @@ UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *p
 	hLay1->addStretch();
 	vLay1->addLayout(hLay1);
 	setLayout(vLay1);
+
 	setWindowTitle("Histogram - " + QFileInfo(imageName).fileName());
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	setAttribute(Qt::WA_DeleteOnClose);
 
+	subThread = TransformThread::GetInstance();
+	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
 	AddTransform(PanImageHist::GetInstance()->GetHistImage(image, histimg));
 }
 
@@ -33,7 +34,9 @@ void UiHistDialog::AddTransform(Transform* transform)
 
 void UiHistDialog::ShowResult()
 {
+	disconnect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
 	histLabel->setPixmap(QPixmap::fromImage(histimg.PanImage2QImage()));
+	this->show();
 }
 
 void UiHistDialog::Save(){

@@ -1,5 +1,5 @@
-#ifndef PANIMAGEHIST_H
-#define PANIMAGEHIST_H
+#ifndef PANIMAGE_HIST_H
+#define PANIMAGE_HIST_H
 
 #include "panimage.h"
 #include "transform.h"

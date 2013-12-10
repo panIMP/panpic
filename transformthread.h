@@ -1,5 +1,5 @@
-#ifndef TRANSACTIONTHREAD_H
-#define TRANSACTIONTHREAD_H
+#ifndef TRANSFORM_THREAD_H
+#define TRANSFORM_THREAD_H
 
 #include <QtCore/QThread>
 #include <QtCore/QQueue>

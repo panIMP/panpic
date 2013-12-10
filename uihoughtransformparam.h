@@ -1,5 +1,5 @@
-#ifndef UIHOUGHTRANSFORMPARAM_H
-#define UIHOUGHTRANSFORMPARAM_H
+#ifndef UI_HOUGHTRANSFORMPARAM_H
+#define UI_HOUGHTRANSFORMPARAM_H
 
 #include <QWidget>
 #include <QtWidgets/QPushButton>
@@ -8,6 +8,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
+#include <QtGui/QRegExpValidator>
 
 #include "panimagedetect.h"
 #include "transform.h"
@@ -18,8 +19,9 @@ class UiHoughTransformParam :public QWidget
 	Q_OBJECT
 
 public:
-	explicit UiHoughTransformParam(PanImage& image, _Pan_Circle& circle, QWidget* parent = 0);
-	
+	explicit UiHoughTransformParam(_Pan_Circle& circle, PanImage& image, QWidget* parent = 0);
+	~UiHoughTransformParam();
+
 	void AddTransform(Transform* transform);
 
 public slots:
@@ -45,8 +47,16 @@ private:
 	QLineEdit* b;
 	QLineEdit* r;
 
-	PanImage img;
-	_Pan_Circle cle;
+	PanImage& img;
+	_Pan_Circle& cle;
+
+	QRegExpValidator* iMinValidator;
+	QRegExpValidator* iMaxValidator;
+	QRegExpValidator* jMinValidator;
+	QRegExpValidator* jMaxValidator;
+	QRegExpValidator* rMinValidator;
+	QRegExpValidator* rMaxValidator;
+	QRegExpValidator* searchStepValidator;
 };
 
 #endif

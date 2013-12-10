@@ -1,43 +1,33 @@
 #include "uimainwindow.h"
 
 
-/*---------------------------------------------------------------------
-Fuction:        MainWindow(const QString& fileName, QWidget *parent)
-
-Description:    1. Creat mainwindow
-				2. Careful about the sub function calling order or some
-				   operation may be used before its calling object's initiation
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
-UiMainWindow::UiMainWindow(const QString& fileName, QWidget *parent) : QMainWindow(parent)
+UiMainWindow::UiMainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	InitGlobalVariables();
-	CreateCenterWidget(fileName);
+	CreateCenterWidget();
 	CreateStatusBar();
 	CreateGlobalSigSlotLink();
 	CreateMainWindowStyle();
 }
 
-
-/*---------------------------------------------------------------------
-Fuction:        CreateTabWidgets()
-
-Description:    1. Creat all the tabWidget in the mainwidow center widget
-				2. Use tabWidget as a flexibale multiply of toolbars
-				3. Set components and layouts of all tabs
-				4. Add each tab to the tabWidget
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
-void UiMainWindow::CreateTabWidgets()
+UiMainWindow::~UiMainWindow()
 {
-	m_shift_tab = new QWidget;
-	QHBoxLayout* hLayShift = new QHBoxLayout;
+	subThread->destroyed();
+
+	PanImageDetect::Destroy();
+	PanImageFilter::Destroy();
+	PanImageHist::Destroy();
+	PanImageIO::Destroy();
+	PanImageShift::Destroy();
+
+	delete zoomValidator;
+	delete picIndexValidator;
+}
+
+void UiMainWindow::CreatePicEditorApp()
+{
+	//	create picture editor tabs
+	m_shift_tab = new QWidget(this);
 	m_rotateClkwise = new QPushButton(QIcon(":/icon/rotate_clockwise.ico"), "", this);
 	m_rotateClkwise->setToolTip("Rotate the picture clockwise");
 	connect(m_rotateClkwise, SIGNAL(clicked()), this, SLOT(RotateClkwise()));
@@ -51,6 +41,7 @@ void UiMainWindow::CreateTabWidgets()
 	m_mirrorV->setToolTip("Get the vertically mirror image of the picture");
 	connect(m_mirrorV, SIGNAL(clicked()), this, SLOT(MirrorV()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_shift_tab, SLOT(setEnabled(bool)));
+	QHBoxLayout* hLayShift = new QHBoxLayout(this);
 	hLayShift->addWidget(m_rotateClkwise);
 	hLayShift->addWidget(m_rotateCntrClkwise);
 	hLayShift->addWidget(m_mirrorH);
@@ -58,8 +49,7 @@ void UiMainWindow::CreateTabWidgets()
 	hLayShift->addStretch();
 	m_shift_tab->setLayout(hLayShift);
 
-	m_hist_tab = new QWidget;
-	QHBoxLayout* hLayHist = new QHBoxLayout;
+	m_hist_tab = new QWidget(this);
 	m_dispHist = new QPushButton("hist", this);
 	connect(m_dispHist, SIGNAL(clicked()), this, SLOT(CreateHistDialog()));
 	m_histEqualize = new QPushButton("equalize", this);
@@ -69,6 +59,7 @@ void UiMainWindow::CreateTabWidgets()
 	m_enhance = new QPushButton("enhance", this);
 	connect(m_enhance, SIGNAL(clicked()), this, SLOT(Enhance()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_hist_tab, SLOT(setEnabled(bool)));
+	QHBoxLayout* hLayHist = new QHBoxLayout(this);
 	hLayHist->addWidget(m_dispHist);
 	hLayHist->addWidget(m_histEqualize);
 	hLayHist->addWidget(m_histMatch);
@@ -76,7 +67,7 @@ void UiMainWindow::CreateTabWidgets()
 	hLayHist->addStretch();
 	m_hist_tab->setLayout(hLayHist);
 
-	m_filter_tab = new QWidget;
+	m_filter_tab = new QWidget(this);
 	m_gray = new QPushButton("gray", this);
 	connect(m_gray, SIGNAL(clicked()), this, SLOT(Gray()));
 	m_sobelSharpen = new QPushButton("sobel", this);
@@ -106,7 +97,7 @@ void UiMainWindow::CreateTabWidgets()
 	m_sketch = new QPushButton("sketch", this);
 	connect(m_sketch, SIGNAL(clicked()), this, SLOT(Sketch()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_filter_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayFilter = new QHBoxLayout;
+	QHBoxLayout* hLayFilter = new QHBoxLayout(this);
 	hLayFilter->addWidget(m_gray);
 	hLayFilter->addWidget(m_sobelSharpen);
 	hLayFilter->addWidget(m_laplaceSharpen);
@@ -124,106 +115,82 @@ void UiMainWindow::CreateTabWidgets()
 	hLayFilter->addStretch();
 	m_filter_tab->setLayout(hLayFilter);
 
-	m_detect_tab = new QWidget;
+	m_detect_tab = new QWidget(this);
 	m_houghTransform = new QPushButton("hough", this);
 	connect(m_houghTransform, SIGNAL(clicked()), this, SLOT(HoughTransform()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_detect_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayDetect = new QHBoxLayout;
+	QHBoxLayout* hLayDetect = new QHBoxLayout(this);
 	hLayDetect->addWidget(m_houghTransform);
 	hLayDetect->addStretch();
 	m_detect_tab->setLayout(hLayDetect);
 
-	m_integrated_tab = new QWidget;
+	m_integrated_tab = new QWidget(this);
 	m_cicle_incision_detect = new QPushButton("circle incision detect", this);
 	connect(m_cicle_incision_detect, SIGNAL(clicked()), this, SLOT(CircleIncisionDetection()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_integrated_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayIntegrate = new QHBoxLayout;
+	QHBoxLayout* hLayIntegrate = new QHBoxLayout(this);
 	hLayIntegrate->addWidget(m_cicle_incision_detect);
 	hLayIntegrate->addStretch();
 	m_integrated_tab->setLayout(hLayIntegrate);
 
-	m_tabWidget = new QTabWidget(this);
-	m_tabWidget->addTab(m_shift_tab, "Shift");
-	m_tabWidget->addTab(m_hist_tab, "Histogram");
-	m_tabWidget->addTab(m_filter_tab, "Filtering");
-	m_tabWidget->addTab(m_detect_tab, "Detecting");
-	m_tabWidget->addTab(m_integrated_tab, "Integrated");
+	m_picEditorTabWidget = new QTabWidget(this);
+	m_picEditorTabWidget->addTab(m_shift_tab, "Shift");
+	m_picEditorTabWidget->addTab(m_hist_tab, "Histogram");
+	m_picEditorTabWidget->addTab(m_filter_tab, "Filtering");
+	m_picEditorTabWidget->addTab(m_detect_tab, "Detecting");
+	m_picEditorTabWidget->addTab(m_integrated_tab, "Integrated");
 
-	m_tabWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-}
-
-
-/*---------------------------------------------------------------------
-Fuction:        CreatePicDispWidgets(const QString &fileName)
-
-Description:    1. Creat picture display area in the mainwidow center widget
-				2. Init image file to display
-
-Input:          File path of the image file to display
-
-Output:         None
-----------------------------------------------------------------------*/
-void UiMainWindow::CreatePicDispWidgets(const QString &fileName)
-{
-	m_dispArea = new QLabel;
-	m_dispArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	//	create picture editor display frame
+	m_dispArea = new QLabel(this);
 	m_dispArea->setAlignment(Qt::AlignCenter);
 	m_dispArea->setAcceptDrops(false);
 
-	if (fileName != 0){
-		m_PanImage = PanImageIO::GetInstance()->ReadPanImage(fileName);
-		SetImage(m_PanImage);
-	}
-	else {
-		SetHasImage(false);
-	}
-
-	m_dispFrame = new QScrollArea;
+	m_dispFrame = new QScrollArea(this);
 	m_dispFrame->setAutoFillBackground(true);
 	m_dispFrame->setBackgroundRole(QPalette::Light);
 	m_dispFrame->setWidgetResizable(true);
 	m_dispFrame->setAcceptDrops(false);
 	m_dispFrame->setWidget(m_dispArea);
+
+	m_picEditorSplitter = new QSplitter(Qt::Vertical, this);
+	m_picEditorSplitter->addWidget(m_picEditorTabWidget);
+	m_picEditorSplitter->addWidget(m_dispFrame);
+	m_picEditorSplitter->setStretchFactor(1,1);
 }
 
-
-/*---------------------------------------------------------------------
-Fuction:        CreatCenterWidget(const QString& fileName)
-
-Description:    1. Creat the layout of the center widget of mainwindow
-				2. transfer the file path parameter
-
-Input:          File path of the image file to display
-
-Output:         None
-----------------------------------------------------------------------*/
-void UiMainWindow::CreateCenterWidget(const QString& fileName)
+void UiMainWindow::CreateCenterWidget()
 {
-	CreateTabWidgets();
-	CreatePicDispWidgets(fileName);
+	//	create app list on the left and app frame
+	m_centerWidget = new QWidget(this);
+	m_appList = new QListWidget(this);
+	m_appList->setFixedWidth(100);
+	m_appFrame = new QStackedLayout(this);
 
-	m_centerSplitter = new QSplitter(Qt::Vertical);
-	m_centerSplitter->addWidget(m_tabWidget);
-	m_centerSplitter->addWidget(m_dispFrame);
-	m_centerSplitter->setStretchFactor(1,1);
+	//	app mode 1 -- picture editor
+	CreatePicEditorApp();
+	m_appList->addItem("Picture Editor");
+	m_appFrame->addWidget(m_picEditorSplitter);
 
-	setCentralWidget(m_centerSplitter);
+	//	app mode 2 -- picture searcher
+
+
+
+	//	connet app list with app frame
+	connect(m_appList, SIGNAL(currentRowChanged(int)), m_appFrame, SLOT(setCurrentIndex(int)));
+	m_appList->setCurrentRow(0);
+
+	QHBoxLayout* hLay = new QHBoxLayout(this);
+	hLay->addWidget(m_appList);
+	hLay->addLayout(m_appFrame);
+	m_centerWidget->setLayout(hLay);
+
+	setCentralWidget(m_centerWidget);
 	setAcceptDrops(false);
 	setMinimumSize(m_minWidth, m_minHeight);
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        CreatStatusBar()
-
-Description:    1. Creat the status bar of mainwindow
-				2. Set components and layout of statusbar
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::CreateStatusBar()
 {
 	m_openPic = new QPushButton(QIcon(":/icon/open_pic.ico"), "", this);
@@ -248,7 +215,7 @@ void UiMainWindow::CreateStatusBar()
 	// enter it twice, i.e. \\.
 	// To match the backslash character itself, enter it four times, i.e. \\\\.
 	QRegExp picIndexRegexp("^\\d*/\\d*$");
-	QValidator* picIndexValidator = new QRegExpValidator(picIndexRegexp, m_curPicIndexBox);
+	picIndexValidator = new QRegExpValidator(picIndexRegexp, m_curPicIndexBox);
 	m_curPicIndexBox->setValidator(picIndexValidator);
 	// pic index box content edited --> switch cur displaying picture
 	connect(m_curPicIndexBox, SIGNAL(returnPressed()), this, SLOT(ShowCurIndexPic()));
@@ -267,7 +234,7 @@ void UiMainWindow::CreateStatusBar()
 	m_zoomRateBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	// use regular expression to restrict the input to be like 'dd%'
 	QRegExp zoomRegexp("[0-9]+%$");
-	QValidator* zoomValidator = new QRegExpValidator(zoomRegexp, m_zoomRateBox);
+	zoomValidator = new QRegExpValidator(zoomRegexp, m_zoomRateBox);
 	m_zoomRateBox->setValidator(zoomValidator);
 	// zoom rate box content edited --> zoom pic according to the new content
 	connect(m_zoomRateBox, SIGNAL(returnPressed()), this, SLOT(ZoomPic()));
@@ -276,10 +243,12 @@ void UiMainWindow::CreateStatusBar()
 	QLabel* widthSentence = new QLabel("Width:", this);
 	connect(this, SIGNAL(ImageLoaded(bool)), widthSentence, SLOT(setEnabled(bool)));
 	m_curPicWidth = new QLabel("", this);
+	m_curPicWidth->setFixedWidth(50);
 	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicWidth, SLOT(setEnabled(bool)));
 	QLabel* heightSentence = new QLabel("Height:", this);
 	connect(this, SIGNAL(ImageLoaded(bool)), heightSentence, SLOT(setEnabled(bool)));
 	m_curPicHeight = new QLabel("", this);
+	m_curPicHeight->setFixedWidth(50);
 	connect(this, SIGNAL(ImageLoaded(bool)), m_curPicHeight, SLOT(setEnabled(bool)));
 
 	m_statusBar = statusBar();
@@ -290,22 +259,13 @@ void UiMainWindow::CreateStatusBar()
 	m_statusBar->addWidget(m_curPicIndexBox);
 	m_statusBar->addWidget(m_nextPic);
 	m_statusBar->addWidget(m_zoomRateBox);
-	m_statusBar->addWidget(widthSentence);
-	m_statusBar->addWidget(m_curPicWidth);
-	m_statusBar->addWidget(heightSentence);
-	m_statusBar->addWidget(m_curPicHeight);
+	m_statusBar->addPermanentWidget(widthSentence);
+	m_statusBar->addPermanentWidget(m_curPicWidth);
+	m_statusBar->addPermanentWidget(heightSentence);
+	m_statusBar->addPermanentWidget(m_curPicHeight);
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        CreatGlobalSigSlotLink()
-
-Description:    Link global signals and slots
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::CreateGlobalSigSlotLink()
 {
 	// mouse wheeled -- > zoom pic & change zoom rate box
@@ -317,35 +277,23 @@ void UiMainWindow::CreateGlobalSigSlotLink()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        CreateMainWindowStyle()
-
-Description:    Create mainwindow style -- size, accepts, title...
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::CreateMainWindowStyle()
 {
+	SetHasImage(false);
 	setAcceptDrops(true);
 	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
+
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(AllTransformDone()));
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        CreateOthers()
-
-Description:    Create all the other image processing related objects
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::InitGlobalVariables()
 {
 	subThread = TransformThread::GetInstance();
+
+	SetHasImage(false);
 
 	m_curFileIndex = 0;
 	m_curFileRange = 0;
@@ -374,15 +322,7 @@ void UiMainWindow::AllTransformDone()
 	setWindowModified(true);
 }
 
-/*---------------------------------------------------------------------
-Fuction:        OpenPic()
 
-Description:    Slot for "m_openPic" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::OpenPic()
 {
 	QString selectedFilter = tr("BMP(*.bmp)");
@@ -414,15 +354,6 @@ void UiMainWindow::OpenPic()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        PrevPic()
-
-Description:    Slot for "m_nextPic" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::PrevPic()
 {
 	m_curFileIndex --;
@@ -443,15 +374,6 @@ void UiMainWindow::PrevPic()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        NextPic()
-
-Description:    Slot for "m_nextPic" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::NextPic()
 {
 	m_curFileIndex ++;
@@ -472,15 +394,6 @@ void UiMainWindow::NextPic()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        Save()
-
-Description:    Slot for "m_save" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::Save()
 {
 	PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
@@ -490,15 +403,6 @@ void UiMainWindow::Save()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        SaveAs()
-
-Description:    Slot for "m_saveAs" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::SaveAs()
 {
 	QString selectedFilter = tr("JPEG(*.jpg *.jpeg)");
@@ -519,80 +423,30 @@ void UiMainWindow::SaveAs()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        RotateClkwise()
-
-Description:    Slot for "m_rotateClkwise" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::RotateClkwise()
 {
 	AddTransform(PanImageShift::GetInstance()->RotateClockWise(m_PanImage));
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        RotateCntrClkwise()
-
-Description:    Slot for "m_rotateCntrClkwise" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::RotateCntrClkwise()
 {
 	AddTransform(PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage));
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        MirrorH()
-
-Description:    Slot for "m_mirrorH" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::MirrorH()
 {
 	AddTransform(PanImageShift::GetInstance()->MirrorH(m_PanImage));
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        MirrorV()
-
-Description:    Slot for "m_mirrorV" action
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::MirrorV()
 {
 	AddTransform(PanImageShift::GetInstance()->MirrorV(m_PanImage));
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        ZoomPic(int curValue)
-
-Description:    SLOT -- zoom in or zoom out the picture
-				Signals that satisfied following two requirements should
-				link to this SLOT:
-				1. meant to zoom the picture
-				2. can transfer the relative value of zoomed piture while
-				   set original picture as ZOOM_SAME
-
-Input:          Relative value of zoomed piture by comparison of border length
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::ZoomPic(int curValue)
 {
 	int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
@@ -608,18 +462,6 @@ void UiMainWindow::ZoomPic(int curValue)
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        ZoomPic()
-
-Description:    SLOT -- zoom in or zoom out the picture
-				Signals that satisfied following two requirements should
-				link to this SLOT:
-				1. meant to zoom the picture
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::ZoomPic()
 {
 	QString tmpStr = QString(m_zoomRateBox->text());
@@ -639,16 +481,6 @@ void UiMainWindow::ZoomPic()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        ZoomRateDisp()
-
-Description:    SLOT -- change the zoom rate value in the zoom rate box
-						accrording to the relative value
-
-Input:          Relative value
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::ZoomRateDisp(int value)
 {
 	int rate = static_cast<int>(float(value) / float(ZOOM_SAME) * 100.0);
@@ -656,15 +488,6 @@ void UiMainWindow::ZoomRateDisp(int value)
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        ShowCurIndexPic()
-
-Description:    SLOT -- display piture of current index in the frame
-
-Input:          None
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::ShowCurIndexPic()
 {
 	QString str = m_curPicIndexBox->text();
@@ -689,16 +512,6 @@ void UiMainWindow::ShowCurIndexPic()
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        ShowCurPicIndex(int indexVal, int rangeVal)
-
-Description:    SLOT -- show current picture index in current folder
-
-Input:          indexVal -- picture index in picture file list
-				rangeVal -- picture file list element num
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal)
 {
 	m_curPicIndexBox->setText(QString("%1/%2").arg(indexVal + 1).arg(rangeVal));
@@ -727,8 +540,7 @@ void UiMainWindow::Enhance()
 
 void UiMainWindow::CreateHistDialog()
 {
-	UiHistDialog* hist = new UiHistDialog(m_PanImage, m_fileName);
-	hist->show();
+	hist = new UiHistDialog(m_PanImage, m_fileName);
 }
 
 void UiMainWindow::Gray()
@@ -815,7 +627,7 @@ void UiMainWindow::HoughTransform()
 {
 	if (m_PanImage.IsBinary())
 	{
-		UiHoughTransformParam* houghParamDialog = new UiHoughTransformParam(m_PanImage,bigCircle);
+		houghParamDialog = new UiHoughTransformParam(bigCircle, m_PanImage);
 		houghParamDialog->show();
 	}
 	else
@@ -858,14 +670,14 @@ void UiMainWindow::CircleIncisionDetection()
 {
 	if (m_PanImage.IsGray())
 	{
-		AddTransform(PanImageDetect::GetInstance()->CicleIncisionDetection(m_PanImage,
+		AddTransform(PanImageDetect::GetInstance(m_PanImage)->CicleIncisionDetection(m_PanImage,
 															GlobalParams::BIG_CIRCLE_MIN,
 															GlobalParams::BIG_CIRCLE_MAX,
 															GlobalParams::SEARCH_STEP,
 															0,
-															GlobalParams::WIDTH,
+															m_PanImage.width(),
 															0,
-															GlobalParams::HEIGHT,
+															m_PanImage.height(),
 															100,
 															bigCircle,
 															smallCircle));
@@ -877,15 +689,7 @@ void UiMainWindow::CircleIncisionDetection()
 	}
 }
 
-/*---------------------------------------------------------------------
-Fuction:        SetHasImage(bool value)
 
-Description:    Set function of property -- "m_hasImage"(bool)
-
-Input:          True or false
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::SetHasImage(bool value)
 {
 	m_hasImage = value;
@@ -893,16 +697,6 @@ void UiMainWindow::SetHasImage(bool value)
 }
 
 
-/*---------------------------------------------------------------------
-Fuction:        SetImage(const QImage& newImage)
-
-Description:    1. Set function of property -- "m_Image"(QImage*)
-				2. Update the display after setting the image
-
-Input:          cv::Mat instance
-
-Output:         None
-----------------------------------------------------------------------*/
 void UiMainWindow::SetImage(PanImage& newImage)
 {
 	m_QImage = newImage.PanImage2QImage();
@@ -957,15 +751,7 @@ void UiMainWindow::dropEvent(QDropEvent* event)
 	emit(PicIndexSwitched(m_curFileIndex, m_curFileRange));
 }
 
-/*---------------------------------------------------------------------
-Fuction:        Overload -- wheelEvent(QWheelEvent *event)
 
-Description:    1. To implement of mouse wheel zooming -- to picture
-
-Input:          1. Event that trigged
-
-Output:         True or False
-----------------------------------------------------------------------*/
 void UiMainWindow::wheelEvent(QWheelEvent *event)
 {
 	QString tmpStr = QString(m_zoomRateBox->text());

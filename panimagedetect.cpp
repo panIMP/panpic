@@ -1,6 +1,8 @@
 #include "panimagedetect.h"
 
-int GlobalParams::H[WIDTH][HEIGHT][R2DIVNUM] = {{{0}}};
+
+int*** GlobalParams::H = 0;
+int GlobalParams::_r2DivNum = 0;
 
 // init the r-¦È space
 const int GlobalParams::sinValue[360] = 
@@ -91,6 +93,8 @@ HoughTransformTransform::HoughTransformTransform(PanImage &image,
 void HoughTransformTransform::apply()
 {
 	cv::Mat mat = image.GetMat();
+	int width = mat.cols;
+	int height = mat.rows;
 
 	circle.a = 0;
 	circle.b = 0;
@@ -124,8 +128,17 @@ void HoughTransformTransform::apply()
 	uchar* data;
 
 	double time_start = clock();
-
-	memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::R2DIVNUM*sizeof(int));
+	//	initialize the Hnew
+	for (i = 0; i < width; i++)
+	{
+		for (j = 0; j < height; j++)
+		{
+			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
+			{
+				GlobalParams::H[i][j][r2Div] = 0;
+			}
+		}
+	}
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
@@ -198,6 +211,8 @@ void HoughTransformTransform::apply()
 		}
 	}
 
+	double time_end = clock();
+	double interval = time_end - time_start;
 
 	if (maxVal >= 8)
 	{
@@ -205,9 +220,6 @@ void HoughTransformTransform::apply()
 		circle.r = (int)sqrtf((float)circle.r2);
 		circle.hasValue = true;	
 	}
-
-	double time_end = clock();
-	double interval = time_end - time_start;
 }
 
 
@@ -236,6 +248,8 @@ HoughTransformTransform2::HoughTransformTransform2(PanImage &image,
 void HoughTransformTransform2::apply()
 {
 	cv::Mat mat = image.GetMat();
+	int width = image.width();
+	int height = image.height();
 
 	smallCircle.a = 0;
 	smallCircle.b = 0;
@@ -271,9 +285,20 @@ void HoughTransformTransform2::apply()
 
 	uchar* data;
 
-	double time_start = clock();
+	//double time_start = clock();
 
-	memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::R2DIVNUM*sizeof(int));
+
+	//memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::_r2DivNum*sizeof(int));
+	for (i = 0; i < width; i++)
+	{
+		for (j = 0; j < height; j++)
+		{
+			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
+			{
+				GlobalParams::H[i][j][r2Div] = 0;
+			}
+		}
+	}
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
@@ -353,8 +378,8 @@ void HoughTransformTransform2::apply()
 		smallCircle.hasValue = true;	
 	}
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 }
 
 
@@ -396,7 +421,7 @@ void LabelStringTransform::apply()
 
 	uchar* data;
 
-	double time_start = clock();
+	//double time_start = clock();
 
 	// unlabel the big circle and label the string
 	if (bigCircle.hasValue)
@@ -469,8 +494,8 @@ void LabelStringTransform::apply()
 		}
 	}
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 
 	// label big circle center point
 	if (bigCircle.hasValue)
@@ -507,7 +532,7 @@ CicleIncisionDetectionTransform::CicleIncisionDetectionTransform(PanImage &image
 
 void CicleIncisionDetectionTransform::apply()
 {
-	double time_start = clock();
+	//double time_start = clock();
 
 	cv::Mat mat = image.GetMat();
 	int height = mat.rows;
@@ -616,7 +641,18 @@ void CicleIncisionDetectionTransform::apply()
 	image.SetIsBinary(true);
 	tmpMat1.copyTo(mat);
 
-	memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::R2DIVNUM*sizeof(int));
+
+	//memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::_r2DivNum*sizeof(int));
+	for (i = 0; i < width; i++)
+	{
+		for (j = 0; j < height; j++)
+		{
+			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
+			{
+				GlobalParams::H[i][j][r2Div] = 0;
+			}
+		}
+	}
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
@@ -727,7 +763,18 @@ void CicleIncisionDetectionTransform::apply()
 
 	maxVal = 0;
 
-	memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::R2DIVNUM*sizeof(int));
+
+	//memset(GlobalParams::H, 0, mat.cols*mat.rows*GlobalParams::_r2DivNum*sizeof(int));
+	for (i = 0; i < width; i++)
+	{
+		for (j = 0; j < height; j++)
+		{
+			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
+			{
+				GlobalParams::H[i][j][r2Div] = 0;
+			}
+		}
+	}
 
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
@@ -901,8 +948,8 @@ void CicleIncisionDetectionTransform::apply()
 		mat.at<uchar>(bigCircle.b, bigCircle.a) = 255;
 	}
 
-	double time_end = clock();
-	double interval = time_end - time_start;
+	//double time_end = clock();
+	//double interval = time_end - time_start;
 }
 
 
@@ -912,20 +959,34 @@ void CicleIncisionDetectionTransform::apply()
 PanImageDetect* PanImageDetect::instance = 0;
 
 
-PanImageDetect::PanImageDetect(void)
+PanImageDetect::PanImageDetect(PanImage& image) : image(image)
 {
+	int width = image.width();
+	int height = image.height();
 
+	int i,j;
+
+	GlobalParams::_r2DivNum = (GlobalParams::BIG_CIRCLE_MAX * GlobalParams::BIG_CIRCLE_MAX + 50) / 100;
+	GlobalParams::H = new int**[width];
+	for (i = 0; i < width; i++)
+	{
+		GlobalParams::H[i] = new int*[height];
+		for (j = 0; j < height; j ++)
+		{
+			GlobalParams::H[i][j] = new int[GlobalParams::_r2DivNum];
+		}
+	}
 }
 
 PanImageDetect::~PanImageDetect(void)
 {
 }
 
-PanImageDetect* PanImageDetect::GetInstance()
+PanImageDetect* PanImageDetect::GetInstance(PanImage& image)
 {
 	if (instance == 0)
 	{
-		instance = new PanImageDetect();
+		instance = new PanImageDetect(image);
 	}
 
 	return instance;

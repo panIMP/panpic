@@ -23,6 +23,9 @@ public:
 	PanImage();
 	~PanImage();
 
+	int height();
+	int width();
+
 	void copyTo(PanImage& image);
 
 	void SetMat(cv::Mat& newMat);

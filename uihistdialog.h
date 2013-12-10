@@ -1,5 +1,5 @@
-#ifndef UIHISTDIALOG_H
-#define UIHISTDIALOG_H
+#ifndef UI_HISTDIALOG_H
+#define UI_HISTDIALOG_H
 
 #include <QWidget>
 #include <QLabel>

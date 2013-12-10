@@ -1,5 +1,5 @@
-#ifndef PANIMAGESHIFT_H
-#define PANIMAGESHIFT_H
+#ifndef PANIMAGE_SHIFT_H
+#define PANIMAGE_SHIFT_H
 
 #include "panimage.h"
 #include "transform.h"
