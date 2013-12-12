@@ -139,9 +139,6 @@ private:
 	//	Signals and const values
 	bool m_hasImage;
 
-	static const int m_minWidth = 900;
-	static const int m_minHeight = 600;
-
 	//	Center widgets
 	QWidget* m_centerWidget;
 	QListWidget* m_appList;
@@ -187,6 +184,7 @@ private:
 
 	//	pic searcher app widgets
 	QSplitter* m_picSearchSplitter;
+	QWidget* m_chooseLine;
 	QWidget* m_searchLine;
 	QWidget* m_resultLine1;
 	QWidget* m_resultLine2;

@@ -4,8 +4,15 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <QString>
+#include <QFileInfo>
 
 #include "panimage.h"
+
+enum Read_Method
+{
+	Read_AS_IT_IS,
+	Read_AS_COLOR,
+};
 
 class PanImageIO
 {

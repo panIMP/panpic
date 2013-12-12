@@ -19,9 +19,6 @@ UiMainWindow::~UiMainWindow()
 	PanImageHist::Destroy();
 	PanImageIO::Destroy();
 	PanImageShift::Destroy();
-
-	delete zoomValidator;
-	delete picIndexValidator;
 }
 
 void UiMainWindow::CreatePicEditorApp()
@@ -97,23 +94,27 @@ void UiMainWindow::CreatePicEditorApp()
 	m_sketch = new QPushButton("sketch", this);
 	connect(m_sketch, SIGNAL(clicked()), this, SLOT(Sketch()));
 	connect(this, SIGNAL(ImageLoaded(bool)), m_filter_tab, SLOT(setEnabled(bool)));
-	QHBoxLayout* hLayFilter = new QHBoxLayout();
-	hLayFilter->addWidget(m_gray);
-	hLayFilter->addWidget(m_sobelSharpen);
-	hLayFilter->addWidget(m_laplaceSharpen);
-	hLayFilter->addWidget(m_medianFilter);
-	hLayFilter->addWidget(m_medianBlur);
-	hLayFilter->addWidget(m_guassinBlur);
-	hLayFilter->addWidget(m_otsuBinary);
-	hLayFilter->addWidget(m_holeFill);
-	hLayFilter->addWidget(m_dilate);
-	hLayFilter->addWidget(m_erode);
-	hLayFilter->addWidget(m_engrave);
-	hLayFilter->addWidget(m_negative);
-	hLayFilter->addWidget(m_comFog);
-	hLayFilter->addWidget(m_sketch);
-	hLayFilter->addStretch();
-	m_filter_tab->setLayout(hLayFilter);
+	QHBoxLayout* hLayFilter0 = new QHBoxLayout();
+	hLayFilter0->addWidget(m_gray);
+	hLayFilter0->addWidget(m_sobelSharpen);
+	hLayFilter0->addWidget(m_laplaceSharpen);
+	hLayFilter0->addWidget(m_medianFilter);
+	hLayFilter0->addWidget(m_medianBlur);
+	hLayFilter0->addWidget(m_guassinBlur);
+	hLayFilter0->addWidget(m_otsuBinary);
+	QHBoxLayout* hLayFilter1 = new QHBoxLayout();
+	hLayFilter1->addWidget(m_holeFill);
+	hLayFilter1->addWidget(m_dilate);
+	hLayFilter1->addWidget(m_erode);
+	hLayFilter1->addWidget(m_engrave);
+	hLayFilter1->addWidget(m_negative);
+	hLayFilter1->addWidget(m_comFog);
+	hLayFilter1->addWidget(m_sketch);
+	hLayFilter1->addStretch();
+	QVBoxLayout* vLayFilter = new QVBoxLayout();
+	vLayFilter->addLayout(hLayFilter0);
+	vLayFilter->addLayout(hLayFilter1);
+	m_filter_tab->setLayout(vLayFilter);
 
 	m_detect_tab = new QWidget;
 	m_houghTransform = new QPushButton("hough");
@@ -161,61 +162,62 @@ void UiMainWindow::CreatePicEditorApp()
 
 void UiMainWindow::CreatePicSearcherApp()
 {
+	m_setSearchFolder = new QPushButton("Search Folder");
+	m_setSearchMethod = new QComboBox;
+	m_startSearch = new QPushButton("Start");
+
+	QHBoxLayout* hLay0 = new QHBoxLayout();
+	hLay0->addStretch();
+	hLay0->addWidget(m_setSearchFolder);
+	hLay0->addWidget(m_setSearchMethod);
+	hLay0->addWidget(m_startSearch);
+	hLay0->addStretch();
+	m_chooseLine = new QWidget;
+	m_chooseLine->setLayout(hLay0);
+
 	m_searchArea = new QLabel;
 	m_searchArea->setAlignment(Qt::AlignCenter);
 	m_searchArea->setAcceptDrops(false);
 	m_searchArea->setFrameStyle(QFrame::Box);
-	m_searchArea->setFixedWidth(320);
+	m_searchArea->setFixedSize(300,200);
 
 	m_traverseArea = new QLabel;
 	m_traverseArea->setAlignment(Qt::AlignCenter);
 	m_traverseArea->setAcceptDrops(false);
 	m_traverseArea->setFrameStyle(QFrame::Box);
-	m_traverseArea->setFixedWidth(320);
-
-	m_setSearchFolder = new QPushButton("Search Folder");
-	m_setSearchFolder->setFixedSize(100,20);
-	m_setSearchMethod = new QComboBox;
-	m_setSearchMethod->setFixedSize(100,20);
-	m_startSearch = new QPushButton("Start");
-	m_startSearch->setFixedSize(100,20);
-
-	QVBoxLayout* vLay1 = new QVBoxLayout();
-	vLay1->addWidget(m_setSearchFolder);
-	vLay1->addWidget(m_setSearchMethod);
-	vLay1->addWidget(m_startSearch);
+	m_traverseArea->setFixedSize(300,200);
 
 	QHBoxLayout* hLay1 = new QHBoxLayout();
 	hLay1->addWidget(m_searchArea);
-	hLay1->addLayout(vLay1);
 	hLay1->addWidget(m_traverseArea);
 	m_searchLine = new QWidget;
 	m_searchLine->setLayout(hLay1);
 
 	m_resultArea1 = new QLabel;
-	m_resultArea1->setFixedHeight(100);
 	m_resultArea1->setFrameStyle(QFrame::Box);
 	m_resultArea2 = new QLabel;
-	m_resultArea2->setFixedHeight(100);
 	m_resultArea2->setFrameStyle(QFrame::Box);
 	m_resultArea3 = new QLabel;
-	m_resultArea3->setFixedHeight(100);
 	m_resultArea3->setFrameStyle(QFrame::Box);
 	m_resultArea4 = new QLabel;
-	m_resultArea4->setFixedHeight(100);
 	m_resultArea4->setFrameStyle(QFrame::Box);
 	m_resultArea5 = new QLabel;
-	m_resultArea5->setFixedHeight(100);
 	m_resultArea5->setFrameStyle(QFrame::Box);
 	m_resultArea6 = new QLabel;
-	m_resultArea6->setFixedHeight(100);
 	m_resultArea6->setFrameStyle(QFrame::Box);
 	m_resultArea7 = new QLabel;
-	m_resultArea7->setFixedHeight(100);
 	m_resultArea7->setFrameStyle(QFrame::Box);
 	m_resultArea8 = new QLabel;
-	m_resultArea8->setFixedHeight(100);
 	m_resultArea8->setFrameStyle(QFrame::Box);
+
+	m_resultArea1->setFixedSize(150,100);
+	m_resultArea2->setFixedSize(150,100);
+	m_resultArea3->setFixedSize(150,100);
+	m_resultArea4->setFixedSize(150,100);
+	m_resultArea5->setFixedSize(150,100);
+	m_resultArea6->setFixedSize(150,100);
+	m_resultArea7->setFixedSize(150,100);
+	m_resultArea8->setFixedSize(150,100);
 
 	QHBoxLayout* hLay2 = new QHBoxLayout();
 	hLay2->addWidget(m_resultArea1);
@@ -234,10 +236,11 @@ void UiMainWindow::CreatePicSearcherApp()
 	m_resultLine2->setLayout(hLay3);
 
 	m_picSearchSplitter = new QSplitter(Qt::Vertical);
+	m_picSearchSplitter->addWidget(m_chooseLine);
 	m_picSearchSplitter->addWidget(m_searchLine);
 	m_picSearchSplitter->addWidget(m_resultLine1);
 	m_picSearchSplitter->addWidget(m_resultLine2);
-	m_picSearchSplitter->setStretchFactor(0,1);
+	m_picSearchSplitter->setStretchFactor(1,1);
 }
 
 
@@ -362,8 +365,9 @@ void UiMainWindow::CreateMainWindowStyle()
 {
 	SetHasImage(false);
 	setAcceptDrops(true);
+	
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-	setMinimumSize(m_minWidth,m_minHeight);
+
 	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -408,10 +412,10 @@ void UiMainWindow::AllTransformDone()
 
 void UiMainWindow::OpenPic()
 {
-	QString selectedFilter = tr("BMP(*.bmp)");
+	QString selectedFilter = tr("ALL(*.*)");
 	m_fileName = QFileDialog::getOpenFileName(this,
 											  tr("Open File"),
-											  "G:/operation/",
+											  "E:/baiduCloud/pics",
 											  tr("JPEG(*.jpg *.jpeg);; BMP(*.bmp);;"\
 												 "PNG(*.png);;TIFF(*.tif)"\
 												 ";;GIF(*.gif);; ICO(*.ico);; ALL(*.*)"

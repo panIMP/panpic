@@ -56,18 +56,39 @@ void PanImageIO::Destroy(){
  *  Input:          Path of QString type
  *  Output:         Image of cv::Mat format
  */
-PanImage PanImageIO::ReadPanImage(const QString& str){
+PanImage PanImageIO::ReadPanImage(const QString& str)
+{
 	PanImage result;
 	result.SetChannelChangeState(false);
 	// Since here you want to read the image as it is,
 	// you should set the flag to be -1, so,
 	// if there exits alpha channel, it will also be read.
-	cv::Mat mat = cv::imread(str.toStdString(), -1);
-	result.SetMat(mat);
 
-	if (mat.channels() == 1)
+	cv::Mat mat1, mat2;
+	mat2 =  cv::imread(str.toStdString(), CV_LOAD_IMAGE_ANYDEPTH);
+
+	if (mat2.depth() == CV_USRTYPE1)
 	{
-		result.SetIsGray(true);
+		if (mat2.channels() == 1)
+		{
+			mat1 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+			result.SetIsGray(true);
+		}
+		else
+		{
+			mat1 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_UNCHANGED);
+			result.SetIsGray(false);
+		}
+		result.SetMat(mat1);
+	}
+	else
+	{
+		result.SetMat(mat2);
+
+		if (mat2.channels() == 1)
+		{
+			result.SetIsGray(true);
+		}
 	}
 
 	return result;
