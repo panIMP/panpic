@@ -1,9 +1,9 @@
-#include "uihoughtransformparam.h"
+#include "uiHoughDlg.h"
 
 
-UiHoughTransformParam::UiHoughTransformParam(_Pan_Circle& circle, PanImage& image, QWidget* parent) : cle(circle) , img(image), QWidget(parent)
+UiHoughTransformParam::UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, baseImage& image, QWidget* parent) : cle(circle) , img(image), QWidget(parent)
 {
-	this->subThread = TransformThread::GetInstance();
+	this->subThread = baseThread::GetInstance();
 	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
 
 	QLabel* iRangeText = new QLabel("x range is");
@@ -50,21 +50,21 @@ UiHoughTransformParam::UiHoughTransformParam(_Pan_Circle& circle, PanImage& imag
 
 	rMin = new QLineEdit;
 	rMin->setAlignment(Qt::AlignCenter);
-	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
+    rMin->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MIN));
 	QRegExp rMinRegExp("[1-9]+$");
 	rMinValidator = new QRegExpValidator(rMinRegExp, rMin);
 	rMin->setValidator(rMinValidator);
 	
 	rMax = new QLineEdit;
 	rMax->setAlignment(Qt::AlignCenter);
-	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
+    rMax->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MAX));
 	QRegExp rMaxRegExp("[1-9]+$");
 	rMaxValidator = new QRegExpValidator(rMaxRegExp, rMax);
 	rMax->setValidator(rMaxValidator);
 	
 	searchStep = new QLineEdit();
 	searchStep->setAlignment(Qt::AlignCenter);
-	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));
+    searchStep->setText(QString("%1").arg(AlgDetect::SEARCH_STEP));
 	QRegExp searchStepRegExp("[1-9]+$");
 	searchStepValidator = new QRegExpValidator(searchStepRegExp, searchStep);
 	searchStep->setValidator(searchStepValidator);
@@ -175,7 +175,7 @@ void UiHoughTransformParam::HoughTransform()
 	unsigned int rMaxValue = rMax->text().toInt();
 	unsigned int step = searchStep->text().toInt();
 
-	AddTransform(PanImageDetect::GetInstance(img)->HoughTransform(img, 
+    AddTransform(new AlgDetect::Hough(img,
 																rMinValue, 
 																rMaxValue,
 																step, 
@@ -193,15 +193,15 @@ void UiHoughTransformParam::ResetParams()
 	iMax->setText(QString("%1").arg(img.width()));
 	jMin->setText("0");
 	jMax->setText(QString("%1").arg(img.height()));
-	rMin->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MIN));
-	rMax->setText(QString("%1").arg(GlobalParams::BIG_CIRCLE_MAX));
-	searchStep->setText(QString("%1").arg(GlobalParams::SEARCH_STEP));
+    rMin->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MIN));
+    rMax->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MAX));
+    searchStep->setText(QString("%1").arg(AlgDetect::SEARCH_STEP));
 	a->setText("");
 	b->setText("");
 	r->setText("");
 }
 
-void UiHoughTransformParam::AddTransform(Transform* transform)
+void UiHoughTransformParam::AddTransform(baseTransform* transform)
 {
 	subThread->addTransform(transform);
 }

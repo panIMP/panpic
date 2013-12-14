@@ -2,29 +2,29 @@ QT += core widgets gui
 
 SOURCES += \
     main.cpp \
-    uimainwindow.cpp \
-    panimage.cpp \
-    panimageio.cpp \
-    panimageshift.cpp \
-    uihistdialog.cpp \
-    panimagefilter.cpp \
-    uihoughtransformparam.cpp \
-    panimagehist.cpp \
-    panimagedetect.cpp \
-    transformthread.cpp
+    algDetect.cpp \
+    algFeatExtract.cpp \
+    algFilter.cpp \
+    algHistProc.cpp \
+    algShift.cpp \
+    uiHistDlg.cpp \
+    uiHoughDlg.cpp \
+    uiMainWin.cpp \
+    baseImage.cpp \
+    baseThread.cpp
 
 HEADERS += \
-    uimainwindow.h \
-    panimage.h \
-    panimageio.h \
-    panimageshift.h \
-    uihistdialog.h \
-    panimagefilter.h \ 
-    uihoughtransformparam.h \
-    panimagehist.h \
-    panimagedetect.h \
-    transformthread.h \
-    transform.h
+    algDetect.h \
+    algFeatExtract.h \
+    algFilter.h \
+    algHistProc.h \
+    algShift.h \
+    uiHistDlg.h \
+    uiHoughDlg.h \
+    uiMainWin.h \
+    baseImage.h \
+    baseTransform.h \
+    baseThread.h
 
 RESOURCES += \
     icons.qrc
@@ -37,7 +37,7 @@ INCLUDEPATH += C:/opencv/build/include/opencv2/
 
 # Contains the list of library files that should be linked with the project.
 LIBS += -LC:/opencv/build/x64/vc11/lib \
-        -lopencv_core244d \
-        -lopencv_highgui244d \
-        -lopencv_imgproc244d \
-        -lopencv_video244d
+        -lopencv_core247d \
+        -lopencv_highgui247d \
+        -lopencv_imgproc247d \
+        -lopencv_video247d

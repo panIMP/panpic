@@ -1,15 +1,15 @@
-#include "transformthread.h"
+#include "baseThread.h"
 
-Transform* const TransformThread::endTransform = 0;
-TransformThread* TransformThread::instance = 0;
+baseTransform* const baseThread::endTransform = 0;
+baseThread* baseThread::instance = 0;
 
-TransformThread::TransformThread(void)
+baseThread::baseThread(void)
 {
 	start();
 }
 
 
-TransformThread::~TransformThread(void)
+baseThread::~baseThread(void)
 {
 	{
 		QMutexLocker locker(&mutex);
@@ -26,17 +26,17 @@ TransformThread::~TransformThread(void)
 	wait();
 }
 
-TransformThread* TransformThread::GetInstance()
+baseThread* baseThread::GetInstance()
 {
 	if (instance == 0)
 	{
-		instance = new TransformThread();
+        instance = new baseThread();
 	}
 
 	return instance;
 }
 
-void TransformThread::Destroy()
+void baseThread::Destroy()
 {
 	if (instance != 0)
 	{
@@ -45,16 +45,16 @@ void TransformThread::Destroy()
 	}
 }
 
-void TransformThread::addTransform(Transform* trans)
+void baseThread::addTransform(baseTransform* trans)
 {
 	QMutexLocker locker(&mutex);
 	transformQuene.enqueue(trans);
 	transformAdded.wakeOne();
 }
 
-void TransformThread::run()
+void baseThread::run()
 {
-	Transform* curTransform = 0;
+    baseTransform* curTransform = 0;
 
 	forever
 	{

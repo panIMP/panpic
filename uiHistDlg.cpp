@@ -1,6 +1,6 @@
-#include "uihistdialog.h"
+#include "uiHistDlg.h"
 
-UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent) :QWidget(parent)
+UiHistDialog::UiHistDialog(baseImage& image, const QString& imageName, QWidget *parent) :QWidget(parent)
 {
 	histLabel = new QLabel;
 	histLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -22,12 +22,12 @@ UiHistDialog::UiHistDialog(PanImage& image, const QString& imageName, QWidget *p
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	subThread = TransformThread::GetInstance();
+	subThread = baseThread::GetInstance();
 	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
-	AddTransform(PanImageHist::GetInstance()->GetHistImage(image, histimg));
+    AddTransform(new AlgHistProc::GetHistImage(image, histimg));
 }
 
-void UiHistDialog::AddTransform(Transform* transform)
+void UiHistDialog::AddTransform(baseTransform* transform)
 {
 	subThread->addTransform(transform);
 }
@@ -50,7 +50,7 @@ void UiHistDialog::Save(){
 													   ),
 													&selectedFilter);
 	if (fileName != NULL){
-		PanImageIO::GetInstance()->SavePanImage(histimg, QFileInfo(fileName).absoluteFilePath());
+        baseImage::SavePanImage(histimg, QFileInfo(fileName).absoluteFilePath());
 		setWindowModified(false);
 		setWindowTitle("Histogram - " + QFileInfo(fileName).fileName());
 	}

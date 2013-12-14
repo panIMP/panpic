@@ -1,4 +1,4 @@
-#include "uimainwindow.h"
+#include "uiMainWin.h"
 
 
 UiMainWindow::UiMainWindow(QWidget *parent) : QMainWindow(parent)
@@ -13,12 +13,6 @@ UiMainWindow::UiMainWindow(QWidget *parent) : QMainWindow(parent)
 UiMainWindow::~UiMainWindow()
 {
 	subThread->destroyed();
-
-	PanImageDetect::Destroy();
-	PanImageFilter::Destroy();
-	PanImageHist::Destroy();
-	PanImageIO::Destroy();
-	PanImageShift::Destroy();
 }
 
 void UiMainWindow::CreatePicEditorApp()
@@ -163,8 +157,13 @@ void UiMainWindow::CreatePicEditorApp()
 void UiMainWindow::CreatePicSearcherApp()
 {
 	m_setSearchFolder = new QPushButton("Search Folder");
+    connect(m_setSearchFolder, SIGNAL(clicked()), this, SLOT(SelectSearchFolder()));
 	m_setSearchMethod = new QComboBox;
+    m_setSearchMethod->addItem("Color feature");
+    m_setSearchMethod->addItem("Grain feature");
+    m_setSearchMethod->addItem("Shape feature");
 	m_startSearch = new QPushButton("Start");
+    connect(m_startSearch, SIGNAL(clicked()), this, SLOT(StartSearch()));
 
 	QHBoxLayout* hLay0 = new QHBoxLayout();
 	hLay0->addStretch();
@@ -179,13 +178,13 @@ void UiMainWindow::CreatePicSearcherApp()
 	m_searchArea->setAlignment(Qt::AlignCenter);
 	m_searchArea->setAcceptDrops(false);
 	m_searchArea->setFrameStyle(QFrame::Box);
-	m_searchArea->setFixedSize(300,200);
+    m_searchArea->setMinimumSize(300,200);
 
 	m_traverseArea = new QLabel;
 	m_traverseArea->setAlignment(Qt::AlignCenter);
 	m_traverseArea->setAcceptDrops(false);
 	m_traverseArea->setFrameStyle(QFrame::Box);
-	m_traverseArea->setFixedSize(300,200);
+    m_traverseArea->setMinimumSize(300,200);
 
 	QHBoxLayout* hLay1 = new QHBoxLayout();
 	hLay1->addWidget(m_searchArea);
@@ -210,14 +209,14 @@ void UiMainWindow::CreatePicSearcherApp()
 	m_resultArea8 = new QLabel;
 	m_resultArea8->setFrameStyle(QFrame::Box);
 
-	m_resultArea1->setFixedSize(150,100);
-	m_resultArea2->setFixedSize(150,100);
-	m_resultArea3->setFixedSize(150,100);
-	m_resultArea4->setFixedSize(150,100);
-	m_resultArea5->setFixedSize(150,100);
-	m_resultArea6->setFixedSize(150,100);
-	m_resultArea7->setFixedSize(150,100);
-	m_resultArea8->setFixedSize(150,100);
+    m_resultArea1->setMinimumSize(150, 100);
+    m_resultArea2->setMinimumSize(150, 100);
+    m_resultArea3->setMinimumSize(150, 100);
+    m_resultArea4->setMinimumSize(150, 100);
+    m_resultArea5->setMinimumSize(150, 100);
+    m_resultArea6->setMinimumSize(150, 100);
+    m_resultArea7->setMinimumSize(150, 100);
+    m_resultArea8->setMinimumSize(150, 100);
 
 	QHBoxLayout* hLay2 = new QHBoxLayout();
 	hLay2->addWidget(m_resultArea1);
@@ -264,7 +263,8 @@ void UiMainWindow::CreateCenterWidget()
 
 	//	connet app list with app frame
 	connect(m_appList, SIGNAL(currentRowChanged(int)), m_appFrame, SLOT(setCurrentIndex(int)));
-	m_appList->setCurrentRow(0);
+    connect(m_appList, SIGNAL(currentRowChanged(int)), this, SLOT(SetImage(int)));
+    m_appList->setCurrentRow(0);
 
 	QHBoxLayout* hLay = new QHBoxLayout();
 	hLay->addWidget(m_appList);
@@ -378,7 +378,7 @@ void UiMainWindow::CreateMainWindowStyle()
 
 void UiMainWindow::InitGlobalVariables()
 {
-	subThread = TransformThread::GetInstance();
+	subThread = baseThread::GetInstance();
 
 	SetHasImage(false);
 
@@ -389,7 +389,7 @@ void UiMainWindow::InitGlobalVariables()
 	smallCircle.hasValue = false;
 }
 
-void UiMainWindow::AddTransform(Transform* transform)
+void UiMainWindow::AddTransform(baseTransform* transform)
 {
 	subThread->addTransform(transform);
 
@@ -409,6 +409,37 @@ void UiMainWindow::AllTransformDone()
 	setWindowModified(true);
 }
 
+void UiMainWindow::SetImage(int curRow)
+{
+    if (m_QImage.isNull())
+    {
+        return;
+    }
+
+    switch (curRow)
+    {
+    case 0:
+        m_editArea->setPixmap(QPixmap::fromImage(m_QImage));
+        break;
+    case 1:
+        if (m_PanImage.IsGray()){
+            m_searchArea->setPixmap(QPixmap::fromImage(
+            m_QImage.convertToFormat(QImage::Format_RGB888).
+            scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+        }
+        else
+        {
+            m_searchArea->setPixmap(QPixmap::fromImage(
+            m_QImage.scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+        }
+        break;
+    default:
+        break;
+    }
+
+    update();
+    updateGeometry();
+}
 
 void UiMainWindow::OpenPic()
 {
@@ -422,7 +453,7 @@ void UiMainWindow::OpenPic()
 												),
 											  &selectedFilter);
 	if (m_fileName != NULL){
-		m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
+        m_PanImage = baseImage::ReadPanImage(m_fileName);
 		SetImage(m_PanImage);
 
 		// once open the picture, get its fileindex and filerange
@@ -448,7 +479,7 @@ void UiMainWindow::PrevPic()
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
 		if (curfileName != NULL){
 			m_fileName = curfileName;
-			m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
+            m_PanImage = baseImage::ReadPanImage(m_fileName);
 			SetImage(m_PanImage);
 		}
 	}
@@ -468,7 +499,7 @@ void UiMainWindow::NextPic()
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
 		if (curfileName != NULL){
 			m_fileName = curfileName;
-			m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
+            m_PanImage = baseImage::ReadPanImage(m_fileName);
 			SetImage(m_PanImage);
 		}
 	}
@@ -483,7 +514,7 @@ void UiMainWindow::NextPic()
 
 void UiMainWindow::Save()
 {
-	PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
+    baseImage::SavePanImage(m_PanImage, QFileInfo(m_fileName).absoluteFilePath());
 	setWindowModified(false);
 	setWindowTitle(tr("%1[*] - %2").arg(m_fileName).arg("panpic"));
 	setWindowModified(false);
@@ -502,7 +533,7 @@ void UiMainWindow::SaveAs()
 													   ),
 													&selectedFilter);
 	if (fileName != NULL){
-		PanImageIO::GetInstance()->SavePanImage(m_PanImage, QFileInfo(fileName).absoluteFilePath());
+        baseImage::SavePanImage(m_PanImage, QFileInfo(fileName).absoluteFilePath());
 		setWindowModified(false);
 		setWindowTitle("panpic - " + QFileInfo(fileName).fileName());
 	}
@@ -512,25 +543,25 @@ void UiMainWindow::SaveAs()
 
 void UiMainWindow::RotateClkwise()
 {
-	AddTransform(PanImageShift::GetInstance()->RotateClockWise(m_PanImage));
+    AddTransform(new AlgShift::RotateTransform(AlgShift::ROTATE_CLOCKWISE, m_PanImage));
 }
 
 
 void UiMainWindow::RotateCntrClkwise()
 {
-	AddTransform(PanImageShift::GetInstance()->RotateCntrClockWise(m_PanImage));
+    AddTransform(new AlgShift::RotateTransform(AlgShift::ROTATE_COUNTERCLOCKWISE, m_PanImage));
 }
 
 
 void UiMainWindow::MirrorH()
 {
-	AddTransform(PanImageShift::GetInstance()->MirrorH(m_PanImage));
+    AddTransform(new AlgShift::FlipTransform(AlgShift::MIRROR_HORIZONGTALLY, m_PanImage));
 }
 
 
 void UiMainWindow::MirrorV()
 {
-	AddTransform(PanImageShift::GetInstance()->MirrorV(m_PanImage));
+    AddTransform(new AlgShift::FlipTransform(AlgShift::MIRROR_VERTICALLY, m_PanImage));
 }
 
 
@@ -538,7 +569,8 @@ void UiMainWindow::ZoomPic(int curValue)
 {
 	int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
 	if (m_PanImage.IsGray()){
-		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
+        m_editArea->setPixmap(QPixmap::fromImage
+                 (m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
 	}
 	else
 	{
@@ -594,7 +626,7 @@ void UiMainWindow::ShowCurIndexPic()
 	QString curfileName = m_curFileList.at(index).absoluteFilePath();
 	if (curfileName != NULL){
 		m_fileName = curfileName;
-		SetImage(PanImageIO::GetInstance()->ReadPanImage(m_fileName));
+        SetImage(baseImage::ReadPanImage(m_fileName));
 	}
 }
 
@@ -608,7 +640,7 @@ void UiMainWindow::ShowCurPicIndex(int indexVal, int rangeVal)
 
 void UiMainWindow::EqualizeHist()
 {
-	AddTransform(PanImageHist::GetInstance()->HistEqalization(m_PanImage));
+    AddTransform(new AlgHistProc::HistEqualize(m_PanImage));
 }
 
 void UiMainWindow::MatchHist()
@@ -617,12 +649,12 @@ void UiMainWindow::MatchHist()
 	for (int i = 0; i < 256; i++){
 		histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256.0;
 	}
-	AddTransform(PanImageHist::GetInstance()->HistMatch(m_PanImage, histV));
+    AddTransform(new AlgHistProc::HistMatch(m_PanImage, histV));
 }
 
 void UiMainWindow::Enhance()
 {
-	AddTransform(PanImageHist::GetInstance()->Enhance(m_PanImage));
+    AddTransform(new AlgHistProc::Enhance(m_PanImage));
 }
 
 void UiMainWindow::CreateHistDialog()
@@ -634,7 +666,7 @@ void UiMainWindow::Gray()
 {
 	if (! m_PanImage.IsGray())
 	{
-		AddTransform(PanImageFilter::GetInstance()->Gray(m_PanImage));
+        AddTransform(new AlgFilter::Gray(m_PanImage));
 	}
 	else
 	{
@@ -647,7 +679,7 @@ void UiMainWindow::SobelSharpen()
 {
 	if (m_PanImage.IsGray())
 	{
-		AddTransform(PanImageFilter::GetInstance()->SobelSharpen(m_PanImage));
+        AddTransform(new AlgFilter::SobelSharpen(m_PanImage));
 	}
 	else
 	{
@@ -658,14 +690,14 @@ void UiMainWindow::SobelSharpen()
 
 void UiMainWindow::LaplaceSharpen()
 {
-	AddTransform(PanImageFilter::GetInstance()->LaplaceSharpen(m_PanImage));
+    AddTransform(new AlgFilter::LaplaceSharpen(m_PanImage));
 }
 
 void UiMainWindow::MedianFilter()
 {
 	if (m_PanImage.IsGray())
 	{
-		AddTransform(PanImageFilter::GetInstance()->MedianFilter(m_PanImage));
+        AddTransform(new AlgFilter::MedianBlur2(m_PanImage));
 	}
 	else
 	{
@@ -676,19 +708,19 @@ void UiMainWindow::MedianFilter()
 
 void UiMainWindow::MedianBlur()
 {
-	AddTransform(PanImageFilter::GetInstance()->MedianBlur(m_PanImage));
+    AddTransform(new AlgFilter::MedianBlur(m_PanImage));
 }
 
 void UiMainWindow::GuassinBlur()
 {
-	AddTransform(PanImageFilter::GetInstance()->GuassinBlur(m_PanImage));
+    AddTransform(new AlgFilter::GuassinBlur(m_PanImage));
 }
 
 void UiMainWindow::OtsuBinary()
 {
 	if (m_PanImage.IsGray())
 	{
-		AddTransform(PanImageFilter::GetInstance()->OtsuBinary(m_PanImage));
+        AddTransform(new AlgFilter::Otsu(m_PanImage));
 	}
 	else
 	{
@@ -701,7 +733,7 @@ void UiMainWindow::HoleFill()
 {
 	if (m_PanImage.IsBinary())
 	{
-		AddTransform(PanImageFilter::GetInstance()->HoleFill(m_PanImage));
+        AddTransform(new AlgFilter::HoleFill(m_PanImage));
 	}
 	else
 	{
@@ -726,41 +758,41 @@ void UiMainWindow::HoughTransform()
 
 void UiMainWindow::Engrave()
 {
-	AddTransform(PanImageFilter::GetInstance()->Engrave(m_PanImage));
+    AddTransform(new AlgFilter::Engrave(m_PanImage));
 }
 
 void UiMainWindow::Negative()
 {
-	AddTransform(PanImageFilter::GetInstance()->Negative(m_PanImage));
+    AddTransform(new AlgFilter::Negative(m_PanImage));
 }
 
 void UiMainWindow::Erode(){
-	AddTransform(PanImageFilter::GetInstance()->Erode(m_PanImage));
+    AddTransform(new AlgFilter::Erode(m_PanImage));
 }
 
 void UiMainWindow::Dilate()
 {
-	AddTransform(PanImageFilter::GetInstance()->Dilate(m_PanImage));
+    AddTransform(new AlgFilter::Dilate(m_PanImage));
 }
 
 void UiMainWindow::ComFog()
 {
-	AddTransform(PanImageFilter::GetInstance()->ComFog(m_PanImage, 5));
+    AddTransform(new AlgFilter::ComFog(m_PanImage, 5));
 }
 
 void UiMainWindow::Sketch()
 {
-	AddTransform(PanImageFilter::GetInstance()->Sketch(m_PanImage));
+    AddTransform(new AlgFilter::Sketch(m_PanImage));
 }
 
 void UiMainWindow::CircleIncisionDetection()
 {
 	if (m_PanImage.IsGray())
 	{
-		AddTransform(PanImageDetect::GetInstance(m_PanImage)->CicleIncisionDetection(m_PanImage,
-															GlobalParams::BIG_CIRCLE_MIN,
-															GlobalParams::BIG_CIRCLE_MAX,
-															GlobalParams::SEARCH_STEP,
+        AddTransform(new AlgDetect::CicleIncisionDetection(m_PanImage,
+                                                            AlgDetect::BIG_CIRCLE_MIN,
+                                                            AlgDetect::BIG_CIRCLE_MAX,
+                                                            AlgDetect::SEARCH_STEP,
 															0,
 															m_PanImage.width(),
 															0,
@@ -776,6 +808,26 @@ void UiMainWindow::CircleIncisionDetection()
 	}
 }
 
+void UiMainWindow::SelectSearchFolder()
+{
+    m_searchFolder = QFileDialog::getExistingDirectory(this, "Select the search folder", "E:/baiduCloud/pics");
+    if ( !m_searchFolder.isNull())
+    {
+        QDir dir;
+        dir.setPath(m_searchFolder);
+        QStringList filter;
+        filter<<"*.jpg"<<"*.jpeg"<<"*.bmp"<<"*.png"<<"*gif" <<"*.ico"<<"*.tif";
+        dir.setNameFilters(filter);
+        m_searchFileList = dir.entryInfoList();
+        unsigned int k;
+        k = m_searchFileList.size();
+    }
+}
+
+void UiMainWindow::StartSearch()
+{
+
+}
 
 void UiMainWindow::SetHasImage(bool value)
 {
@@ -784,7 +836,7 @@ void UiMainWindow::SetHasImage(bool value)
 }
 
 
-void UiMainWindow::SetImage(PanImage& newImage)
+void UiMainWindow::SetImage(baseImage& newImage)
 {
 	m_QImage = newImage.PanImage2QImage();
 
@@ -841,7 +893,7 @@ void UiMainWindow::dropEvent(QDropEvent* event)
 		return;
 	}
 
-	m_PanImage = PanImageIO::GetInstance()->ReadPanImage(m_fileName);
+    m_PanImage = baseImage::ReadPanImage(m_fileName);
 	SetImage(m_PanImage);
 
 	// once open the picture, get its fileindex and filerange
@@ -874,3 +926,27 @@ void UiMainWindow::wheelEvent(QWheelEvent *event)
 	}
 }
 
+void UiMainWindow::resizeEvent(QResizeEvent *event)
+{
+    event->accept();
+
+    switch (m_appList->currentRow())
+    {
+    case 0:
+        break;
+    case 1:
+        if (m_PanImage.IsGray()){
+            m_searchArea->setPixmap(QPixmap::fromImage(
+            m_QImage.convertToFormat(QImage::Format_RGB888).
+            scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+        }
+        else
+        {
+            m_searchArea->setPixmap(QPixmap::fromImage(
+            m_QImage.scaled(m_searchArea->size(), Qt::KeepAspectRatio)));
+        }
+        break;
+    default:
+        break;
+    }
+}

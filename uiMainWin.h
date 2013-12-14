@@ -1,5 +1,5 @@
-#ifndef UI_MAINWINDOW_H
-#define UI_MAINWINDOW_H
+#ifndef UI_MAIN_WIN_H
+#define UI_MAIN_WIN_H
 
 #include <QtWidgets/QMainWindow>
 #include <QtCore/QString>
@@ -34,15 +34,17 @@
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QComboBox>
 
-#include "panimage.h"
-#include "panimageio.h"
-#include "panimageshift.h"
-#include "panimagehist.h"
-#include "uihistdialog.h"
-#include "panimagefilter.h"
-#include "uihoughtransformparam.h"
-#include "panimagedetect.h"
-#include "transformthread.h"
+#include "baseImage.h"
+#include "baseThread.h"
+
+#include "algShift.h"
+#include "algHistProc.h"
+#include "algFilter.h"
+#include "algDetect.h"
+
+#include "uiHistDlg.h"
+#include "uiHoughDlg.h"
+
 
 class UiMainWindow : public QMainWindow
 {
@@ -56,8 +58,8 @@ public:
 	bool HasImage() const {return m_hasImage;}
 	void SetHasImage(bool value);
 
-	PanImage& Image(){return m_PanImage;}
-	void SetImage(PanImage& newImage);
+	baseImage& Image(){return m_PanImage;}
+    void SetImage(baseImage& newImage);
 
 	void InitGlobalVariables();
 
@@ -69,7 +71,7 @@ public:
 	void CreateGlobalSigSlotLink();
 	void CreateMainWindowStyle();
 
-	void AddTransform(Transform* transform);
+	void AddTransform(baseTransform* transform);
 
 signals:
 	void ImageChanged();
@@ -80,29 +82,26 @@ signals:
 public slots:
 	void AllTransformDone();
 
+    void SetImage(int);
+
 	void OpenPic();
 	void NextPic();
 	void PrevPic();
 	void Save();
 	void SaveAs();
-
 	void RotateClkwise();
 	void RotateCntrClkwise();
 	void MirrorH();
 	void MirrorV();
-
 	void ZoomPic(int curValue);
 	void ZoomPic();
 	void ZoomRateDisp(int value);
-
 	void ShowCurIndexPic();
 	void ShowCurPicIndex(int, int);
-
 	void EqualizeHist();
 	void MatchHist();
 	void CreateHistDialog();
 	void Enhance();
-
 	void Gray();
 	void OtsuBinary();
 	void SobelSharpen();
@@ -117,16 +116,17 @@ public slots:
 	void Negative();
 	void ComFog();
 	void Sketch();
-
 	void HoughTransform();
-
 	void CircleIncisionDetection();
+
+    void SelectSearchFolder();
+    void StartSearch();
 
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent* event);
 	void wheelEvent(QWheelEvent *event);
-
+    void resizeEvent(QResizeEvent *event);
 
 private:
 	// Independent Dialogs
@@ -134,7 +134,7 @@ private:
 	UiHoughTransformParam* houghParamDialog;
 
 	//	Transform threads
-	TransformThread* subThread;
+	baseThread* subThread;
 
 	//	Signals and const values
 	bool m_hasImage;
@@ -179,8 +179,8 @@ private:
 	QPushButton* m_houghTransform;
 	QWidget* m_integrated_tab;
 	QPushButton* m_cicle_incision_detect;
-	_Pan_Circle bigCircle;
-	_Pan_Circle smallCircle;
+    AlgDetect::_Pan_Circle bigCircle;
+    AlgDetect::_Pan_Circle smallCircle;
 
 	//	pic searcher app widgets
 	QSplitter* m_picSearchSplitter;
@@ -214,6 +214,8 @@ private:
 	int m_curFileRange;
 	QFileInfoList m_curFileList;
 	QString m_fileName;
+    QString m_searchFolder;
+    QFileInfoList m_searchFileList;
 	QPushButton* m_openPic;
 	QPushButton* m_save;
 	QPushButton* m_saveAs;
@@ -223,7 +225,7 @@ private:
 	QLabel* m_curPicHeight;
 
 	//	shared global variables
-	PanImage m_PanImage;
+	baseImage m_PanImage;
 	QImage m_QImage;
 };
 

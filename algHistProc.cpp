@@ -1,13 +1,13 @@
-#include "panimagehist.h"
+#include "algHistProc.h"
 
 
-GetHistImageTransform::GetHistImageTransform(PanImage& image, PanImage& histImage) : image(image), histImage(histImage)
+AlgHistProc::GetHistImage::GetHistImage(baseImage& image, baseImage& histImage) : image(image), histImage(histImage)
 {
 
 }
 
 
-void GetHistImageTransform::apply()
+void AlgHistProc::GetHistImage::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::MatND hist;
@@ -80,13 +80,13 @@ void GetHistImageTransform::apply()
 }
 
 
-HistEqualizeTransform::HistEqualizeTransform(PanImage& image) : image(image)
+AlgHistProc::HistEqualize::HistEqualize(baseImage& image) : image(image)
 {
 
 }
 
 
-void HistEqualizeTransform::apply()
+void AlgHistProc::HistEqualize::apply()
 {
 	cv::Mat mat = image.GetMat();
 	if (mat.channels() == 1){
@@ -103,13 +103,13 @@ void HistEqualizeTransform::apply()
 }
 
 
-HistMatchTransform::HistMatchTransform(PanImage& image, float* histMatch) : image(image)
+AlgHistProc::HistMatch::HistMatch(baseImage& image, float* histMatch) : image(image)
 {
 	this->histMatch = histMatch;
 }
 
 
-void HistMatchTransform::apply()
+void AlgHistProc::HistMatch::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
@@ -190,12 +190,12 @@ void HistMatchTransform::apply()
 }
 
 
-EnhanceTransform::EnhanceTransform(PanImage& image) : image(image)
+AlgHistProc::Enhance::Enhance(baseImage& image) : image(image)
 {
 
 }
 
-void EnhanceTransform::apply()
+void AlgHistProc::Enhance::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
@@ -231,58 +231,4 @@ void EnhanceTransform::apply()
 
 	cv::merge(v, mat);
 }
-
-
-PanImageHist* PanImageHist::instance = 0;
-
-PanImageHist::PanImageHist()
-{
-
-}
-
-
-PanImageHist::~PanImageHist(){
-
-}
-
-
-PanImageHist* PanImageHist::GetInstance(){
-	if (instance == 0){
-		instance = new PanImageHist();
-	}
-
-	return instance;
-}
-
-
-void PanImageHist::Destroy(){
-	if (instance != 0){
-		delete instance;
-		instance = 0;
-	}
-}
-
-
-GetHistImageTransform* PanImageHist::GetHistImage(PanImage& image, PanImage& histImage){
-	return new GetHistImageTransform(image, histImage);
-}
-
-
-HistEqualizeTransform* PanImageHist::HistEqalization(PanImage &image){
-	return new HistEqualizeTransform(image);
-}
-
-HistMatchTransform* PanImageHist::HistMatch(PanImage &image, float* histMatch){
-	return new HistMatchTransform(image, histMatch);
-}
-
-EnhanceTransform* PanImageHist::Enhance(PanImage& image)
-{
-	return new EnhanceTransform(image);
-}
-
-
-
-
-
 

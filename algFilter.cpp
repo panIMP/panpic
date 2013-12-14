@@ -3,15 +3,15 @@
 #include <qicon.h>
 #include <time.h>
 
-#include "panimagefilter.h"
+#include "algFilter.h"
 
 
-GrayTransform::GrayTransform(PanImage& image) : image(image) 
+AlgFilter::Gray::Gray(baseImage& image) : image(image)
 {
 
 }
 
-void GrayTransform::apply()
+void AlgFilter::Gray::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int channels = mat.channels();
@@ -34,34 +34,34 @@ void GrayTransform::apply()
 	image.SetMat(mat);
 }
 
-MedianBlurTransform::MedianBlurTransform(PanImage& image) : image(image)
+AlgFilter::MedianBlur::MedianBlur(baseImage& image) : image(image)
 {
 
 }
 	
-void MedianBlurTransform::apply()
+void AlgFilter::MedianBlur::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::medianBlur(mat, mat, 5);
 }
 
-GuassinBlurTransform::GuassinBlurTransform(PanImage& image) : image(image)
+AlgFilter::GuassinBlur::GuassinBlur(baseImage& image) : image(image)
 {
 
 }
 
-void GuassinBlurTransform::apply()
+void AlgFilter::GuassinBlur::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::GaussianBlur(mat, mat, cv::Size(5,5), 1.5, 1.5);
 }
 
-ComFogTransform::ComFogTransform(PanImage& image, int randRange) : image(image)
+AlgFilter::ComFog::ComFog(baseImage& image, int randRange) : image(image)
 {
 	this->randRange = randRange;
 }
 
-void ComFogTransform::apply()
+void AlgFilter::ComFog::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width = mat.cols;
@@ -137,12 +137,12 @@ void ComFogTransform::apply()
 	cv::merge(v, mat);
 }
 
-SketchTransform::SketchTransform(PanImage& image) : image(image)
+AlgFilter::Sketch::Sketch(baseImage& image) : image(image)
 {
 
 }
 
-void SketchTransform::apply()
+void AlgFilter::Sketch::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -162,9 +162,9 @@ void SketchTransform::apply()
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-			a = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templt, 3, i, j);
-			b1 = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
-			b2 = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
+            a = AlgFilter::TempltExcuteCl(tmpMat1, templt, 3, i, j);
+            b1 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
+            b2 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
 			b = b1 > b2 ? b1 : b2;
 			if (b < 25)
 			{
@@ -191,18 +191,18 @@ void SketchTransform::apply()
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-			a = PanImageFilter::GetInstance()->TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
+            a = AlgFilter::TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
 			mat.at<uchar>(j, i) = a;
 		}
 	}
 }
 
-SobelSharpenTransform::SobelSharpenTransform(PanImage& image) : image(image)
+AlgFilter::SobelSharpen::SobelSharpen(baseImage& image) : image(image)
 {
 	
 }
 
-void SobelSharpenTransform::apply()
+void AlgFilter::SobelSharpen::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -254,23 +254,23 @@ void SobelSharpenTransform::apply()
 	cv::add(mat1, mat2, mat);*/
 }
 
-LaplaceSharpenTransform::LaplaceSharpenTransform(PanImage& image) : image(image)
+AlgFilter::LaplaceSharpen::LaplaceSharpen(baseImage& image) : image(image)
 {
 
 }
 
-void LaplaceSharpenTransform::apply()
+void AlgFilter::LaplaceSharpen::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::Laplacian(mat, mat, CV_8U);
 }
 
-MedianFilterTransform::MedianFilterTransform(PanImage& image) : image(image)
+AlgFilter::MedianBlur2::MedianBlur2(baseImage& image) : image(image)
 {
 
 }
 
-void MedianFilterTransform::apply()
+void AlgFilter::MedianBlur2::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -313,34 +313,34 @@ void MedianFilterTransform::apply()
 }
 
 
-ErodeTransform::ErodeTransform(PanImage& image) : image(image)
+AlgFilter::Erode::Erode(baseImage& image) : image(image)
 {
 
 }
 
-void ErodeTransform::apply()
+void AlgFilter::Erode::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::erode(mat, mat, cv::Mat());
 }
 
-DilateTransform::DilateTransform(PanImage& image) : image(image)
+AlgFilter::Dilate::Dilate(baseImage& image) : image(image)
 {
 
 }
 
-void DilateTransform::apply()
+void AlgFilter::Dilate::apply()
 {
 	cv::Mat mat = image.GetMat();
 	cv::dilate(mat, mat, cv::Mat());
 }
 
-OtsuBinaryTransform::OtsuBinaryTransform(PanImage& image) : image(image)
+AlgFilter::Otsu::Otsu(baseImage& image) : image(image)
 {
 
 }
 
-void OtsuBinaryTransform::apply()
+void AlgFilter::Otsu::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -437,12 +437,12 @@ void OtsuBinaryTransform::apply()
 	image.SetIsBinary(true);
 }
 
-EngraveTransform::EngraveTransform(PanImage& image) : image(image)
+AlgFilter::Engrave::Engrave(baseImage& image) : image(image)
 {
 
 }
 
-void EngraveTransform::apply()
+void AlgFilter::Engrave::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -467,12 +467,12 @@ void EngraveTransform::apply()
 	cv::merge(v, mat);
 }
 
-NegativeTransform::NegativeTransform(PanImage& image) : image(image)
+AlgFilter::Negative::Negative(baseImage& image) : image(image)
 {
 
 }
 
-void NegativeTransform::apply()
+void AlgFilter::Negative::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int height = mat.rows;
@@ -500,12 +500,12 @@ void NegativeTransform::apply()
 	cv::merge(v, mat);
 }
 
-HoleFillTransform::HoleFillTransform(PanImage& image) : image(image)
+AlgFilter::HoleFill::HoleFill(baseImage& image) : image(image)
 {
 
 }
 
-void HoleFillTransform::apply()
+void AlgFilter::HoleFill::apply()
 {
 	cv::Mat mat = image.GetMat();
 	unsigned int width	= mat.cols;
@@ -569,40 +569,7 @@ void HoleFillTransform::apply()
 	}
 }
 
-
-
-PanImageFilter* PanImageFilter::instance = 0;
-
-PanImageFilter::PanImageFilter()
-{
-}
-
-
-PanImageFilter::~PanImageFilter()
-{
-
-}
-
-PanImageFilter* PanImageFilter::GetInstance()
-{
-	if (instance == 0)
-	{
-		instance = new PanImageFilter();
-	}
-
-	return instance;
-}
-
-void PanImageFilter::Destroy()
-{
-	if (instance != 0)
-	{
-		delete instance;
-		instance = 0;
-	}
-}
-
-int PanImageFilter::CalcCombosX2Y2R2(int r2)
+int AlgFilter::CalcCombosX2Y2R2(int r2)
 {
 	int x = 0;
 	int y = 0;
@@ -622,7 +589,7 @@ int PanImageFilter::CalcCombosX2Y2R2(int r2)
 	return comboNum;
 }
 
-int PanImageFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y)
+int AlgFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y)
 {
 	int i, j, px, py, m;
 	m = 0;
@@ -644,74 +611,3 @@ int PanImageFilter::TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int
 
 	return m;
 }
-
-GrayTransform* PanImageFilter::Gray(PanImage& image)
-{
-	return new GrayTransform(image);
-}
-
-ComFogTransform* PanImageFilter::ComFog(PanImage& image, unsigned int randRange)
-{
-	return new ComFogTransform(image, randRange);
-}
-
-SketchTransform* PanImageFilter::Sketch(PanImage& image)
-{	
-	return new SketchTransform(image);
-}
-
-SobelSharpenTransform* PanImageFilter::SobelSharpen(PanImage &image)
-{
-	return new SobelSharpenTransform(image);
-}
-
-LaplaceSharpenTransform* PanImageFilter::LaplaceSharpen(PanImage& image)
-{
-	return new LaplaceSharpenTransform(image);
-}
-
-MedianBlurTransform* PanImageFilter::MedianBlur(PanImage& image)
-{
-	return new MedianBlurTransform(image);
-}
-
-GuassinBlurTransform* PanImageFilter::GuassinBlur(PanImage& image)
-{
-	return new GuassinBlurTransform(image);
-}
-
-MedianFilterTransform* PanImageFilter::MedianFilter(PanImage& image)
-{
-	return new MedianFilterTransform(image);
-}
-
-EngraveTransform* PanImageFilter::Engrave(PanImage& image)
-{
-	return new EngraveTransform(image);
-}
-
-OtsuBinaryTransform* PanImageFilter::OtsuBinary(PanImage& image)
-{
-	return new OtsuBinaryTransform(image);
-}
-
-ErodeTransform* PanImageFilter::Erode(PanImage& image)
-{
-	return new ErodeTransform(image);
-}
-
-DilateTransform* PanImageFilter::Dilate(PanImage& image)
-{
-	return new DilateTransform(image);
-}
-
-HoleFillTransform* PanImageFilter::HoleFill(PanImage& image)
-{
-	return new HoleFillTransform(image);
-}
-
-NegativeTransform* PanImageFilter::Negative(PanImage& image)
-{
-	return new NegativeTransform(image);
-}
-

@@ -1,5 +1,5 @@
-#ifndef UI_HOUGHTRANSFORMPARAM_H
-#define UI_HOUGHTRANSFORMPARAM_H
+#ifndef UI_HOUGH_DLG_H
+#define UI_HOUGH_DLG_H
 
 #include <QWidget>
 #include <QtWidgets/QPushButton>
@@ -10,19 +10,19 @@
 #include <QtWidgets/QMessageBox>
 #include <QtGui/QRegExpValidator>
 
-#include "panimagedetect.h"
-#include "transform.h"
-#include "transformthread.h"
+#include "algDetect.h"
+#include "baseTransform.h"
+#include "baseThread.h"
 
 class UiHoughTransformParam :public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit UiHoughTransformParam(_Pan_Circle& circle, PanImage& image, QWidget* parent = 0);
+    explicit UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, baseImage& image, QWidget* parent = 0);
 	~UiHoughTransformParam();
 
-	void AddTransform(Transform* transform);
+	void AddTransform(baseTransform* transform);
 
 public slots:
 	void ShowResult();
@@ -31,7 +31,7 @@ public slots:
 	void ResetParams();
 
 private:
-	TransformThread* subThread;
+	baseThread* subThread;
 
 	QPushButton* paramOk;
 	QPushButton* paramReset;
@@ -47,8 +47,8 @@ private:
 	QLineEdit* b;
 	QLineEdit* r;
 
-	PanImage& img;
-	_Pan_Circle& cle;
+	baseImage& img;
+    AlgDetect::_Pan_Circle& cle;
 
 	QRegExpValidator* iMinValidator;
 	QRegExpValidator* iMaxValidator;

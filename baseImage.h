@@ -1,5 +1,5 @@
-#ifndef PANIMAGE_H
-#define PANIMAGE_H
+#ifndef BASE_IMAGE_H
+#define BASE_IMAGE_H
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -11,7 +11,7 @@
 #include <QDebug>
 #include <time.h>
 
-class PanImage
+class baseImage
 {
 private:
 	cv::Mat mat;
@@ -20,13 +20,13 @@ private:
 	bool isGray;
 
 public:
-	PanImage();
-	~PanImage();
+    baseImage();
+    ~baseImage();
 
 	int height();
 	int width();
 
-	void copyTo(PanImage& image);
+    void copyTo(baseImage& image);
 
 	void SetMat(cv::Mat& newMat);
 	cv::Mat& GetMat();
@@ -40,7 +40,12 @@ public:
 	void SetIsGray(bool state);
 	bool IsGray();
 
-	QImage PanImage2QImage();
+    //  Image input and output
+    static baseImage ReadPanImage(const QString& str);
+    void static SavePanImage(baseImage& ImageToSave, const QString& str);
+
+    //  PanImage --> QImage
+    QImage PanImage2QImage();
 };
 
-#endif // CVIMAGE_H
+#endif

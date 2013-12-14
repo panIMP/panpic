@@ -1,5 +1,5 @@
-#ifndef UI_HISTDIALOG_H
-#define UI_HISTDIALOG_H
+#ifndef UI_HIST_DLG_H
+#define UI_HIST_DLG_H
 
 #include <QWidget>
 #include <QLabel>
@@ -10,18 +10,17 @@
 #include <QPushButton>
 #include <QFileDialog>
 
-#include "panimage.h"
-#include "panimageio.h"
-#include "panimagehist.h"
-#include "transformthread.h"
+#include "baseImage.h"
+#include "algHistProc.h"
+#include "baseThread.h"
 
 class UiHistDialog : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit UiHistDialog(PanImage& image, const QString& imageName, QWidget *parent = 0);
+	explicit UiHistDialog(baseImage& image, const QString& imageName, QWidget *parent = 0);
 	
-	void AddTransform(Transform* transform);
+	void AddTransform(baseTransform* transform);
 
 signals:
 	
@@ -31,11 +30,11 @@ public slots:
 
 private:
 	//	Transform threads
-	TransformThread* subThread;
+	baseThread* subThread;
 
 	QLabel* histLabel;
 	QPushButton* save;
-	PanImage histimg;
+	baseImage histimg;
 };
 
 #endif // UIHISTDIALOG_H
