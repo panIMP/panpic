@@ -1,6 +1,9 @@
 #ifndef ALG_FEAT_EXTRACT_H
 #define ALG_FEAT_EXTRACT_H
 
+#include "baseTransform.h"
+#include "baseImage.h"
+
 namespace AlgFeatExtract {
     class GetColorHist;
     class GetColorAccumHist;
@@ -14,6 +17,16 @@ namespace AlgFeatExtract {
     class GetSpacialFeats;
 }
 
+class AlgFeatExtract::GetColorHist : public baseTransform
+{
+public:
+    GetColorHist(baseImage& image);
+
+    void apply();
+
+private:
+    baseImage& image;
+};
 
 
 #endif

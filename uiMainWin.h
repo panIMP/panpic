@@ -59,7 +59,7 @@ public:
 	void SetHasImage(bool value);
 
 	baseImage& Image(){return m_PanImage;}
-    void SetImage(baseImage& newImage);
+	void SetImage(baseImage& newImage);
 
 	void InitGlobalVariables();
 
@@ -82,7 +82,7 @@ signals:
 public slots:
 	void AllTransformDone();
 
-    void SetImage(int);
+	void SetImage(int);
 
 	void OpenPic();
 	void NextPic();
@@ -119,19 +119,19 @@ public slots:
 	void HoughTransform();
 	void CircleIncisionDetection();
 
-    void SelectSearchFolder();
-    void StartSearch();
+	void SelectSearchFolder();
+	void StartSearch();
 
 protected:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent* event);
 	void wheelEvent(QWheelEvent *event);
-    void resizeEvent(QResizeEvent *event);
+	void resizeEvent(QResizeEvent *event);
 
 private:
 	// Independent Dialogs
 	UiHistDialog* hist;
-	UiHoughTransformParam* houghParamDialog;
+	UiHoughDlg* houghParamDialog;
 
 	//	Transform threads
 	baseThread* subThread;
@@ -179,8 +179,9 @@ private:
 	QPushButton* m_houghTransform;
 	QWidget* m_integrated_tab;
 	QPushButton* m_cicle_incision_detect;
-    AlgDetect::_Pan_Circle bigCircle;
-    AlgDetect::_Pan_Circle smallCircle;
+	AlgDetect::_Pan_Circle bigCircle;
+	AlgDetect::_Pan_Circle smallCircle;
+	AlgDetect::_Hough_Param hParam;
 
 	//	pic searcher app widgets
 	QSplitter* m_picSearchSplitter;
@@ -214,8 +215,8 @@ private:
 	int m_curFileRange;
 	QFileInfoList m_curFileList;
 	QString m_fileName;
-    QString m_searchFolder;
-    QFileInfoList m_searchFileList;
+	QString m_searchFolder;
+	QFileInfoList m_searchFileList;
 	QPushButton* m_openPic;
 	QPushButton* m_save;
 	QPushButton* m_saveAs;

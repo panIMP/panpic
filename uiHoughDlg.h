@@ -14,13 +14,13 @@
 #include "baseTransform.h"
 #include "baseThread.h"
 
-class UiHoughTransformParam :public QWidget
+class UiHoughDlg :public QWidget
 {
 	Q_OBJECT
 
 public:
-    explicit UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, baseImage& image, QWidget* parent = 0);
-	~UiHoughTransformParam();
+	explicit UiHoughDlg(AlgDetect::_Pan_Circle& circle, baseImage& image, AlgDetect::_Hough_Param& hParam,QWidget* parent = 0);
+	~UiHoughDlg();
 
 	void AddTransform(baseTransform* transform);
 
@@ -47,8 +47,9 @@ private:
 	QLineEdit* b;
 	QLineEdit* r;
 
-	baseImage& img;
-    AlgDetect::_Pan_Circle& cle;
+	baseImage& image;
+	AlgDetect::_Pan_Circle& cle;
+	AlgDetect::_Hough_Param& hParam;
 
 	QRegExpValidator* iMinValidator;
 	QRegExpValidator* iMaxValidator;

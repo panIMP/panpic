@@ -1,8 +1,85 @@
 #include "uiHoughDlg.h"
 
+namespace AlgDetect {
+	// init the r-¦È space
+	static const int sinValue[360] =
+	{
+		0,    17,	34,   52,  70,  87,  104, 122, 139, 156, 174, 191, 208, 225, 242,
+		259,  276,  292,  309, 326, 342, 358, 375, 391, 407, 423, 438, 454, 469, 485,
+		500,  515,  530,  545, 559, 574, 588, 602, 616, 629, 643, 656, 669, 682, 695,
+		707,  719,  731,  743, 755, 766, 777, 788, 799, 809, 819, 829, 839, 848, 857,
+		866,  875,  883,  891, 899, 906, 914, 921, 927, 934, 940, 946, 951, 956, 961,
+		966,  970,  974,  978, 982, 985, 988, 990, 993, 995, 996, 998, 999, 999, 1000,
 
-UiHoughTransformParam::UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, baseImage& image, QWidget* parent) : cle(circle) , img(image), QWidget(parent)
+		1000, 1000, 999, 999, 998, 996, 995, 993, 990, 988, 985, 982, 978, 974,  970,
+		966,  961,  956, 951, 946, 940, 934, 927, 921, 914, 906, 899, 891, 883,  875,
+		866,  857,  848, 839, 829, 819, 809, 799, 788, 777, 766, 755, 743, 731,  719,
+		707,  695,  682, 669, 656, 643, 629, 616, 602, 588, 574, 559, 545, 530,  515,
+		500,  485,  469, 454, 438, 423, 407, 391, 375, 358, 342, 326, 309, 292,  276,
+		259,  242,  225, 208, 191, 174, 156, 139, 122, 104, 87,  70,  52,  34,   17,
+
+		0,    17,	34,   52,  70,  87,  104, 122, 139, 156, 174, 191, 208, 225, 242,
+		259,  276,  292,  309, 326, 342, 358, 375, 391, 407, 423, 438, 454, 469, 485,
+		500,  515,  530,  545, 559, 574, 588, 602, 616, 629, 643, 656, 669, 682, 695,
+		707,  719,  731,  743, 755, 766, 777, 788, 799, 809, 819, 829, 839, 848, 857,
+		866,  875,  883,  891, 899, 906, 914, 921, 927, 934, 940, 946, 951, 956, 961,
+		966,  970,  974,  978, 982, 985, 988, 990, 993, 995, 996, 998, 999, 999, 1000,
+
+		1000, 1000, 999, 999, 998, 996, 995, 993, 990, 988, 985, 982, 978, 974,  970,
+		966,  961,  956, 951, 946, 940, 934, 927, 921, 914, 906, 899, 891, 883,  875,
+		866,  857,  848, 839, 829, 819, 809, 799, 788, 777, 766, 755, 743, 731,  719,
+		707,  695,  682, 669, 656, 643, 629, 616, 602, 588, 574, 559, 545, 530,  515,
+		500,  485,  469, 454, 438, 423, 407, 391, 375, 358, 342, 326, 309, 292,  276,
+		259,  242,  225, 208, 191, 174, 156, 139, 122, 104, 87,  70,  52,  34,   17,
+	};
+
+	// init the r-¦È space
+	static const int cosValue[360] =
+	{
+		1000, 1000, 999, 999, 998, 996, 995, 993, 990, 988, 985, 982, 978, 974,  970,
+		966,  961,  956, 951, 946, 940, 934, 927, 921, 914, 906, 899, 891, 883,  875,
+		866,  857,  848, 839, 829, 819, 809, 799, 788, 777, 766, 755, 743, 731,  719,
+		707,  695,  682, 669, 656, 643, 629, 616, 602, 588, 574, 559, 545, 530,  515,
+		500,  485,  469, 454, 438, 423, 407, 391, 375, 358, 342, 326, 309, 292,  276,
+		259,  242,  225, 208, 191, 174, 156, 139, 122, 104, 87,  70,  52,  34,   17,
+
+		0,    17,	34,   52,  70,  87,  104, 122, 139, 156, 174, 191, 208, 225, 242,
+		259,  276,  292,  309, 326, 342, 358, 375, 391, 407, 423, 438, 454, 469, 485,
+		500,  515,  530,  545, 559, 574, 588, 602, 616, 629, 643, 656, 669, 682, 695,
+		707,  719,  731,  743, 755, 766, 777, 788, 799, 809, 819, 829, 839, 848, 857,
+		866,  875,  883,  891, 899, 906, 914, 921, 927, 934, 940, 946, 951, 956, 961,
+		966,  970,  974,  978, 982, 985, 988, 990, 993, 995, 996, 998, 999, 999, 1000,
+
+		1000, 1000, 999, 999, 998, 996, 995, 993, 990, 988, 985, 982, 978, 974,  970,
+		966,  961,  956, 951, 946, 940, 934, 927, 921, 914, 906, 899, 891, 883,  875,
+		866,  857,  848, 839, 829, 819, 809, 799, 788, 777, 766, 755, 743, 731,  719,
+		707,  695,  682, 669, 656, 643, 629, 616, 602, 588, 574, 559, 545, 530,  515,
+		500,  485,  469, 454, 438, 423, 407, 391, 375, 358, 342, 326, 309, 292,  276,
+		259,  242,  225, 208, 191, 174, 156, 139, 122, 104, 87,  70,  52,  34,   17,
+
+		0,    17,	34,   52,  70,  87,  104, 122, 139, 156, 174, 191, 208, 225, 242,
+		259,  276,  292,  309, 326, 342, 358, 375, 391, 407, 423, 438, 454, 469, 485,
+		500,  515,  530,  545, 559, 574, 588, 602, 616, 629, 643, 656, 669, 682, 695,
+		707,  719,  731,  743, 755, 766, 777, 788, 799, 809, 819, 829, 839, 848, 857,
+		866,  875,  883,  891, 899, 906, 914, 921, 927, 934, 940, 946, 951, 956, 961,
+		966,  970,  974,  978, 982, 985, 988, 990, 993, 995, 996, 998, 999, 999, 1000,
+	};
+}
+
+
+UiHoughDlg::UiHoughDlg(	AlgDetect::_Pan_Circle& circle, 
+						baseImage& image, 
+						AlgDetect::_Hough_Param& hParam, 
+						QWidget* parent) :
+						cle(circle), 
+						image(image), 
+						hParam(hParam), 
+						QWidget(parent)
 {
+	if (!hParam.isInited){
+		hParam.InitGlobalVaribles(image);
+	}
+
 	this->subThread = baseThread::GetInstance();
 	connect(subThread, SIGNAL(allTransformDone()), this, SLOT(ShowResult()));
 
@@ -50,21 +127,21 @@ UiHoughTransformParam::UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, bas
 
 	rMin = new QLineEdit;
 	rMin->setAlignment(Qt::AlignCenter);
-    rMin->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MIN));
+	rMin->setText(QString("%1").arg(hParam.BIG_CIRCLE_MIN));
 	QRegExp rMinRegExp("[1-9]+$");
 	rMinValidator = new QRegExpValidator(rMinRegExp, rMin);
 	rMin->setValidator(rMinValidator);
 	
 	rMax = new QLineEdit;
 	rMax->setAlignment(Qt::AlignCenter);
-    rMax->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MAX));
+	rMax->setText(QString("%1").arg(hParam.BIG_CIRCLE_MAX));
 	QRegExp rMaxRegExp("[1-9]+$");
 	rMaxValidator = new QRegExpValidator(rMaxRegExp, rMax);
 	rMax->setValidator(rMaxValidator);
 	
 	searchStep = new QLineEdit();
 	searchStep->setAlignment(Qt::AlignCenter);
-    searchStep->setText(QString("%1").arg(AlgDetect::SEARCH_STEP));
+	searchStep->setText(QString("%1").arg(hParam.SEARCH_STEP));
 	QRegExp searchStepRegExp("[1-9]+$");
 	searchStepValidator = new QRegExpValidator(searchStepRegExp, searchStep);
 	searchStep->setValidator(searchStepValidator);
@@ -154,7 +231,7 @@ UiHoughTransformParam::UiHoughTransformParam(AlgDetect::_Pan_Circle& circle, bas
 	setAttribute(Qt::WA_DeleteOnClose);
 }
 
-UiHoughTransformParam::~UiHoughTransformParam()
+UiHoughDlg::~UiHoughDlg()
 {
 	delete iMinValidator;
 	delete iMaxValidator;
@@ -165,7 +242,7 @@ UiHoughTransformParam::~UiHoughTransformParam()
 	delete searchStepValidator;
 };
 
-void UiHoughTransformParam::HoughTransform()
+void UiHoughDlg::HoughTransform()
 {
 	unsigned int iMinValue = iMin->text().toInt();
 	unsigned int iMaxValue = iMax->text().toInt();
@@ -175,38 +252,39 @@ void UiHoughTransformParam::HoughTransform()
 	unsigned int rMaxValue = rMax->text().toInt();
 	unsigned int step = searchStep->text().toInt();
 
-    AddTransform(new AlgDetect::Hough(img,
-																rMinValue, 
-																rMaxValue,
-																step, 
-																iMinValue, 
-																iMaxValue, 
-																jMinValue, 
-																jMaxValue,
-																100,
-																cle));
+	AddTransform(new AlgDetect::Hough(  image,
+										rMinValue,
+										rMaxValue,
+										step,
+										iMinValue,
+										iMaxValue,
+										jMinValue,
+										jMaxValue,
+										100,
+										cle,
+										hParam));
 }
 
-void UiHoughTransformParam::ResetParams()
+void UiHoughDlg::ResetParams()
 {
 	iMin->setText("0");
-	iMax->setText(QString("%1").arg(img.width()));
+	iMax->setText(QString("%1").arg(image.width()));
 	jMin->setText("0");
-	jMax->setText(QString("%1").arg(img.height()));
-    rMin->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MIN));
-    rMax->setText(QString("%1").arg(AlgDetect::BIG_CIRCLE_MAX));
-    searchStep->setText(QString("%1").arg(AlgDetect::SEARCH_STEP));
+	jMax->setText(QString("%1").arg(image.height()));
+	rMin->setText(QString("%1").arg(hParam.BIG_CIRCLE_MIN));
+	rMax->setText(QString("%1").arg(hParam.BIG_CIRCLE_MAX));
+	searchStep->setText(QString("%1").arg(hParam.SEARCH_STEP));
 	a->setText("");
 	b->setText("");
 	r->setText("");
 }
 
-void UiHoughTransformParam::AddTransform(baseTransform* transform)
+void UiHoughDlg::AddTransform(baseTransform* transform)
 {
 	subThread->addTransform(transform);
 }
 
-void UiHoughTransformParam::ShowResult()
+void UiHoughDlg::ShowResult()
 {
 	if (cle.hasValue)
 	{

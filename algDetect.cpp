@@ -1,36 +1,51 @@
 #include "algDetect.h"
 
-void AlgDetect::InitGlobalVaribles(baseImage& image)
+int*** AlgDetect::_Hough_Param::H = 0;
+
+void AlgDetect::_Hough_Param::InitGlobalVaribles(baseImage& image)
 {
-    int width = image.width();
-    int height = image.height();
+	isInited = false;
 
-    int i,j;
+	CIRCLE_WIDTH = 3;
+	SEARCH_STEP = 4;
+	BIG_CIRCLE_MIN = 95;
+	BIG_CIRCLE_MAX = 97;
+	SMALL_CIRCLE_MIN = 2;
+	SMALL_CIRCLE_MAX = 8;
 
-    _r2DivNum = (BIG_CIRCLE_MAX * BIG_CIRCLE_MAX + 50) / 100;
-    H = new int**[width];
-    for (i = 0; i < width; i++)
-    {
-        H[i] = new int*[height];
-        for (j = 0; j < height; j ++)
-        {
-           H[i][j] = new int[_r2DivNum];
-        }
-    }
+	NON_WITHIN_CIRCLE = 0;
+	WITHIN_CIRCLE = 1;
 
-    isInited = true;
+	int width = image.width();
+	int height = image.height();
+
+	int i,j;
+
+	_r2DivNum = (BIG_CIRCLE_MAX * BIG_CIRCLE_MAX + 50) / 100;
+	H = new int**[width];
+	for (i = 0; i < width; i++)
+	{
+		H[i] = new int*[height];
+		for (j = 0; j < height; j ++)
+		{
+		   H[i][j] = new int[_r2DivNum];
+		}
+	}
+
+	isInited = true;
 }
 
 AlgDetect::Hough::Hough(baseImage &image,
-                        int rMin,
-                        int rMax,
-                        int step,
-                        int iMin,
-                        int iMax,
-                        int jMin,
-                        int jMax,
-                        int div,
-                        _Pan_Circle& circle) : image(image),circle(circle)
+						int rMin,
+						int rMax,
+						int step,
+						int iMin,
+						int iMax,
+						int jMin,
+						int jMax,
+						int div,
+						_Pan_Circle& circle,
+						_Hough_Param& hParam) : image(image),circle(circle),hParam(hParam)
 {
 	this->rMin = rMin;
 	this->rMax = rMax;
@@ -40,11 +55,6 @@ AlgDetect::Hough::Hough(baseImage &image,
 	this->jMin = jMin;
 	this->jMax = jMax;
 	this->div = div;
-
-    if (!isInited)
-    {
-        InitGlobalVaribles(image);
-    }
 }
 
 void AlgDetect::Hough::apply()
@@ -92,7 +102,7 @@ void AlgDetect::Hough::apply()
 		{
 			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
 			{
-                H[i][j][r2Div] = 0;
+			   hParam.H[i][j][r2Div] = 0;
 			}
 		}
 	}
@@ -131,7 +141,7 @@ void AlgDetect::Hough::apply()
 						if (r2 > r2Min && r2 < r2Max)
 						{   
 							r2Div = (r2 + div2) / div;
-                            AlgDetect::H[a][b][r2Div] ++;
+							hParam.H[a][b][r2Div] ++;
 						}
 					}
 				}
@@ -147,19 +157,19 @@ void AlgDetect::Hough::apply()
 		{
 			for (b = bMin; b < bMax; b++)
 			{
-                tmpMaxValNeighbourSum =	  AlgDetect::H[a][b][r2Div]
-                                        + AlgDetect::H[a-1][b][r2Div]
-                                        + AlgDetect::H[a][b-1][r2Div]
-                                        + AlgDetect::H[a-1][b-1][r2Div]
-                                        + AlgDetect::H[a+1][b][r2Div]
-                                        + AlgDetect::H[a][b+1][r2Div]
-                                        + AlgDetect::H[a+1][b+1][r2Div]
-                                        + AlgDetect::H[a-1][b+1][r2Div]
-                                        + AlgDetect::H[a+1][b-1][r2Div];
+				tmpMaxValNeighbourSum =	  hParam.H[a][b][r2Div]
+										+ hParam.H[a-1][b][r2Div]
+										+ hParam.H[a][b-1][r2Div]
+										+ hParam.H[a-1][b-1][r2Div]
+										+ hParam.H[a+1][b][r2Div]
+										+ hParam.H[a][b+1][r2Div]
+										+ hParam.H[a+1][b+1][r2Div]
+										+ hParam.H[a-1][b+1][r2Div]
+										+ hParam.H[a+1][b-1][r2Div];
 				if (tmpMaxValNeighbourSum > maxValNeighbourSum)
 				{
 					maxValNeighbourSum = tmpMaxValNeighbourSum;
-                    maxVal = AlgDetect::H[a][b][r2Div];
+					maxVal = hParam.H[a][b][r2Div];
 					circle.a= a;
 					circle.b = b;
 					circle.r2Div = r2Div;
@@ -180,17 +190,19 @@ void AlgDetect::Hough::apply()
 }
 
 
-AlgDetect::Hough2::Hough2(baseImage &image,
-													int rMin, 
-													int rMax, 
-													int step, 
-													int iMin, 
-													int iMax, 
-													int jMin, 
-													int jMax, 
-													int div, 
-													_Pan_Circle& bigCircle,
-													_Pan_Circle& smallCircle) : image(image), bigCircle(bigCircle), smallCircle(smallCircle)
+AlgDetect::Hough2::Hough2(  baseImage &image,
+							int rMin,
+							int rMax,
+							int step,
+							int iMin,
+							int iMax,
+							int jMin,
+							int jMax,
+							int div,
+							_Pan_Circle& bigCircle,
+							_Pan_Circle& smallCircle,
+							_Hough_Param& hParam) :
+							image(image), bigCircle(bigCircle), smallCircle(smallCircle), hParam(hParam)
 {
 	this->rMin = rMin;
 	this->rMax = rMax;
@@ -200,11 +212,6 @@ AlgDetect::Hough2::Hough2(baseImage &image,
 	this->jMin = jMin;
 	this->jMax = jMax;
 	this->div = div;
-
-    if (!isInited)
-    {
-        InitGlobalVaribles(image);
-    }
 }
 
 void AlgDetect::Hough2::apply()
@@ -222,7 +229,7 @@ void AlgDetect::Hough2::apply()
 
 	int r2Min = rMin * rMin;
 	int r2Max = rMax * rMax;
-    int r2MaxInsidebigCircle = (bigCircle.r - AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - AlgDetect::CIRCLE_WIDTH);
+	int r2MaxInsidebigCircle = (bigCircle.r - hParam.CIRCLE_WIDTH) * (bigCircle.r - hParam.CIRCLE_WIDTH);
 	int r2MinDiv = r2Min / div;
 	int r2MaxDiv = r2Max / div;
 
@@ -250,14 +257,14 @@ void AlgDetect::Hough2::apply()
 	//double time_start = clock();
 
 
-    //memset(AlgDetect::H, 0, mat.cols*mat.rows*AlgDetect::_r2DivNum*sizeof(int));
+	//memset(hParam.H, 0, mat.cols*mat.rows*hParam._r2DivNum*sizeof(int));
 	for (i = 0; i < width; i++)
 	{
 		for (j = 0; j < height; j++)
 		{
 			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
 			{
-                AlgDetect::H[i][j][r2Div] = 0;
+				hParam.H[i][j][r2Div] = 0;
 			}
 		}
 	}
@@ -305,7 +312,7 @@ void AlgDetect::Hough2::apply()
 						if (r2 > r2Min && r2 < r2Max)
 						{   
 							r2Div = (r2 + div2) / div;
-                            AlgDetect::H[a][b][r2Div] ++;
+							hParam.H[a][b][r2Div] ++;
 						}
 					}
 				}
@@ -321,7 +328,7 @@ void AlgDetect::Hough2::apply()
 		{
 			for (b = bMin; b < bMax; b++)
 			{
-                tmpVal = AlgDetect::H[a][b][r2Div];
+				tmpVal = hParam.H[a][b][r2Div];
 				if (tmpVal > maxVal)
 				{
 					maxVal = tmpVal;
@@ -346,13 +353,11 @@ void AlgDetect::Hough2::apply()
 
 
 AlgDetect::LabelString::LabelString(baseImage& image,
-										   _Pan_Circle& bigCircle, 
-										   _Pan_Circle& smallCircle) : image(image), bigCircle(bigCircle), smallCircle(smallCircle)
+								   _Pan_Circle& bigCircle,
+								   _Pan_Circle& smallCircle,
+								   _Hough_Param& hParam) :
+									image(image), bigCircle(bigCircle), smallCircle(smallCircle), hParam(hParam)
 {
-    if (!isInited)
-    {
-        InitGlobalVaribles(image);
-    }
 }
 
 void AlgDetect::LabelString::apply()
@@ -361,8 +366,8 @@ void AlgDetect::LabelString::apply()
 	int height = mat.rows;
 	int width = mat.cols;
 
-    int r2MinThresh = (bigCircle.r - 3* AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - 3*AlgDetect::CIRCLE_WIDTH);
-    int r2MaxThresh = (bigCircle.r - AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - AlgDetect::CIRCLE_WIDTH);
+	int r2MinThresh = (bigCircle.r - 3* hParam.CIRCLE_WIDTH) * (bigCircle.r - 3*hParam.CIRCLE_WIDTH);
+	int r2MaxThresh = (bigCircle.r - hParam.CIRCLE_WIDTH) * (bigCircle.r - hParam.CIRCLE_WIDTH);
 
 	int i, j;
 
@@ -471,19 +476,21 @@ void AlgDetect::LabelString::apply()
 
 
 AlgDetect::CicleIncisionDetection::CicleIncisionDetection(baseImage &image,
-																 int rMin, 
-																 int rMax, 
-																 int step, 
-																 int iMin, 
-																 int iMax, 
-																 int jMin, 
-																 int jMax, 
-																 int div, 
-																 _Pan_Circle& bigCircle, 
-																 _Pan_Circle& smallCircle)
-																 : image(image),
-																 bigCircle(bigCircle),
-																 smallCircle(smallCircle)
+														 int rMin,
+														 int rMax,
+														 int step,
+														 int iMin,
+														 int iMax,
+														 int jMin,
+														 int jMax,
+														 int div,
+														 _Pan_Circle& bigCircle,
+														 _Pan_Circle& smallCircle,
+														 _Hough_Param& hParam)
+														 : image(image),
+														 bigCircle(bigCircle),
+														 smallCircle(smallCircle),
+														 hParam(hParam)
 {
 	this->rMax = rMax;
 	this->rMin = rMin;
@@ -493,11 +500,6 @@ AlgDetect::CicleIncisionDetection::CicleIncisionDetection(baseImage &image,
 	this->jMin = jMin;
 	this->jMax = jMax;
 	this->div = div;
-
-    if (!isInited)
-    {
-        InitGlobalVaribles(image);
-    }
 }
 
 void AlgDetect::CicleIncisionDetection::apply()
@@ -612,14 +614,14 @@ void AlgDetect::CicleIncisionDetection::apply()
 	tmpMat1.copyTo(mat);
 
 
-    //memset(AlgDetect::H, 0, mat.cols*mat.rows*AlgDetect::_r2DivNum*sizeof(int));
+	//memset(hParam.H, 0, mat.cols*mat.rows*hParam._r2DivNum*sizeof(int));
 	for (i = 0; i < width; i++)
 	{
 		for (j = 0; j < height; j++)
 		{
 			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
 			{
-                AlgDetect::H[i][j][r2Div] = 0;
+				hParam.H[i][j][r2Div] = 0;
 			}
 		}
 	}
@@ -658,7 +660,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 						if (r2 > r2Min && r2 < r2Max)
 						{   
 							r2Div = (r2 + div2) / div;
-                            AlgDetect::H[a][b][r2Div] ++;
+							hParam.H[a][b][r2Div] ++;
 						}
 					}
 				}
@@ -674,19 +676,19 @@ void AlgDetect::CicleIncisionDetection::apply()
 		{
 			for (b = bMin; b < bMax; b++)
 			{
-                tmpMaxValNeighbourSum =	  AlgDetect::H[a][b][r2Div]
-                                        + AlgDetect::H[a-1][b][r2Div]
-                                        + AlgDetect::H[a][b-1][r2Div]
-                                        + AlgDetect::H[a-1][b-1][r2Div]
-                                        + AlgDetect::H[a+1][b][r2Div]
-                                        + AlgDetect::H[a][b+1][r2Div]
-                                        + AlgDetect::H[a+1][b+1][r2Div]
-                                        + AlgDetect::H[a-1][b+1][r2Div]
-                                        + AlgDetect::H[a+1][b-1][r2Div];
+				tmpMaxValNeighbourSum =	  hParam.H[a][b][r2Div]
+										+ hParam.H[a-1][b][r2Div]
+										+ hParam.H[a][b-1][r2Div]
+										+ hParam.H[a-1][b-1][r2Div]
+										+ hParam.H[a+1][b][r2Div]
+										+ hParam.H[a][b+1][r2Div]
+										+ hParam.H[a+1][b+1][r2Div]
+										+ hParam.H[a-1][b+1][r2Div]
+										+ hParam.H[a+1][b-1][r2Div];
 				if (tmpMaxValNeighbourSum > maxValNeighbourSum)
 				{
 					maxValNeighbourSum = tmpMaxValNeighbourSum;
-                    maxVal = AlgDetect::H[a][b][r2Div];
+					maxVal = hParam.H[a][b][r2Div];
 					bigCircle.a= a;
 					bigCircle.b = b;
 					bigCircle.r2Div = r2Div;
@@ -707,8 +709,8 @@ void AlgDetect::CicleIncisionDetection::apply()
 		return;
 	}
 
-    rMin = AlgDetect::SMALL_CIRCLE_MIN;
-    rMax = AlgDetect::SMALL_CIRCLE_MAX;
+	rMin = hParam.SMALL_CIRCLE_MIN;
+	rMax = hParam.SMALL_CIRCLE_MAX;
 	step = 1;
 	iMin = bigCircle.a - bigCircle.r;
 	iMax = bigCircle.a + bigCircle.r;
@@ -722,7 +724,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	r2MinDiv = r2Min / div;
 	r2MaxDiv = r2Max / div;
 
-    r2MaxInsidebigCircle = (bigCircle.r - AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - AlgDetect::CIRCLE_WIDTH);
+	r2MaxInsidebigCircle = (bigCircle.r - hParam.CIRCLE_WIDTH) * (bigCircle.r - hParam.CIRCLE_WIDTH);
 
 	aMin = iMin + rMin;
 	aMax = iMax - rMin;
@@ -734,14 +736,14 @@ void AlgDetect::CicleIncisionDetection::apply()
 	maxVal = 0;
 
 
-    //memset(AlgDetect::H, 0, mat.cols*mat.rows*AlgDetect::_r2DivNum*sizeof(int));
+	//memset(hParam.H, 0, mat.cols*mat.rows*hParam._r2DivNum*sizeof(int));
 	for (i = 0; i < width; i++)
 	{
 		for (j = 0; j < height; j++)
 		{
 			for (r2Div = r2MinDiv; r2Div < r2MaxDiv; r2Div++)
 			{
-                AlgDetect::H[i][j][r2Div] = 0;
+				hParam.H[i][j][r2Div] = 0;
 			}
 		}
 	}
@@ -789,7 +791,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 						if (r2 > r2Min && r2 < r2Max)
 						{   
 							r2Div = (r2 + div2) / div;
-                            AlgDetect::H[a][b][r2Div] ++;
+							hParam.H[a][b][r2Div] ++;
 						}
 					}
 				}
@@ -805,7 +807,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 		{
 			for (b = bMin; b < bMax; b++)
 			{
-                tmpVal = AlgDetect::H[a][b][r2Div];
+				tmpVal = hParam.H[a][b][r2Div];
 				if (tmpVal > maxVal)
 				{
 					maxVal = tmpVal;
@@ -824,8 +826,8 @@ void AlgDetect::CicleIncisionDetection::apply()
 		smallCircle.hasValue = true;	
 	}
 
-    r2MinThresh = (bigCircle.r - 3* AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - 3*AlgDetect::CIRCLE_WIDTH);
-    r2MaxThresh = (bigCircle.r - AlgDetect::CIRCLE_WIDTH) * (bigCircle.r - AlgDetect::CIRCLE_WIDTH);
+	r2MinThresh = (bigCircle.r - 3* hParam.CIRCLE_WIDTH) * (bigCircle.r - 3*hParam.CIRCLE_WIDTH);
+	r2MaxThresh = (bigCircle.r - hParam.CIRCLE_WIDTH) * (bigCircle.r - hParam.CIRCLE_WIDTH);
 
 	iMax = bigCircle.a + bigCircle.r;
 	iMin = bigCircle.a - bigCircle.r;

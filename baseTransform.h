@@ -1,8 +1,6 @@
 #ifndef BASE_TRANSFORM_H
 #define BASE_TRANSFORM_H
 
-#include <QtCore/QString>
-#include "baseImage.h"
 
 class baseTransform
 {
