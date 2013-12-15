@@ -5,7 +5,7 @@
 class baseTransform
 {
 public:
-    virtual ~baseTransform(void)
+	virtual ~baseTransform(void)
 	{
 	}
 

@@ -10,7 +10,7 @@
 
 
 namespace AlgDetect {
-	typedef struct
+	typedef struct panCircle
 	{
 		int a;
 		int b;
@@ -18,9 +18,9 @@ namespace AlgDetect {
 		long r2;
 		long r2Div;
 		bool hasValue;
-	}_Pan_Circle;
+	}panCircle;
 
-	typedef struct
+	typedef struct _Hough_Param
 	{
 		bool isInited;
 		int CIRCLE_WIDTH;
@@ -36,7 +36,15 @@ namespace AlgDetect {
 		static int*** H;
 
 		void InitGlobalVaribles(baseImage&);
-	}_Hough_Param;
+	}houghParam;
+
+    typedef struct _String_
+    {
+        int stringCenterX;
+        int stringCenterY;
+    }strInfo;
+
+    void PutResultText(AlgDetect::panCircle& bigCircle, AlgDetect::panCircle& smallCircle, baseImage& image, strInfo& stringInfo);
 
 	class Hough;
 	class Hough2;
@@ -57,16 +65,16 @@ public:
 			int jMin,
 			int jMax,
 			int div,
-			_Pan_Circle& circle,
-			_Hough_Param& hParam);
+			panCircle& circle,
+			houghParam& hParam);
 
 	void apply();
 
 private:
 	baseImage& image;
 
-	_Pan_Circle& circle;
-	_Hough_Param& hParam;
+	panCircle& circle;
+	houghParam& hParam;
 	int rMin; 
 	int rMax;
 	int step;
@@ -90,18 +98,18 @@ public:
 			int jMin,
 			int jMax,
 			int div,
-			_Pan_Circle& bigCircle,
-			_Pan_Circle& smallCircle,
-			_Hough_Param& hParam);
+			panCircle& bigCircle,
+			panCircle& smallCircle,
+			houghParam& hParam);
 
 	void apply();
 
 private:
 	baseImage& image;
 
-	_Pan_Circle& bigCircle;
-	_Pan_Circle& smallCircle;
-	_Hough_Param& hParam;
+	panCircle& bigCircle;
+	panCircle& smallCircle;
+	houghParam& hParam;
 	int rMin; 
 	int rMax;
 	int step;
@@ -116,16 +124,16 @@ private:
 class AlgDetect::LabelString : public baseTransform
 {
 public:
-	LabelString(baseImage& image, _Pan_Circle& bigCircle, _Pan_Circle& smallCircle, _Hough_Param& hParam);
+	LabelString(baseImage& image, panCircle& bigCircle, panCircle& smallCircle, _Hough_Param& hParam);
 
 	void apply();
 
 private:
 	baseImage& image;
 
-	_Pan_Circle& bigCircle;
-	_Pan_Circle& smallCircle;
-	_Hough_Param& hParam;
+	panCircle& bigCircle;
+	panCircle& smallCircle;
+	houghParam& hParam;
 };
 
 
@@ -141,18 +149,18 @@ public:
 							int jMin,
 							int jMax,
 							int div,
-							_Pan_Circle& bigCircle,
-							_Pan_Circle& smallCircle,
-							_Hough_Param& hParam);
+							panCircle& bigCircle,
+							panCircle& smallCircle,
+							houghParam& hParam);
 
 	void apply();
 
 private:
 	baseImage& image;
 
-	_Pan_Circle& bigCircle;
-	_Pan_Circle& smallCircle;
-	_Hough_Param& hParam;
+	panCircle& bigCircle;
+	panCircle& smallCircle;
+	houghParam& hParam;
 	int rMin; 
 	int rMax;
 	int step;

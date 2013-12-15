@@ -1,8 +1,8 @@
 #include "algDetect.h"
 
-int*** AlgDetect::_Hough_Param::H = 0;
+int*** AlgDetect::houghParam::H = 0;
 
-void AlgDetect::_Hough_Param::InitGlobalVaribles(baseImage& image)
+void AlgDetect::houghParam::InitGlobalVaribles(baseImage& image)
 {
 	isInited = false;
 
@@ -44,8 +44,8 @@ AlgDetect::Hough::Hough(baseImage &image,
 						int jMin,
 						int jMax,
 						int div,
-						_Pan_Circle& circle,
-						_Hough_Param& hParam) : image(image),circle(circle),hParam(hParam)
+						panCircle& circle,
+						houghParam& hParam) : image(image),circle(circle),hParam(hParam)
 {
 	this->rMin = rMin;
 	this->rMax = rMax;
@@ -59,9 +59,9 @@ AlgDetect::Hough::Hough(baseImage &image,
 
 void AlgDetect::Hough::apply()
 {
-	cv::Mat mat = image.GetMat();
-	int width = mat.cols;
-	int height = mat.rows;
+	cv::Mat* mat = image.GetMat();
+	int width = mat->cols;
+	int height = mat->rows;
 
 	circle.a = 0;
 	circle.b = 0;
@@ -110,7 +110,7 @@ void AlgDetect::Hough::apply()
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
 	{
-		data = mat.ptr<uchar>(j);
+		data = mat->ptr<uchar>(j);
 		data += iMin;
 
 		for (i = iMin; i < iMax; i+=step)
@@ -199,9 +199,9 @@ AlgDetect::Hough2::Hough2(  baseImage &image,
 							int jMin,
 							int jMax,
 							int div,
-							_Pan_Circle& bigCircle,
-							_Pan_Circle& smallCircle,
-							_Hough_Param& hParam) :
+							panCircle& bigCircle,
+							panCircle& smallCircle,
+							houghParam& hParam) :
 							image(image), bigCircle(bigCircle), smallCircle(smallCircle), hParam(hParam)
 {
 	this->rMin = rMin;
@@ -216,7 +216,7 @@ AlgDetect::Hough2::Hough2(  baseImage &image,
 
 void AlgDetect::Hough2::apply()
 {
-	cv::Mat mat = image.GetMat();
+	cv::Mat* mat = image.GetMat();
 	int width = image.width();
 	int height = image.height();
 
@@ -273,7 +273,7 @@ void AlgDetect::Hough2::apply()
 	for (j = jMin; j < jMax; j+=step)
 	{
 		jDistBorder = j - bigCircle.b;
-		data = mat.ptr<uchar>(j);
+		data = mat->ptr<uchar>(j);
 		data += iMin;
 
 		for (i = iMin; i < iMax; i+=step)
@@ -353,18 +353,18 @@ void AlgDetect::Hough2::apply()
 
 
 AlgDetect::LabelString::LabelString(baseImage& image,
-								   _Pan_Circle& bigCircle,
-								   _Pan_Circle& smallCircle,
-								   _Hough_Param& hParam) :
+								   panCircle& bigCircle,
+								   panCircle& smallCircle,
+								   houghParam& hParam) :
 									image(image), bigCircle(bigCircle), smallCircle(smallCircle), hParam(hParam)
 {
 }
 
 void AlgDetect::LabelString::apply()
 {
-	cv::Mat mat = image.GetMat();
-	int height = mat.rows;
-	int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	int height = mat->rows;
+	int width = mat->cols;
 
 	int r2MinThresh = (bigCircle.r - 3* hParam.CIRCLE_WIDTH) * (bigCircle.r - 3*hParam.CIRCLE_WIDTH);
 	int r2MaxThresh = (bigCircle.r - hParam.CIRCLE_WIDTH) * (bigCircle.r - hParam.CIRCLE_WIDTH);
@@ -398,7 +398,7 @@ void AlgDetect::LabelString::apply()
 	{
 		for (j = 0; j < height; j++)
 		{
-			data = mat.ptr<uchar>(j);
+			data = mat->ptr<uchar>(j);
 
 			for (i = 0; i < width; i++)
 			{
@@ -441,7 +441,7 @@ void AlgDetect::LabelString::apply()
 	{
 		for (j = jMinSmall; j < jMaxSmall; j++)
 		{
-			uchar* data = mat.ptr<uchar>(j);
+			uchar* data = mat->ptr<uchar>(j);
 			data += iMinSmall;
 			for (i = iMinSmall; i < iMaxSmall; i++)
 			{
@@ -453,11 +453,11 @@ void AlgDetect::LabelString::apply()
 
 					if (distanceSmall <= smallCircle.r2)
 					{
-						mat.at<uchar>(j, i) = 255;
+						mat->at<uchar>(j, i) = 255;
 					}
 					else
 					{
-						mat.at<uchar>(j, i) = 0;
+						mat->at<uchar>(j, i) = 0;
 					}
 				}		
 			}
@@ -470,7 +470,7 @@ void AlgDetect::LabelString::apply()
 	// label big circle center point
 	if (bigCircle.hasValue)
 	{
-		mat.at<uchar>(bigCircle.b, bigCircle.a) = 255;
+		mat->at<uchar>(bigCircle.b, bigCircle.a) = 255;
 	}
 }
 
@@ -484,9 +484,9 @@ AlgDetect::CicleIncisionDetection::CicleIncisionDetection(baseImage &image,
 														 int jMin,
 														 int jMax,
 														 int div,
-														 _Pan_Circle& bigCircle,
-														 _Pan_Circle& smallCircle,
-														 _Hough_Param& hParam)
+														 panCircle& bigCircle,
+														 panCircle& smallCircle,
+														 houghParam& hParam)
 														 : image(image),
 														 bigCircle(bigCircle),
 														 smallCircle(smallCircle),
@@ -506,9 +506,9 @@ void AlgDetect::CicleIncisionDetection::apply()
 {
 	//double time_start = clock();
 
-	cv::Mat mat = image.GetMat();
-	int height = mat.rows;
-	int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	int height = mat->rows;
+	int width = mat->cols;
 	uchar* data;
 
 	int r2Min = rMin * rMin;
@@ -533,8 +533,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	int iDistBorder = 0;
 	int jDistBorder = 0;
 	int distance = 0;
-	int stringCenterX = 0;
-	int stringCenterY = 0;
+	strInfo stringInfo;
 	int stringPointNum = 1;
 	int iMaxSmall;
 	int iMinSmall;
@@ -562,17 +561,17 @@ void AlgDetect::CicleIncisionDetection::apply()
 	smallCircle.r2Div = 0;
 
 	cv::Mat tmpMat1, tmpMat2;
-	tmpMat1.create(mat.rows, mat.cols, CV_8UC1);
+	tmpMat1.create(mat->rows, mat->cols, CV_8UC1);
 
 	for(i = 1; i < width - 1; i++)
 	{
 		for (j = 1; j < height - 1; j++)
 		{
 			tmpMat1.at<uchar>(j, i) = cv::saturate_cast<uchar>(
-						fabs((float)(mat.at<uchar>(j+1, i-1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j+1, i)
-									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j-1, i+1) - 2*mat.at<uchar>(j-1, i)))
-						+fabs((float)(mat.at<uchar>(j-1, i+1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j, i+1)
-									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j+1, i-1) - 2*mat.at<uchar>(j, i-1)))
+						fabs((float)(mat->at<uchar>(j+1, i-1) + mat->at<uchar>(j+1, i+1) + 2*mat->at<uchar>(j+1, i)
+									-mat->at<uchar>(j-1, i-1) - mat->at<uchar>(j-1, i+1) - 2*mat->at<uchar>(j-1, i)))
+						+fabs((float)(mat->at<uchar>(j-1, i+1) + mat->at<uchar>(j+1, i+1) + 2*mat->at<uchar>(j, i+1)
+									-mat->at<uchar>(j-1, i-1) - mat->at<uchar>(j+1, i-1) - 2*mat->at<uchar>(j, i-1)))
 						);
 		}
 	}
@@ -611,7 +610,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	}
 
 	image.SetIsBinary(true);
-	tmpMat1.copyTo(mat);
+	tmpMat1.copyTo(*mat);
 
 
 	//memset(hParam.H, 0, mat.cols*mat.rows*hParam._r2DivNum*sizeof(int));
@@ -629,7 +628,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	// do by algorithm by every step pixels
 	for (j = jMin; j < jMax; j+=step)
 	{
-		data = mat.ptr<uchar>(j);
+		data = mat->ptr<uchar>(j);
 		data += iMin;
 
 		for (i = iMin; i < iMax; i+=step)
@@ -752,7 +751,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	for (j = jMin; j < jMax; j+=step)
 	{
 		jDistBorder = j - bigCircle.b;
-		data = mat.ptr<uchar>(j);
+		data = mat->ptr<uchar>(j);
 		data += iMin;
 
 		for (i = iMin; i < iMax; i+=step)
@@ -835,23 +834,22 @@ void AlgDetect::CicleIncisionDetection::apply()
 	jMin = bigCircle.b - bigCircle.r;
 	distance = 0;
 
-	stringCenterX = 0;
-	stringCenterY = 0;
-	stringPointNum = 1;
 
 	iMaxSmall = smallCircle.a + smallCircle.r;
 	iMinSmall = smallCircle.a - smallCircle.r;
 	jMaxSmall = smallCircle.b + smallCircle.r;
 	jMinSmall = smallCircle.b - smallCircle.r;
 	distanceSmall = 0;
-	iDistSmall, jDistSmall;
 
+	stringInfo.stringCenterX = 0;
+	stringInfo.stringCenterY = 0;
+	stringPointNum = 0;
 	// unlabel the big circle and label the string
 	if (bigCircle.hasValue)
 	{
 		for (j = 0; j < height; j++)
 		{
-			data = mat.ptr<uchar>(j);
+			data = mat->ptr<uchar>(j);
 
 			for (i = 0; i < width; i++)
 			{
@@ -866,9 +864,11 @@ void AlgDetect::CicleIncisionDetection::apply()
 
 						if (distance > r2MinThresh && distance < r2MaxThresh)
 						{
-							*data = 255;
-							stringCenterX += i;
-							stringCenterY += j;
+							//*data = 255;
+							*data = 30;
+
+							stringInfo.stringCenterX += i;
+							stringInfo.stringCenterY += j;
 							stringPointNum ++;
 						}
 						else
@@ -885,8 +885,15 @@ void AlgDetect::CicleIncisionDetection::apply()
 				data ++;
 			}
 		}
-		stringCenterX /= stringPointNum;
-		stringCenterY /= stringPointNum;
+		
+		//	exception -- no string point found
+		if (stringPointNum == 0)
+		{
+			exit(3);
+		}
+
+		stringInfo.stringCenterX /= stringPointNum;
+		stringInfo.stringCenterY /= stringPointNum;
 	}
 
 	// label the small circle within the big circle
@@ -894,7 +901,7 @@ void AlgDetect::CicleIncisionDetection::apply()
 	{
 		for (j = jMinSmall; j < jMaxSmall; j++)
 		{
-			uchar* data = mat.ptr<uchar>(j);
+			uchar* data = mat->ptr<uchar>(j);
 			data += iMinSmall;
 			for (i = iMinSmall; i < iMaxSmall; i++)
 			{
@@ -906,21 +913,84 @@ void AlgDetect::CicleIncisionDetection::apply()
 
 					if (distanceSmall <= smallCircle.r2)
 					{
-						mat.at<uchar>(j, i) = 255;
+						mat->at<uchar>(j, i) = 255;
 					}
 					else
 					{
-						mat.at<uchar>(j, i) = 0;
+						mat->at<uchar>(j, i) = 0;
 					}
 				}		
 			}
 		}
-
-		mat.at<uchar>(smallCircle.b, smallCircle.a) = 255;
-		mat.at<uchar>(bigCircle.b, bigCircle.a) = 255;
 	}
+
+	PutResultText(bigCircle, smallCircle, image, stringInfo);
 
 	//double time_end = clock();
 	//double interval = time_end - time_start;
 }
+
+void AlgDetect::PutResultText(AlgDetect::panCircle& bigCircle, AlgDetect::panCircle& smallCircle, baseImage& image, strInfo& stringInfo)
+{
+	cv::Mat* mat = image.GetMat();
+	int height = mat->rows;
+
+
+	cv::cvtColor(*mat, *mat, CV_GRAY2RGB);
+	image.SetChannelChangeState(true);
+	image.SetIsGray(false);
+
+	cv::line(*mat, cv::Point(stringInfo.stringCenterX, stringInfo.stringCenterY), cv::Point(bigCircle.a, bigCircle.b), cv::Scalar(255,0,0));
+
+	bigCircle.b = height - bigCircle.b;
+	stringInfo.stringCenterY = height - stringInfo.stringCenterY;
+	double angleValue = atan2(((double)stringInfo.stringCenterY - (double)bigCircle.b), ((double)stringInfo.stringCenterX - (double)bigCircle.a)) * 180.0 / 3.1415926;
+
+	//  write the location of center of the circle
+	QString msgChipSide = QString("Chip Side : ");
+	cv::putText(*mat, msgChipSide.toStdString(),cv::Point(20,20),cv::FONT_HERSHEY_COMPLEX ,0.4, cv::Scalar(0,255,0), 1, CV_AA);
+	QString msgChipCenter = QString("Chip Center : ");
+	cv::putText(*mat,msgChipCenter.toStdString(),cv::Point(20,40),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(0,255,0), 1, CV_AA);
+	QString msgString = QString("String Center : ");
+	cv::putText(*mat, msgString.toStdString(),cv::Point(20,60),cv::FONT_HERSHEY_COMPLEX,0.4, cv::Scalar(0,255,0), 1, CV_AA);
+	QString msgAngle = QString("Normal Angle : ");
+	cv::putText(*mat, msgAngle.toStdString(),cv::Point(20,80),cv::FONT_HERSHEY_COMPLEX,0.4, cv::Scalar(0,255,0), 1, CV_AA);
+
+	if (smallCircle.hasValue){
+		mat->at<cv::Vec3b>(smallCircle.b, smallCircle.a)[0] = 0;
+		mat->at<cv::Vec3b>(smallCircle.b, smallCircle.a)[1] = 0;
+		mat->at<cv::Vec3b>(smallCircle.b, smallCircle.a)[2] = 255;
+
+		QString msgSideInfo = QString("Front");
+		cv::putText(*mat,msgSideInfo.toStdString(),cv::Point(140, 20),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255,255,255), 1, CV_AA);
+	}else{
+		QString msgSideInfo = QString("Back");
+		cv::putText(*mat,msgSideInfo.toStdString(),cv::Point(140, 20),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255,255,255), 1, CV_AA);
+	}
+
+	/*mat->at<cv::Vec3b>(bigCircle.b, bigCircle.a)[0] = 0;
+	mat->at<cv::Vec3b>(bigCircle.b, bigCircle.a)[1] = 0;
+	mat->at<cv::Vec3b>(bigCircle.b, bigCircle.a)[2] = 255;*/
+	QString msgChipCenterNum = QString("( %1, %2 )").arg(bigCircle.a).arg(bigCircle.b);
+	cv::putText(*mat,msgChipCenterNum.toStdString(),cv::Point(140, 40),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255,255,255), 1, CV_AA);
+	
+	/*mat->at<cv::Vec3b>(stringInfo.stringCenterY, stringInfo.stringCenterX)[0] = 0;
+	mat->at<cv::Vec3b>(stringInfo.stringCenterY, stringInfo.stringCenterX)[1] = 0;
+	mat->at<cv::Vec3b>(stringInfo.stringCenterY, stringInfo.stringCenterX)[2] = 255;*/
+	QString msgStringCenterNum = QString("( %1, %2 )").arg(stringInfo.stringCenterX).arg(stringInfo.stringCenterY);
+	cv::putText(*mat,msgStringCenterNum.toStdString(),cv::Point(140, 60),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255,255,255), 1, CV_AA);	
+
+	QString msgAngleNum = QString("%1").arg(angleValue);
+	cv::putText(*mat,msgAngleNum.toStdString(),cv::Point(140, 80),cv::FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(255,255,255), 1, CV_AA);
+}
+
+
+
+
+
+
+
+
+
+
 

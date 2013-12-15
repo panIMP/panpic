@@ -13,16 +13,16 @@ class baseThread : public QThread
 {
 	Q_OBJECT
 
-    baseThread(void);
-    ~baseThread(void);
-    baseThread(baseThread&);
-    baseThread& operator = (baseThread&);
+	baseThread(void);
+	~baseThread(void);
+	baseThread(baseThread&);
+	baseThread& operator = (baseThread&);
 
 public:
-    static baseThread* GetInstance();
+	static baseThread* GetInstance();
 	static void Destroy();
 
-    void addTransform(baseTransform* trans);
+	void addTransform(baseTransform* trans);
 
 signals:
 	void transformStarted();
@@ -32,10 +32,10 @@ protected:
 	void run();
 
 private:
-    static baseThread* instance;
-    static baseTransform* const endTransform;
+	static baseThread* instance;
+	static baseTransform* const endTransform;
 
-    QQueue<baseTransform*> transformQuene;
+	QQueue<baseTransform*> transformQuene;
 	QWaitCondition transformAdded;
 	QMutex mutex;
 };

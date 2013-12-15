@@ -19,7 +19,7 @@ class UiHoughDlg :public QWidget
 	Q_OBJECT
 
 public:
-	explicit UiHoughDlg(AlgDetect::_Pan_Circle& circle, baseImage& image, AlgDetect::_Hough_Param& hParam,QWidget* parent = 0);
+    explicit UiHoughDlg(AlgDetect::panCircle& circle, baseImage& image, AlgDetect::houghParam& hParam,QWidget* parent = 0);
 	~UiHoughDlg();
 
 	void AddTransform(baseTransform* transform);
@@ -48,8 +48,8 @@ private:
 	QLineEdit* r;
 
 	baseImage& image;
-	AlgDetect::_Pan_Circle& cle;
-	AlgDetect::_Hough_Param& hParam;
+    AlgDetect::panCircle& cle;
+    AlgDetect::houghParam& hParam;
 
 	QRegExpValidator* iMinValidator;
 	QRegExpValidator* iMaxValidator;

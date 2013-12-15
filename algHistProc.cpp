@@ -9,15 +9,15 @@ AlgHistProc::GetHistImage::GetHistImage(baseImage& image, baseImage& histImage) 
 
 void AlgHistProc::GetHistImage::apply()
 {
-	cv::Mat mat = image.GetMat();
+	cv::Mat* mat = image.GetMat();
 	cv::MatND hist;
 
-	if (mat.channels() == 1){
+	if (mat->channels() == 1){
 		int histSize[] = {256};
 		float hRanges[] = {0.0, 255.0};
 		const float* ranges[] = {hRanges};
 		const int channels[] = {0};
-		cv::calcHist(&mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges);
+		cv::calcHist(mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges);
 		double maxVal = 0;
 		double minVal = 0;
 		cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
@@ -33,9 +33,9 @@ void AlgHistProc::GetHistImage::apply()
 		histImage.SetMat(histMat);
 	}
 
-	else if (mat.channels() == 3){
+	else if (mat->channels() == 3){
 		cv::Mat hsv;
-		cv::cvtColor(mat, hsv, CV_BGR2HSV);
+		cv::cvtColor(*mat, hsv, CV_BGR2HSV);
 		std::vector<cv::Mat> v(hsv.channels());
 		cv::split(hsv, v);
 		std::vector<cv::Mat> temp(hsv.channels() - 1);
@@ -69,7 +69,10 @@ void AlgHistProc::GetHistImage::apply()
 				int i = h*sbins + s;
 				hsv_color.setTo(cv::Scalar(h*180.f / hbins,s*255.f/sbins, 255));
 				cv::cvtColor(hsv_color,rgb_color,CV_HSV2BGR);
-				cv::Scalar color = rgb_color.at<cv::Vec3b>(0,0);
+                cv::Scalar color(rgb_color.at<cv::Vec3b>(0,0)[0],
+                                 rgb_color.at<cv::Vec3b>(0,0)[1],
+                                 rgb_color.at<cv::Vec3b>(0,0)[2]);
+
 				cv::rectangle(histMat, cv::Point(i*bin_w,height),
 							  cv::Point((i+1)*bin_w,height - intensity),
 							  color, -1);
@@ -88,17 +91,17 @@ AlgHistProc::HistEqualize::HistEqualize(baseImage& image) : image(image)
 
 void AlgHistProc::HistEqualize::apply()
 {
-	cv::Mat mat = image.GetMat();
-	if (mat.channels() == 1){
-		cv::equalizeHist(mat, mat);
+	cv::Mat* mat = image.GetMat();
+	if (mat->channels() == 1){
+		cv::equalizeHist(*mat, *mat);
 	}
-	else if (mat.channels() == 3){
-		std::vector<cv::Mat> v(mat.channels());
-		cv::split(mat, v);
+	else if (mat->channels() == 3){
+		std::vector<cv::Mat> v(mat->channels());
+		cv::split(*mat, v);
 		cv::equalizeHist(v[0], v[0]);
 		cv::equalizeHist(v[1], v[1]);
 		cv::equalizeHist(v[2], v[2]);
-		cv::merge(v, mat);
+		cv::merge(v, *mat);
 	}
 }
 
@@ -111,13 +114,13 @@ AlgHistProc::HistMatch::HistMatch(baseImage& image, float* histMatch) : image(im
 
 void AlgHistProc::HistMatch::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int width = mat.cols;
-	unsigned int height = mat.rows;
-	unsigned int channelNum = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int width = mat->cols;
+	unsigned int height = mat->rows;
+	unsigned int channelNum = mat->channels();
 	
 	std::vector<cv::Mat> v(channelNum);
-	cv::split(mat, v);
+	cv::split(*mat, v);
 
 	cv::Mat hist;
 	int histSize[] = {256};
@@ -186,7 +189,7 @@ void AlgHistProc::HistMatch::apply()
 		}
 	}
 	
-	cv::merge(v, mat);
+	cv::merge(v, *mat);
 }
 
 
@@ -197,17 +200,17 @@ AlgHistProc::Enhance::Enhance(baseImage& image) : image(image)
 
 void AlgHistProc::Enhance::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int width = mat.cols;
-	unsigned int height = mat.rows;
-	unsigned int channels = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int width = mat->cols;
+	unsigned int height = mat->rows;
+	unsigned int channels = mat->channels();
 
 	std::vector<cv::Mat> v(channels);
 	std::vector<double> maxValue(channels);
 	std::vector<double> minValue(channels);
 	std::vector<double> enhanceRate(channels);
 
-	cv::split(mat, v);
+	cv::split(*mat, v);
 
 	for (unsigned int k = 0; k < channels; k++)
 	{
@@ -229,6 +232,6 @@ void AlgHistProc::Enhance::apply()
 		}
 	}
 
-	cv::merge(v, mat);
+	cv::merge(v, *mat);
 }
 

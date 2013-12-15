@@ -13,8 +13,8 @@ AlgFilter::Gray::Gray(baseImage& image) : image(image)
 
 void AlgFilter::Gray::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int channels = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int channels = mat->channels();
 	
 	if (channels < 3)
 	{
@@ -23,15 +23,14 @@ void AlgFilter::Gray::apply()
 
 	if (image.GetChannelChangeState())
 	{
-		cv::cvtColor(mat, mat, CV_RGB2GRAY);
+		cv::cvtColor(*mat, *mat, CV_RGB2GRAY);
 	}
 	else
 	{
-		cv::cvtColor(mat, mat, CV_BGR2GRAY);
+		cv::cvtColor(*mat, *mat, CV_BGR2GRAY);
 	}
 
 	image.SetIsGray(true);
-	image.SetMat(mat);
 }
 
 AlgFilter::MedianBlur::MedianBlur(baseImage& image) : image(image)
@@ -41,8 +40,8 @@ AlgFilter::MedianBlur::MedianBlur(baseImage& image) : image(image)
 	
 void AlgFilter::MedianBlur::apply()
 {
-	cv::Mat mat = image.GetMat();
-	cv::medianBlur(mat, mat, 5);
+	cv::Mat* mat = image.GetMat();
+	cv::medianBlur(*mat, *mat, 5);
 }
 
 AlgFilter::GuassinBlur::GuassinBlur(baseImage& image) : image(image)
@@ -52,8 +51,8 @@ AlgFilter::GuassinBlur::GuassinBlur(baseImage& image) : image(image)
 
 void AlgFilter::GuassinBlur::apply()
 {
-	cv::Mat mat = image.GetMat();
-	cv::GaussianBlur(mat, mat, cv::Size(5,5), 1.5, 1.5);
+	cv::Mat* mat = image.GetMat();
+	cv::GaussianBlur(*mat, *mat, cv::Size(5,5), 1.5, 1.5);
 }
 
 AlgFilter::ComFog::ComFog(baseImage& image, int randRange) : image(image)
@@ -63,19 +62,19 @@ AlgFilter::ComFog::ComFog(baseImage& image, int randRange) : image(image)
 
 void AlgFilter::ComFog::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int width = mat.cols;
-	unsigned int height = mat.rows;
-	unsigned int channels = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int width = mat->cols;
+	unsigned int height = mat->rows;
+	unsigned int channels = mat->channels();
 	cv::Mat tmpMat;
-	mat.copyTo(tmpMat);
+	mat->copyTo(tmpMat);
 
 	unsigned int randNum, randDirection, m, n;
 
 	std::vector<cv::Mat> v(channels);
-	cv::split(mat, v);
+	cv::split(*mat, v);
 	std::vector<cv::Mat> tmpV(channels);
-	cv::split(mat, tmpV);
+	cv::split(*mat, tmpV);
 
 	for (unsigned int k = 0; k < channels; k++)
 	{
@@ -134,7 +133,7 @@ void AlgFilter::ComFog::apply()
 		}
 	}
 
-	cv::merge(v, mat);
+	cv::merge(v, *mat);
 }
 
 AlgFilter::Sketch::Sketch(baseImage& image) : image(image)
@@ -144,13 +143,13 @@ AlgFilter::Sketch::Sketch(baseImage& image) : image(image)
 
 void AlgFilter::Sketch::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;
 
 	cv::Mat tmpMat1, tmpMat2;
-	mat.copyTo(tmpMat1);
-	mat.copyTo(tmpMat2);
+	mat->copyTo(tmpMat1);
+	mat->copyTo(tmpMat2);
 
 	int templt[9] = {1, 1, 1, 1, -8, 1, 1, 1, 1};
 	int templtTest1[9] = {1, 1, -1, 1, 0, -1, -1, 1, -1};
@@ -162,9 +161,9 @@ void AlgFilter::Sketch::apply()
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-            a = AlgFilter::TempltExcuteCl(tmpMat1, templt, 3, i, j);
-            b1 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
-            b2 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
+			a = AlgFilter::TempltExcuteCl(tmpMat1, templt, 3, i, j);
+			b1 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest1, 3, i, j);
+			b2 = AlgFilter::TempltExcuteCl(tmpMat1, templtTest2, 3, i, j);
 			b = b1 > b2 ? b1 : b2;
 			if (b < 25)
 			{
@@ -191,8 +190,8 @@ void AlgFilter::Sketch::apply()
 	{
 		for (unsigned int i = 1; i < width - 1; i++)
 		{
-            a = AlgFilter::TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
-			mat.at<uchar>(j, i) = a;
+			a = AlgFilter::TempltExcuteCl(tmpMat2, templtAve, 3, i, j) / 12;
+			mat->at<uchar>(j, i) = a;
 		}
 	}
 }
@@ -204,12 +203,12 @@ AlgFilter::SobelSharpen::SobelSharpen(baseImage& image) : image(image)
 
 void AlgFilter::SobelSharpen::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;
 
 	cv::Mat result;
-	result.create(mat.rows, mat.cols, CV_8UC1);
+	result.create(mat->rows, mat->cols, CV_8UC1);
 
 	//double time_start = clock();
 
@@ -218,15 +217,15 @@ void AlgFilter::SobelSharpen::apply()
 		for (unsigned int j = 1; j < height - 1; j++)
 		{
 			result.at<uchar>(j, i) = cv::saturate_cast<uchar>(
-						fabs((float)(mat.at<uchar>(j+1, i-1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j+1, i)
-									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j-1, i+1) - 2*mat.at<uchar>(j-1, i)))
-						+fabs((float)(mat.at<uchar>(j-1, i+1) + mat.at<uchar>(j+1, i+1) + 2*mat.at<uchar>(j, i+1)
-									-mat.at<uchar>(j-1, i-1) - mat.at<uchar>(j+1, i-1) - 2*mat.at<uchar>(j, i-1)))
+						fabs((float)(mat->at<uchar>(j+1, i-1) + mat->at<uchar>(j+1, i+1) + 2*mat->at<uchar>(j+1, i)
+									-mat->at<uchar>(j-1, i-1) - mat->at<uchar>(j-1, i+1) - 2*mat->at<uchar>(j-1, i)))
+						+fabs((float)(mat->at<uchar>(j-1, i+1) + mat->at<uchar>(j+1, i+1) + 2*mat->at<uchar>(j, i+1)
+									-mat->at<uchar>(j-1, i-1) - mat->at<uchar>(j+1, i-1) - 2*mat->at<uchar>(j, i-1)))
 						);
 		}
 	}
 
-	result.copyTo(mat);
+	result.copyTo(*mat);
 
 	//double time_end = clock();
 	//double interval = time_end - time_start;
@@ -235,7 +234,7 @@ void AlgFilter::SobelSharpen::apply()
 	{
 		for(unsigned int j = 0; j < height; ++j)
 		{
-			mat.at<uchar>(j, i) = 0;
+			mat->at<uchar>(j, i) = 0;
 		}
 	}
 
@@ -261,8 +260,8 @@ AlgFilter::LaplaceSharpen::LaplaceSharpen(baseImage& image) : image(image)
 
 void AlgFilter::LaplaceSharpen::apply()
 {
-	cv::Mat mat = image.GetMat();
-	cv::Laplacian(mat, mat, CV_8U);
+	cv::Mat* mat = image.GetMat();
+	cv::Laplacian(*mat, *mat, CV_8U);
 }
 
 AlgFilter::MedianBlur2::MedianBlur2(baseImage& image) : image(image)
@@ -272,15 +271,15 @@ AlgFilter::MedianBlur2::MedianBlur2(baseImage& image) : image(image)
 
 void AlgFilter::MedianBlur2::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;
 
 	cv::Mat tmpMat;
 
 	//double time_start = clock();
 
-	mat.copyTo(tmpMat);
+	mat->copyTo(tmpMat);
 
 	for (unsigned int j = 1; j < height - 1; j++)
 	{
@@ -296,11 +295,11 @@ void AlgFilter::MedianBlur2::apply()
 				 +tmpMat.at<uchar>(j-1, i+1) 
 				 +tmpMat.at<uchar>(j+1, i-1)) < 5*255) 
 			{
-				mat.at<uchar>(j, i) = 0;
+				mat->at<uchar>(j, i) = 0;
 			}
 			else
 			{
-				mat.at<uchar>(j, i) = 255;
+				mat->at<uchar>(j, i) = 255;
 			}
 		}
 	}
@@ -320,8 +319,8 @@ AlgFilter::Erode::Erode(baseImage& image) : image(image)
 
 void AlgFilter::Erode::apply()
 {
-	cv::Mat mat = image.GetMat();
-	cv::erode(mat, mat, cv::Mat());
+	cv::Mat* mat = image.GetMat();
+	cv::erode(*mat, *mat, cv::Mat());
 }
 
 AlgFilter::Dilate::Dilate(baseImage& image) : image(image)
@@ -331,8 +330,8 @@ AlgFilter::Dilate::Dilate(baseImage& image) : image(image)
 
 void AlgFilter::Dilate::apply()
 {
-	cv::Mat mat = image.GetMat();
-	cv::dilate(mat, mat, cv::Mat());
+	cv::Mat* mat = image.GetMat();
+	cv::dilate(*mat, *mat, cv::Mat());
 }
 
 AlgFilter::Otsu::Otsu(baseImage& image) : image(image)
@@ -342,16 +341,16 @@ AlgFilter::Otsu::Otsu(baseImage& image) : image(image)
 
 void AlgFilter::Otsu::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;
 
 	cv::MatND hist;
 	int histSize[] = {256};
 	float hRanges[] = {0.0, 255.0};
 	const float* ranges[] = {hRanges};
 	const int channels[] = {0};
-	cv::calcHist(&mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges);
+	cv::calcHist(mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges);
 	double maxVal = 0;
 	double minVal = 0;
 	cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
@@ -408,7 +407,7 @@ void AlgFilter::Otsu::apply()
 
 	for (unsigned int j = 0; j < height - 1; j++)
 	{
-		data = mat.ptr<uchar>(j);
+		data = mat->ptr<uchar>(j);
 
 		for(unsigned int i = 0; i < width - 1; i++)
 		{
@@ -429,7 +428,7 @@ void AlgFilter::Otsu::apply()
 	{
 		for(unsigned int j = 0; j < height; ++j)
 		{
-			mat.at<uchar>(j, i) = 0;
+			mat->at<uchar>(j, i) = 0;
 		}
 	}
 
@@ -444,13 +443,13 @@ AlgFilter::Engrave::Engrave(baseImage& image) : image(image)
 
 void AlgFilter::Engrave::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;
-	unsigned int channels = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;
+	unsigned int channels = mat->channels();
 
 	std::vector<cv::Mat> v(channels);
-	cv::split(mat, v);
+	cv::split(*mat, v);
 
 	for (unsigned int k = 0; k < channels; k++)
 	{
@@ -464,7 +463,7 @@ void AlgFilter::Engrave::apply()
 		}
 	}
 
-	cv::merge(v, mat);
+	cv::merge(v, *mat);
 }
 
 AlgFilter::Negative::Negative(baseImage& image) : image(image)
@@ -474,13 +473,13 @@ AlgFilter::Negative::Negative(baseImage& image) : image(image)
 
 void AlgFilter::Negative::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int height = mat.rows;
-	unsigned int width = mat.cols;	
-	unsigned int channels = mat.channels();
+	cv::Mat* mat = image.GetMat();
+	unsigned int height = mat->rows;
+	unsigned int width = mat->cols;	
+	unsigned int channels = mat->channels();
 	
 	std::vector<cv::Mat> v(channels);
-	cv::split(mat, v);
+	cv::split(*mat, v);
 	uchar* data;
 
 	for (unsigned int k = 0; k < channels; k++)
@@ -497,7 +496,7 @@ void AlgFilter::Negative::apply()
 		}
 	}
 
-	cv::merge(v, mat);
+	cv::merge(v, *mat);
 }
 
 AlgFilter::HoleFill::HoleFill(baseImage& image) : image(image)
@@ -507,9 +506,9 @@ AlgFilter::HoleFill::HoleFill(baseImage& image) : image(image)
 
 void AlgFilter::HoleFill::apply()
 {
-	cv::Mat mat = image.GetMat();
-	unsigned int width	= mat.cols;
-	unsigned int height = mat.rows;
+	cv::Mat* mat = image.GetMat();
+	unsigned int width	= mat->cols;
+	unsigned int height = mat->rows;
 	unsigned int xStart = 0;
 	unsigned int xEnd	= 0;
 	unsigned int x		= 0;
@@ -518,7 +517,7 @@ void AlgFilter::HoleFill::apply()
 
 	for (j = 0; j < height; j++)
 	{
-		uchar* data = mat.ptr<uchar>(j);
+		uchar* data = mat->ptr<uchar>(j);
 
 		x = 0;
 		while(*(data + x) == 0)

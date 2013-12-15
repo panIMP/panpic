@@ -20,12 +20,14 @@ namespace AlgFeatExtract {
 class AlgFeatExtract::GetColorHist : public baseTransform
 {
 public:
-    GetColorHist(baseImage& image);
+    GetColorHist(baseImage& image, baseImage& histImage);
 
     void apply();
 
 private:
     baseImage& image;
+    baseImage& histImage;
+    int convertMask;
 };
 
 

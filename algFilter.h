@@ -7,29 +7,29 @@
 
 
 namespace AlgFilter {
-    class Gray;
-    class MedianBlur;
-    class MedianBlur2;
-    class GuassinBlur;
-    class ComFog;
-    class Sketch;
-    class SobelSharpen;
-    class LaplaceSharpen;
-    class Erode;
-    class Dilate;
-    class Otsu;
-    class Engrave;
-    class Negative;
-    class HoleFill;
+	class Gray;
+	class MedianBlur;
+	class MedianBlur2;
+	class GuassinBlur;
+	class ComFog;
+	class Sketch;
+	class SobelSharpen;
+	class LaplaceSharpen;
+	class Erode;
+	class Dilate;
+	class Otsu;
+	class Engrave;
+	class Negative;
+	class HoleFill;
 
-    int CalcCombosX2Y2R2(int r2);
-    int TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y);
+	int CalcCombosX2Y2R2(int r2);
+	int TempltExcuteCl(cv::Mat& mat, int* templt, int tw, int x, int y);
 }
 
 class AlgFilter::Gray : public baseTransform
 {
 public: 
-    Gray(baseImage& image);
+	Gray(baseImage& image);
 
 	void apply();
 
@@ -40,7 +40,7 @@ private:
 class AlgFilter::MedianBlur : public baseTransform
 {
 public:
-    MedianBlur(baseImage& image);
+	MedianBlur(baseImage& image);
 
 	void apply();
 
@@ -51,7 +51,7 @@ private:
 class AlgFilter::GuassinBlur : public baseTransform
 {
 public:
-    GuassinBlur(baseImage& image);
+	GuassinBlur(baseImage& image);
 
 	void apply();
 
@@ -62,7 +62,7 @@ private:
 class AlgFilter::ComFog : public baseTransform
 {
 public:
-    ComFog(baseImage& image, int randRange);
+	ComFog(baseImage& image, int randRange);
 
 	void apply();
 
@@ -74,7 +74,7 @@ private:
 class AlgFilter::Sketch : public baseTransform
 {
 public:
-    Sketch(baseImage& image);
+	Sketch(baseImage& image);
 
 	void apply();
 
@@ -85,7 +85,7 @@ private:
 class AlgFilter::SobelSharpen : public baseTransform
 {
 public:
-    SobelSharpen(baseImage& image);
+	SobelSharpen(baseImage& image);
 
 	void apply();
 
@@ -96,7 +96,7 @@ private:
 class AlgFilter::LaplaceSharpen : public baseTransform
 {
 public:
-    LaplaceSharpen(baseImage& image);
+	LaplaceSharpen(baseImage& image);
 
 	void apply();
 
@@ -107,7 +107,7 @@ private:
 class AlgFilter::MedianBlur2 : public baseTransform
 {
 public:
-    MedianBlur2(baseImage& image);
+	MedianBlur2(baseImage& image);
 
 	void apply();
 
@@ -118,7 +118,7 @@ private:
 class AlgFilter::Erode : public baseTransform
 {
 public:
-    Erode(baseImage& image);
+	Erode(baseImage& image);
 
 	void apply();
 
@@ -129,7 +129,7 @@ private:
 class AlgFilter::Dilate : public baseTransform
 {
 public:
-    Dilate(baseImage& image);
+	Dilate(baseImage& image);
 
 	void apply();
 
@@ -140,7 +140,7 @@ private:
 class AlgFilter::Otsu : public baseTransform
 {
 public:
-    Otsu(baseImage& image);
+	Otsu(baseImage& image);
 
 	void apply();
 
@@ -151,7 +151,7 @@ private:
 class AlgFilter::Engrave : public baseTransform
 {
 public:
-    Engrave(baseImage& image);
+	Engrave(baseImage& image);
 
 	void apply();
 
@@ -162,7 +162,7 @@ private:
 class AlgFilter::Negative : public baseTransform
 {
 public:
-    Negative(baseImage& image);
+	Negative(baseImage& image);
 
 	void apply();
 
@@ -173,7 +173,7 @@ private:
 class AlgFilter::HoleFill : public baseTransform
 {
 public:
-    HoleFill(baseImage& image);
+	HoleFill(baseImage& image);
 
 	void apply();
 

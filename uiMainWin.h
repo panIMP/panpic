@@ -41,6 +41,7 @@
 #include "algHistProc.h"
 #include "algFilter.h"
 #include "algDetect.h"
+#include "algFeatExtract.h"
 
 #include "uiHistDlg.h"
 #include "uiHoughDlg.h"
@@ -82,7 +83,7 @@ signals:
 public slots:
 	void AllTransformDone();
 
-	void SetImage(int);
+	void SetSearchImage(int);
 
 	void OpenPic();
 	void NextPic();
@@ -179,9 +180,9 @@ private:
 	QPushButton* m_houghTransform;
 	QWidget* m_integrated_tab;
 	QPushButton* m_cicle_incision_detect;
-	AlgDetect::_Pan_Circle bigCircle;
-	AlgDetect::_Pan_Circle smallCircle;
-	AlgDetect::_Hough_Param hParam;
+	AlgDetect::panCircle bigCircle;
+	AlgDetect::panCircle smallCircle;
+	AlgDetect::houghParam hParam;
 
 	//	pic searcher app widgets
 	QSplitter* m_picSearchSplitter;
@@ -203,6 +204,8 @@ private:
 	QPushButton* m_setSearchFolder;
 	QPushButton* m_startSearch;
 	QComboBox* m_setSearchMethod;
+
+	baseImage histImage;
 
 	//	Status bar
 	QStatusBar* m_statusBar;

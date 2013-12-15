@@ -67,9 +67,9 @@ namespace AlgDetect {
 }
 
 
-UiHoughDlg::UiHoughDlg(	AlgDetect::_Pan_Circle& circle, 
+UiHoughDlg::UiHoughDlg(	AlgDetect::panCircle& circle,
 						baseImage& image, 
-						AlgDetect::_Hough_Param& hParam, 
+						AlgDetect::houghParam& hParam,
 						QWidget* parent) :
 						cle(circle), 
 						image(image), 

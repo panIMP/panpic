@@ -3,6 +3,7 @@
 
 baseImage::baseImage()
 {
+	mat.create(0,0,CV_8UC1);
 	channelChangeState = false;
 	isBinary = false;
 	isGray = false;
@@ -12,8 +13,24 @@ baseImage::~baseImage(){
 
 }
 
+baseImage::baseImage(const baseImage& image){
+	SetMat(image.mat);
+	SetChannelChangeState(image.channelChangeState);
+	SetIsBinary(image.isBinary);
+	SetIsGray(image.isGray);
+}
 
-void baseImage::copyTo(baseImage& image){
+baseImage& baseImage::operator=(const baseImage& image){
+	SetChannelChangeState(image.channelChangeState);
+	SetMat(image.mat);
+	SetIsBinary(image.isBinary);
+	SetIsGray(image.isGray);
+
+	return *this;
+}
+
+
+void baseImage::copyTo(baseImage& image) const{
 	image.SetMat(mat);
 
 	image.channelChangeState  = channelChangeState;
@@ -22,13 +39,13 @@ void baseImage::copyTo(baseImage& image){
 }
 
 
-void baseImage::SetMat(cv::Mat& newMat){
+void baseImage::SetMat(const cv::Mat& newMat){
 	newMat.copyTo(mat);
 }
 
 
-cv::Mat& baseImage::GetMat(){
-	return mat;
+cv::Mat* baseImage::GetMat(){
+	return &mat;
 }
 
 
@@ -71,53 +88,46 @@ int baseImage::width()
 
 baseImage baseImage::ReadPanImage(const QString& str)
 {
-    baseImage result;
-    result.SetChannelChangeState(false);
-    // Since here you want to read the image as it is,
-    // you should set the flag to be -1, so,
-    // if there exits alpha channel, it will also be read.
+	baseImage result;
+	result.SetChannelChangeState(false);
+	// Since here you want to read the image as it is,
+	// you should set the flag to be -1, so,
+	// if there exits alpha channel, it will also be read.
 
-    cv::Mat mat1, mat2;
-    mat2 =  cv::imread(str.toStdString(), CV_LOAD_IMAGE_ANYDEPTH);
+	cv::Mat mat1, mat2;
 
-    if (mat2.depth() == CV_USRTYPE1)
-    {
-        if (mat2.channels() == 1)
-        {
-            mat1 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
-            result.SetIsGray(true);
-        }
-        else
-        {
-            mat1 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_UNCHANGED);
-            result.SetIsGray(false);
-        }
-        result.SetMat(mat1);
-    }
-    else
-    {
-        result.SetMat(mat2);
+	mat1 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_UNCHANGED);
 
-        if (mat2.channels() == 1)
-        {
-            result.SetIsGray(true);
-        }
-    }
+	if (mat1.depth() == CV_USRTYPE1)
+	{
+		mat2 = cv::imread(str.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+		result.SetIsGray(true);
+		result.SetMat(mat2);
+	}
+	else
+	{
+		result.SetMat(mat1);
 
-    return result;
+		if (mat1.channels() == 1)
+		{
+			result.SetIsGray(true);
+		}
+	}
+
+	return result;
 }
 
 
 void baseImage::SavePanImage(baseImage& ImageToSave, const QString &str){
-    if (ImageToSave.GetMat().channels() == 3){
-        // transform the image back to opencv style channel order, since
-        // it has been converted to RGB format when loaded for QImage display
-        if (ImageToSave.GetChannelChangeState())
-        {
-            cv::cvtColor(ImageToSave.GetMat(), ImageToSave.GetMat(), CV_RGB2BGR);
-        }
-    }
-    cv::imwrite(str.toStdString(), ImageToSave.GetMat());
+	if (ImageToSave.GetMat()->channels() == 3){
+		// transform the image back to opencv style channel order, since
+		// it has been converted to RGB format when loaded for QImage display
+		if (ImageToSave.GetChannelChangeState())
+		{
+			cv::cvtColor(*ImageToSave.GetMat(), *ImageToSave.GetMat(), CV_RGB2BGR);
+		}
+	}
+	cv::imwrite(str.toStdString(), *ImageToSave.GetMat());
 }
 
 

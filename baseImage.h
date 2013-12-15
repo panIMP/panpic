@@ -20,16 +20,18 @@ private:
 	bool isGray;
 
 public:
-    baseImage();
-    ~baseImage();
+	baseImage();
+	~baseImage();
+	baseImage& operator= (const baseImage&);
+	baseImage(const baseImage&);
 
 	int height();
 	int width();
 
-    void copyTo(baseImage& image);
+	void copyTo(baseImage& image) const;
 
-	void SetMat(cv::Mat& newMat);
-	cv::Mat& GetMat();
+	void SetMat(const cv::Mat& newMat);
+	cv::Mat* GetMat();
 
 	void SetChannelChangeState(bool state);
 	bool GetChannelChangeState();
@@ -40,12 +42,12 @@ public:
 	void SetIsGray(bool state);
 	bool IsGray();
 
-    //  Image input and output
-    static baseImage ReadPanImage(const QString& str);
-    void static SavePanImage(baseImage& ImageToSave, const QString& str);
+	//  Image input and output
+	static baseImage ReadPanImage(const QString& str);
+	void static SavePanImage(baseImage& ImageToSave, const QString& str);
 
-    //  PanImage --> QImage
-    QImage PanImage2QImage();
+	//  PanImage --> QImage
+	QImage PanImage2QImage();
 };
 
 #endif

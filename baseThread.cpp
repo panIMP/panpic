@@ -30,7 +30,7 @@ baseThread* baseThread::GetInstance()
 {
 	if (instance == 0)
 	{
-        instance = new baseThread();
+		instance = new baseThread();
 	}
 
 	return instance;
@@ -54,7 +54,7 @@ void baseThread::addTransform(baseTransform* trans)
 
 void baseThread::run()
 {
-    baseTransform* curTransform = 0;
+	baseTransform* curTransform = 0;
 
 	forever
 	{

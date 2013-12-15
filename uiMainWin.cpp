@@ -263,7 +263,7 @@ void UiMainWindow::CreateCenterWidget()
 
 	//	connet app list with app frame
 	connect(m_appList, SIGNAL(currentRowChanged(int)), m_appFrame, SLOT(setCurrentIndex(int)));
-	connect(m_appList, SIGNAL(currentRowChanged(int)), this, SLOT(SetImage(int)));
+	connect(m_appList, SIGNAL(currentRowChanged(int)), this, SLOT(SetSearchImage(int)));
 	m_appList->setCurrentRow(0);
 
 	QHBoxLayout* hLay = new QHBoxLayout();
@@ -293,11 +293,11 @@ void UiMainWindow::CreateStatusBar()
 	m_curPicIndexBox->setText("0/0");
 	m_curPicIndexBox->setMaximumWidth(50);
 	m_curPicIndexBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	// use regular expression to restrict the input to be like 'dd/dd'
-	// \d should be set as \\
-	// The C++ compiler transforms backslashes in strings. To include a \ in a regexp,
-	// enter it twice, i.e. \\.
-	// To match the backslash character itself, enter it four times, i.e. \\\\.
+    /* use regular expression to restrict the input to be like 'dd/dd'
+     \d should be set as \\
+     The C++ compiler transforms backslashes in strings. To include a \ in a regexp,
+     enter it twice, i.e. \\.
+     To match the backslash character itself, enter it four times, i.e. \\\\. */
 	QRegExp picIndexRegexp("^\\d*/\\d*$");
 	picIndexValidator = new QRegExpValidator(picIndexRegexp, m_curPicIndexBox);
 	m_curPicIndexBox->setValidator(picIndexValidator);
@@ -410,7 +410,7 @@ void UiMainWindow::AllTransformDone()
 	setWindowModified(true);
 }
 
-void UiMainWindow::SetImage(int curRow)
+void UiMainWindow::SetSearchImage(int curRow)
 {
 	if (m_QImage.isNull())
 	{
@@ -447,7 +447,7 @@ void UiMainWindow::OpenPic()
 	QString selectedFilter = tr("ALL(*.*)");
 	m_fileName = QFileDialog::getOpenFileName(this,
 											  tr("Open File"),
-											  "E:/baiduCloud/pics",
+											  "G:/operation/",
 											  tr("JPEG(*.jpg *.jpeg);; BMP(*.bmp);;"\
 												 "PNG(*.png);;TIFF(*.tif)"\
 												 ";;GIF(*.gif);; ICO(*.ico);; ALL(*.*)"
@@ -568,7 +568,7 @@ void UiMainWindow::MirrorV()
 
 void UiMainWindow::ZoomPic(int curValue)
 {
-	int curWidth = m_PanImage.GetMat().cols * curValue / ZOOM_SAME;
+	int curWidth = m_PanImage.GetMat()->cols * curValue / ZOOM_SAME;
 	if (m_PanImage.IsGray()){
 		m_editArea->setPixmap(QPixmap::fromImage
 				 (m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
@@ -587,7 +587,7 @@ void UiMainWindow::ZoomPic()
 	QString tmpStr = QString(m_zoomRateBox->text());
 	tmpStr.chop(1);
 	float value = tmpStr.toFloat() / 100.0;
-	int curWidth = static_cast<int>(value * float(m_PanImage.GetMat().cols));
+	int curWidth = static_cast<int>(value * float(m_PanImage.GetMat()->cols));
 	if (m_PanImage.IsGray())
 	{
 		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
@@ -627,7 +627,8 @@ void UiMainWindow::ShowCurIndexPic()
 	QString curfileName = m_curFileList.at(index).absoluteFilePath();
 	if (curfileName != NULL){
 		m_fileName = curfileName;
-		SetImage(baseImage::ReadPanImage(m_fileName));
+        m_PanImage = baseImage::ReadPanImage(m_fileName);
+        SetImage(m_PanImage);
 	}
 }
 
@@ -648,7 +649,7 @@ void UiMainWindow::MatchHist()
 {
 	float histV[256] = {0.0};
 	for (int i = 0; i < 256; i++){
-		histV[i] = m_PanImage.GetMat().cols * m_PanImage.GetMat().rows / 256.0;
+		histV[i] = m_PanImage.GetMat()->cols * m_PanImage.GetMat()->rows / 256.0;
 	}
 	AddTransform(new AlgHistProc::HistMatch(m_PanImage, histV));
 }
@@ -829,14 +830,12 @@ void UiMainWindow::SelectSearchFolder()
 		filter<<"*.jpg"<<"*.jpeg"<<"*.bmp"<<"*.png"<<"*gif" <<"*.ico"<<"*.tif";
 		dir.setNameFilters(filter);
 		m_searchFileList = dir.entryInfoList();
-		unsigned int k;
-		k = m_searchFileList.size();
 	}
 }
 
 void UiMainWindow::StartSearch()
 {
-
+	AddTransform(new AlgFeatExtract::GetColorHist(m_PanImage, histImage));
 }
 
 void UiMainWindow::SetHasImage(bool value)
