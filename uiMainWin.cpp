@@ -294,10 +294,10 @@ void UiMainWindow::CreateStatusBar()
 	m_curPicIndexBox->setMaximumWidth(50);
 	m_curPicIndexBox->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     /* use regular expression to restrict the input to be like 'dd/dd'
-     \d should be set as \\
-     The C++ compiler transforms backslashes in strings. To include a \ in a regexp,
-     enter it twice, i.e. \\.
-     To match the backslash character itself, enter it four times, i.e. \\\\. */
+	// \d should be set as \\
+	// The C++ compiler transforms backslashes in strings. To include a \ in a regexp,
+	// enter it twice, i.e. \\.
+    // To match the backslash character itself, enter it four times, i.e. \\\\. */
 	QRegExp picIndexRegexp("^\\d*/\\d*$");
 	picIndexValidator = new QRegExpValidator(picIndexRegexp, m_curPicIndexBox);
 	m_curPicIndexBox->setValidator(picIndexValidator);
@@ -752,7 +752,7 @@ void UiMainWindow::HoughTransform()
 		{
 			hParam.InitGlobalVaribles(m_PanImage);
 		}
-		houghParamDialog = new UiHoughDlg(bigCircle, m_PanImage, hParam);
+        houghParamDialog = new UiHoughDlg(m_PanImage, bigCircle, hParam);
 		houghParamDialog->show();
 	}
 	else

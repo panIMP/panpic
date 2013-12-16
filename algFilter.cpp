@@ -69,18 +69,18 @@ void AlgFilter::ComFog::apply()
 	cv::Mat tmpMat;
 	mat->copyTo(tmpMat);
 
-	unsigned int randNum, randDirection, m, n;
+    int randNum, randDirection, m, n;
 
 	std::vector<cv::Mat> v(channels);
 	cv::split(*mat, v);
 	std::vector<cv::Mat> tmpV(channels);
 	cv::split(*mat, tmpV);
 
-	for (unsigned int k = 0; k < channels; k++)
+    for (unsigned int k = 0; k < channels; k++)
 	{
-		for (unsigned int j = 0; j < height; j++)
+        for (unsigned int j = 0; j < height; j++)
 		{	
-			for (unsigned int i = 0; i < width; i++)
+            for (unsigned int i = 0; i < width; i++)
 			{
 				randNum = rand() % randRange;
 				randDirection = rand() % 4;
@@ -111,11 +111,11 @@ void AlgFilter::ComFog::apply()
 					break;
 				}
 
-				if (m >= width)
+                if ((unsigned int)m >= width)
 				{
 					m = width - 1;
 				}
-				if (n >= height)
+                if ((unsigned int)n >= height)
 				{
 					n = height - 1;
 				}

@@ -67,14 +67,7 @@ namespace AlgDetect {
 }
 
 
-UiHoughDlg::UiHoughDlg(	AlgDetect::panCircle& circle,
-						baseImage& image, 
-						AlgDetect::houghParam& hParam,
-						QWidget* parent) :
-						cle(circle), 
-						image(image), 
-						hParam(hParam), 
-						QWidget(parent)
+UiHoughDlg::UiHoughDlg(baseImage& image, AlgDetect::panCircle& circle, AlgDetect::houghParam& hParam, QWidget* parent) : image(image), cle(circle), hParam(hParam), QWidget(parent)
 {
 	if (!hParam.isInited){
 		hParam.InitGlobalVaribles(image);

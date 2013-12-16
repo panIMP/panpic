@@ -1,6 +1,5 @@
 #include "algShift.h"
 
-
 AlgShift::RotateTransform::RotateTransform(int orientation, baseImage& image) : image(image)
 {
 	this->orientation = orientation;

@@ -19,7 +19,7 @@ class UiHoughDlg :public QWidget
 	Q_OBJECT
 
 public:
-    explicit UiHoughDlg(AlgDetect::panCircle& circle, baseImage& image, AlgDetect::houghParam& hParam,QWidget* parent = 0);
+    explicit UiHoughDlg(baseImage& image, AlgDetect::panCircle& circle, AlgDetect::houghParam& hParam, QWidget* parent = 0);
 	~UiHoughDlg();
 
 	void AddTransform(baseTransform* transform);
@@ -47,7 +47,7 @@ private:
 	QLineEdit* b;
 	QLineEdit* r;
 
-	baseImage& image;
+    baseImage& image;
     AlgDetect::panCircle& cle;
     AlgDetect::houghParam& hParam;
 

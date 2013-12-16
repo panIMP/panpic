@@ -70,9 +70,8 @@ void AlgHistProc::GetHistImage::apply()
 				hsv_color.setTo(cv::Scalar(h*180.f / hbins,s*255.f/sbins, 255));
 				cv::cvtColor(hsv_color,rgb_color,CV_HSV2BGR);
                 cv::Scalar color(rgb_color.at<cv::Vec3b>(0,0)[0],
-                                 rgb_color.at<cv::Vec3b>(0,0)[1],
-                                 rgb_color.at<cv::Vec3b>(0,0)[2]);
-
+                                rgb_color.at<cv::Vec3b>(0,0)[1],
+                        rgb_color.at<cv::Vec3b>(0,0)[2]);
 				cv::rectangle(histMat, cv::Point(i*bin_w,height),
 							  cv::Point((i+1)*bin_w,height - intensity),
 							  color, -1);
