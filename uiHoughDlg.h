@@ -19,7 +19,8 @@ class UiHoughDlg :public QWidget
 	Q_OBJECT
 
 public:
-    explicit UiHoughDlg(baseImage& image, AlgDetect::panCircle& circle, AlgDetect::houghParam& hParam, QWidget* parent = 0);
+    explicit UiHoughDlg(baseImage& image, AlgDetect::panCircle& circle, AlgDetect::houghParam& hParam,
+                        QWidget* parent = 0);
 	~UiHoughDlg();
 
 	void AddTransform(baseTransform* transform);
@@ -31,6 +32,10 @@ public slots:
 	void ResetParams();
 
 private:
+    baseImage& image;
+    AlgDetect::panCircle& cle;
+    AlgDetect::houghParam& hParam;
+
 	baseThread* subThread;
 
 	QPushButton* paramOk;
@@ -46,10 +51,6 @@ private:
 	QLineEdit* a;
 	QLineEdit* b;
 	QLineEdit* r;
-
-    baseImage& image;
-    AlgDetect::panCircle& cle;
-    AlgDetect::houghParam& hParam;
 
 	QRegExpValidator* iMinValidator;
 	QRegExpValidator* iMaxValidator;

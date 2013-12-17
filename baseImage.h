@@ -11,19 +11,67 @@
 #include <QDebug>
 #include <time.h>
 
+enum _FEAT_TYPE{
+    _COLOR_HIST,
+    _ACCUM_COLOR_HIST,
+    _COLOR_SET,
+    _COLOR_CO_VEC,
+
+    _GRAY_LEV_CO_MATRIX,
+    _TAMURA_TEXTURES,
+
+    _FOURIER_SHAPE_DESCRIPT,
+    _INVARIANT_MOMENTS,
+
+    _SPACIAL_FEATS,
+
+
+    _FEAT_TYPE_END,
+};
+
+typedef struct _FEAT_GET_STATE
+{
+    bool getColorHist;
+    bool getAccumColorHist;
+    bool getColorSet;
+    bool getColorCoVec;
+
+    bool getGrayLevCoMatrix;
+    bool getTamuraTextures;
+
+    bool getFourierShapeDescript;
+    bool getInvariantMoments;
+
+    bool getSpacialFeat;
+
+}featGetState;
+
+
+typedef struct _FEAT
+{
+    cv::Mat histMat;
+
+    featGetState state;
+
+}imageFeat;
+
 class baseImage
 {
 private:
-	cv::Mat mat;
-	bool channelChangeState;
+    baseImage& operator= (const baseImage&);
+    baseImage(const baseImage&);
+
+    cv::Mat mat;
+    bool channelChanged;
 	bool isBinary;
 	bool isGray;
+    imageFeat feat;
 
-public:
-	baseImage();
-	~baseImage();
-	baseImage& operator= (const baseImage&);
-	baseImage(const baseImage&);
+
+public:    
+    baseImage();
+    ~baseImage();
+
 
 	int height();
 	int width();
@@ -42,8 +90,11 @@ public:
 	void SetIsGray(bool state);
 	bool IsGray();
 
+    void SetImageFeat(const imageFeat& feat);
+    imageFeat* GetImageFeat();
+
 	//  Image input and output
-	static baseImage ReadPanImage(const QString& str);
+    bool static ReadPanImage(const QString& str, baseImage* image);
 	void static SavePanImage(baseImage& ImageToSave, const QString& str);
 
 	//  PanImage --> QImage

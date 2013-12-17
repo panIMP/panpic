@@ -388,6 +388,7 @@ void UiMainWindow::InitGlobalVariables()
 	bigCircle.hasValue = false;
 	smallCircle.hasValue = false;
 	hParam.isInited = false;
+    searchImageNum = 0;
 }
 
 void UiMainWindow::AddTransform(baseTransform* transform)
@@ -454,8 +455,9 @@ void UiMainWindow::OpenPic()
 												),
 											  &selectedFilter);
 	if (m_fileName != NULL){
-		m_PanImage = baseImage::ReadPanImage(m_fileName);
-		SetImage(m_PanImage);
+        if (baseImage::ReadPanImage(m_fileName, &m_PanImage)){
+            SetImage(m_PanImage);
+        }
 
 		// once open the picture, get its fileindex and filerange
 		QDir dir;
@@ -480,8 +482,9 @@ void UiMainWindow::PrevPic()
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
 		if (curfileName != NULL){
 			m_fileName = curfileName;
-			m_PanImage = baseImage::ReadPanImage(m_fileName);
-			SetImage(m_PanImage);
+            if (baseImage::ReadPanImage(m_fileName, &m_PanImage)){
+                SetImage(m_PanImage);
+            }
 		}
 	}
 	else {
@@ -500,8 +503,9 @@ void UiMainWindow::NextPic()
 		QString curfileName = m_curFileList.at(m_curFileIndex).absoluteFilePath();
 		if (curfileName != NULL){
 			m_fileName = curfileName;
-			m_PanImage = baseImage::ReadPanImage(m_fileName);
-			SetImage(m_PanImage);
+            if (baseImage::ReadPanImage(m_fileName, &m_PanImage)){
+                SetImage(m_PanImage);
+            }
 		}
 	}
 	else {
@@ -590,7 +594,9 @@ void UiMainWindow::ZoomPic()
 	int curWidth = static_cast<int>(value * float(m_PanImage.GetMat()->cols));
 	if (m_PanImage.IsGray())
 	{
-		m_editArea->setPixmap(QPixmap::fromImage(m_QImage.convertToFormat(QImage::Format_RGB888).scaledToWidth(curWidth)));
+        m_editArea->setPixmap (QPixmap::fromImage(m_QImage.
+                                                  convertToFormat(QImage::Format_RGB888).
+                                                  scaledToWidth (curWidth)));
 	}
 	else 
 	{
@@ -627,8 +633,9 @@ void UiMainWindow::ShowCurIndexPic()
 	QString curfileName = m_curFileList.at(index).absoluteFilePath();
 	if (curfileName != NULL){
 		m_fileName = curfileName;
-        m_PanImage = baseImage::ReadPanImage(m_fileName);
-        SetImage(m_PanImage);
+        if (baseImage::ReadPanImage(m_fileName, &m_PanImage)){
+            SetImage(m_PanImage);
+        }
 	}
 }
 
@@ -835,7 +842,14 @@ void UiMainWindow::SelectSearchFolder()
 
 void UiMainWindow::StartSearch()
 {
-	AddTransform(new AlgFeatExtract::GetColorHist(m_PanImage, histImage));
+    searchImageNum = m_searchFileList.size();
+    baseImage** searchImage = new baseImage*[searchImageNum];
+    for (int i = 0; i < searchImageNum; ++i){
+        baseImage tmpImage;
+        baseImage::ReadPanImage(m_searchFileList[i].absoluteFilePath(), &tmpImage);
+        searchImage[i] = &tmpImage;
+    }
+    AddTransform(new AlgFeatSearch::GetFeat(m_PanImage, searchImage, searchImageNum + 1, _COLOR_HIST));
 }
 
 void UiMainWindow::SetHasImage(bool value)
@@ -902,8 +916,10 @@ void UiMainWindow::dropEvent(QDropEvent* event)
 		return;
 	}
 
-	m_PanImage = baseImage::ReadPanImage(m_fileName);
-	SetImage(m_PanImage);
+    if (baseImage::ReadPanImage(m_fileName, &m_PanImage))
+    {
+        SetImage(m_PanImage);
+    }
 
 	// once open the picture, get its fileindex and filerange
 	QDir dir;

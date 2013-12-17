@@ -41,7 +41,7 @@
 #include "algHistProc.h"
 #include "algFilter.h"
 #include "algDetect.h"
-#include "algFeatExtract.h"
+#include "algFeatSearch.h"
 
 #include "uiHistDlg.h"
 #include "uiHoughDlg.h"
@@ -185,11 +185,17 @@ private:
 	AlgDetect::houghParam hParam;
 
 	//	pic searcher app widgets
+    QString m_searchFolder;
+    QFileInfoList m_searchFileList;
+    QFileInfoList m_searchResultList;
+    int searchImageNum;
+    static const int resultImageNum = 8;
+
 	QSplitter* m_picSearchSplitter;
 	QWidget* m_chooseLine;
 	QWidget* m_searchLine;
 	QWidget* m_resultLine1;
-	QWidget* m_resultLine2;
+	QWidget* m_resultLine2;    
 
 	QLabel* m_searchArea;
 	QLabel* m_traverseArea;
@@ -205,8 +211,6 @@ private:
 	QPushButton* m_startSearch;
 	QComboBox* m_setSearchMethod;
 
-	baseImage histImage;
-
 	//	Status bar
 	QStatusBar* m_statusBar;
 	QLineEdit* m_zoomRateBox;
@@ -218,8 +222,6 @@ private:
 	int m_curFileRange;
 	QFileInfoList m_curFileList;
 	QString m_fileName;
-	QString m_searchFolder;
-	QFileInfoList m_searchFileList;
 	QPushButton* m_openPic;
 	QPushButton* m_save;
 	QPushButton* m_saveAs;
@@ -230,7 +232,7 @@ private:
 
 	//	shared global variables
 	baseImage m_PanImage;
-	QImage m_QImage;
+    QImage m_QImage;
 };
 
 #endif // MAINWINDOW_H

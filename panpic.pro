@@ -3,7 +3,6 @@ QT += core widgets gui
 SOURCES += \
     main.cpp \
     algDetect.cpp \
-    algFeatExtract.cpp \
     algFilter.cpp \
     algHistProc.cpp \
     algShift.cpp \
@@ -11,11 +10,11 @@ SOURCES += \
     uiHoughDlg.cpp \
     uiMainWin.cpp \
     baseImage.cpp \
-    baseThread.cpp
+    baseThread.cpp \
+    algFeatSearch.cpp
 
 HEADERS += \
     algDetect.h \
-    algFeatExtract.h \
     algFilter.h \
     algHistProc.h \
     algShift.h \
@@ -24,20 +23,19 @@ HEADERS += \
     uiMainWin.h \
     baseImage.h \
     baseTransform.h \
-    baseThread.h
+    baseThread.h \
+    algFeatSearch.h
 
 RESOURCES += \
     icons.qrc
 
 
 # Specifies the head file directories that should be searched.
-INCLUDEPATH += G:/opencv/build/include/
-INCLUDEPATH += G:/opencv/build/include/opencv/
-INCLUDEPATH += G:/opencv/build/include/opencv2/
+INCLUDEPATH += G:/opencv_mingw_hpbuild/install/include/
+INCLUDEPATH += G:/opencv_mingw_hpbuild/install/include/opencv/
+INCLUDEPATH += G:/opencv_mingw_hpbuild/install/include/opencv2/
 
 # Contains the list of library files that should be linked with the project.
-LIBS += -LG:/opencv/build/x64/vc11/lib \
-        -lopencv_core247d \
-        -lopencv_highgui247d \
-        -lopencv_imgproc247d \
-        -lopencv_video247d
+LIBS += G:/opencv_mingw_hpbuild/install/lib/libopencv_core244d.dll.a
+LIBS += G:/opencv_mingw_hpbuild/install/lib/libopencv_highgui244d.dll.a
+LIBS += G:/opencv_mingw_hpbuild/install/lib/libopencv_imgproc244d.dll.a

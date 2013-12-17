@@ -14,21 +14,36 @@ AlgFilter::Gray::Gray(baseImage& image) : image(image)
 void AlgFilter::Gray::apply()
 {
 	cv::Mat* mat = image.GetMat();
-	unsigned int channels = mat->channels();
 	
-	if (channels < 3)
-	{
-		return;
-	}
+    switch (mat->channels()) {
+    case 1:
+        return;
 
-	if (image.GetChannelChangeState())
-	{
-		cv::cvtColor(*mat, *mat, CV_RGB2GRAY);
-	}
-	else
-	{
-		cv::cvtColor(*mat, *mat, CV_BGR2GRAY);
-	}
+    case 2:
+        return;
+
+    case 3:
+        if (image.GetChannelChangeState())
+        {
+            cv::cvtColor(*mat, *mat, CV_RGB2GRAY);
+        }
+        else
+        {
+            cv::cvtColor(*mat, *mat, CV_BGR2GRAY);
+        }
+        break;
+
+    case 4:
+        if (image.GetChannelChangeState())
+        {
+            cv::cvtColor(*mat, *mat, CV_RGBA2GRAY);
+        }
+        else
+        {
+            cv::cvtColor(*mat, *mat, CV_BGRA2GRAY);
+        }
+        break;
+    }
 
 	image.SetIsGray(true);
 }

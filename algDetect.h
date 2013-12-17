@@ -44,7 +44,10 @@ namespace AlgDetect {
         int stringCenterY;
     }strInfo;
 
-    void PutResultText(AlgDetect::panCircle& bigCircle, AlgDetect::panCircle& smallCircle, baseImage& image, strInfo& stringInfo);
+    void PutResultText(AlgDetect::panCircle& bigCircle,
+                       AlgDetect::panCircle& smallCircle,
+                       baseImage& image,
+                       strInfo& stringInfo);
 
 	class Hough;
 	class Hough2;
@@ -65,8 +68,8 @@ public:
 			int jMin,
 			int jMax,
 			int div,
-			panCircle& circle,
-			houghParam& hParam);
+            panCircle& circle,
+            houghParam& hParam);
 
 	void apply();
 
@@ -98,9 +101,9 @@ public:
 			int jMin,
 			int jMax,
 			int div,
-			panCircle& bigCircle,
-			panCircle& smallCircle,
-			houghParam& hParam);
+            panCircle& bigCircle,
+            panCircle& smallCircle,
+            houghParam& hParam);
 
 	void apply();
 
@@ -124,7 +127,10 @@ private:
 class AlgDetect::LabelString : public baseTransform
 {
 public:
-	LabelString(baseImage& image, panCircle& bigCircle, panCircle& smallCircle, _Hough_Param& hParam);
+    LabelString(baseImage& image,
+                panCircle& bigCircle,
+                panCircle& smallCircle,
+                _Hough_Param& hParam);
 
 	void apply();
 
