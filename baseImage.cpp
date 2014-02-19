@@ -138,7 +138,9 @@ bool baseImage::ReadPanImage(const QString& str, baseImage* image)
 		if (mat1.channels() == 1)
 		{
             image->SetIsGray(true);
-		}
+        }else{
+            image->SetIsGray(false);
+        }
 	}
 
     return true;

@@ -254,7 +254,7 @@ void AlgDetect::Hough2::apply()
 
 	uchar* data;
 
-	//double time_start = clock();
+    //double time_start = clock();
 
 
 	//memset(hParam.H, 0, mat.cols*mat.rows*hParam._r2DivNum*sizeof(int));

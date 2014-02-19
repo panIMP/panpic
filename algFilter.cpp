@@ -245,13 +245,13 @@ void AlgFilter::SobelSharpen::apply()
 	//double time_end = clock();
 	//double interval = time_end - time_start;
 
-	for(unsigned int i = width - 100; i < width; ++i)
+    /*for(unsigned int i = width - 100; i < width; ++i)
 	{
 		for(unsigned int j = 0; j < height; ++j)
 		{
 			mat->at<uchar>(j, i) = 0;
 		}
-	}
+    }*/
 
 	/*cv::Mat mat = image.GetMat();
 	cv::Mat mat1, mat2;
@@ -360,6 +360,9 @@ void AlgFilter::Otsu::apply()
 	unsigned int height = mat->rows;
 	unsigned int width = mat->cols;
 
+    cv::Mat rawMat;
+    mat->copyTo(rawMat);
+
 	cv::MatND hist;
 	int histSize[] = {256};
 	float hRanges[] = {0.0, 255.0};
@@ -439,13 +442,16 @@ void AlgFilter::Otsu::apply()
 		}
 	}
 
-	for(unsigned int i = width - 100; i < width; ++i)
+    /*for(unsigned int i = width - 100; i < width; ++i)
 	{
 		for(unsigned int j = 0; j < height; ++j)
 		{
 			mat->at<uchar>(j, i) = 0;
 		}
-	}
+    }*/
+
+    cv::bitwise_and(*mat, rawMat, *mat);
+
 
 	// extra
 	image.SetIsBinary(true);
