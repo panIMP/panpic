@@ -814,7 +814,7 @@ void UiMainWindow::CircleIncisionDetection()
 															m_PanImage.width(),
 															0,
 															m_PanImage.height(),
-															100,
+                                                            100,
 															bigCircle,
 															smallCircle,
 															hParam));

@@ -256,7 +256,7 @@ void UiHoughDlg::HoughTransform()
 										iMaxValue,
 										jMinValue,
 										jMaxValue,
-										100,
+                                        128,
 										cle,
 										hParam));
 }

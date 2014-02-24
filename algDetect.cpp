@@ -21,7 +21,7 @@ void AlgDetect::houghParam::InitGlobalVaribles(baseImage& image)
 
 	int i,j;
 
-	_r2DivNum = (BIG_CIRCLE_MAX * BIG_CIRCLE_MAX + 50) / 100;
+    _r2DivNum = (BIG_CIRCLE_MAX * BIG_CIRCLE_MAX + 64) / 128;
 	H = new int**[width];
 	for (i = 0; i < width; i++)
 	{
